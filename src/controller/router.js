@@ -5,7 +5,6 @@ class Router {
     const config = this.config = opts.config;
     this.store = opts.store;
     this.controller = opts.controller;
-    // this.eventBus = opts.eventBus;
     this.dataManager = opts.dataManager;
     this.history = window.history;
 
@@ -65,8 +64,6 @@ class Router {
   }
 
   hashChanged() {
-    // console.log('hash changed =>', window.location.hash);
-
     const location = window.location;
     const hash = location.hash;
 
@@ -114,23 +111,6 @@ class Router {
                         // .then(this.didGeocode.bind(this));
       }
     }
-
-    // the following code doesn't seem to be needed anymore. it's probably
-    // happening in didGeocode.
-    // if not silent, update hash. this is needed for updating the hash after
-    // topic clicks.
-    // if (!this.silent) {
-    //   const prevOrNextAddress = nextAddress || this.getAddressFromState();
-    //   const nextHash = this.makeHash(prevOrNextAddress, nextTopic);
-    //
-    //   if (nextHash) {
-    //     // TODO replace state
-    //     const prevState = this.history.state;
-    //     // this.history.replaceState(prevState, null, nextHash);
-    //
-    //     // window.location.hash = nextHash;
-    //   }
-    // }
   }
 
   configForBasemap(key) {
@@ -146,7 +126,6 @@ class Router {
       this.store.commit('setActiveTopic', nextTopic);
       this.store.commit('setActiveParcelLayer', this.activeParcelLayer());
       const prevBasemap = this.store.state.map.basemap || null;
-      // if (!this.store.state.map.shouldShowImagery) {
       const nextTopicConfig = this.config.topics.filter(topic => {
         return topic.key === nextTopic;
       })[0] || {};
@@ -154,11 +133,6 @@ class Router {
       if (prevBasemap !== nextBasemap) {
         this.store.commit('setBasemap', nextTopicConfig.parcels);
       }
-      // console.log('in routeToTopic, nextTopic', nextTopic, 'target', target);
-      // if (target) {
-      //   target.scrollIntoView();
-      // }
-      // }
     }
 
     if (!this.silent) {
@@ -170,16 +144,11 @@ class Router {
   }
 
   didGeocode() {
-    // console.log('Router.didGeocode');
-
-    // update url
-    // REVIEW this is ais-specific
     const geocodeData = this.store.state.geocode.data;
 
     // make hash if there is geocode data
     console.log('Router.didGeocode running - geocodeData:', geocodeData);
     if (geocodeData) {
-      // const address = geocodeData.properties.street_address;
       let address;
 
       if (geocodeData.street_address) {
@@ -187,8 +156,6 @@ class Router {
       } else if (geocodeData.properties.street_address) {
         address = geocodeData.properties.street_address;
       }
-    // } else if (this.store.state.activeDorMapreg) {
-    //   address = this.store.state.activeDorMapreg;
       const topic = this.store.state.activeTopic;
 
       // REVIEW this is only pushing state when routing is turned on. but maybe we
@@ -205,15 +172,9 @@ class Router {
     } else {
       // wipe out hash if a geocode fails
       if (!this.silent) {
-        // push state
-        // const nextHistoryState = {
-        //   geocode: null
-        // };
-        // this.history.pushState(nextHistoryState, null, '#');
         this.history.pushState(null, null, '#');
       }
     }
-
   }
 }
 

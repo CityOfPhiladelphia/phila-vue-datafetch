@@ -18,16 +18,12 @@ import path from 'path';
 const pkg = JSON.parse(fs.readFileSync(path.resolve('./package.json'), 'utf-8'));
 const external = Object.keys(pkg.dependencies || {});
 
-// don't bundle this css either
-external.push('leaflet-measure/dist/leaflet-measure.css');
-external.push('leaflet-vector-icon/dist/leaflet-vector-icon.css');
-
 export default {
   input: 'src/main.js',
   output: {
-    file: 'dist/phila-vue-mapping.js',
+    file: 'dist/phila-vue-datafetch.js',
     format: 'umd',
-    name: 'philaVueMapping',
+    name: 'philaVueDatafetch',
     // silence warning about multiple exports
     exports: 'named',
     // map imports to global names for using vue-leaflet-esri in the browser
