@@ -41,17 +41,15 @@ class Controller {
 
   handleSearchFormSubmit(value) {
     const input = value
-    // const input = this.store.state.map.addressEntered;
-    // console.log('handle search form submit', e, this);
-
-    // const input = e.target[0].value;
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setLastSearchMethod', 'geocode');
-    this.store.commit('setClickCoords', null);
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
-    // this.store.commit('setShouldShowAddressCandidateList', false);
-
+    this.store.commit('setShouldShowAddressCandidateList', false);
+    if (this.store.state.map) {
+      this.store.commit('setClickCoords', null);
+    }
 
     // clear out state
     const parcelLayers = Object.keys(this.config.parcels || {});

@@ -615,8 +615,10 @@ class DataManager {
     if (lastSearchMethod === 'geocode' && this.store.state.geocode.status !== 'error') {
       if (!activeTopicConfig.zoomToShape) {
         // console.log('NO ZOOM TO SHAPE - NOW IT SHOULD NOT BE ZOOMING TO THE SHAPE ON GEOCODE');
-        this.store.commit('setMapCenter', coords);
-        this.store.commit('setMapZoom', 19);
+        if (this.store.state.map) {
+          this.store.commit('setMapCenter', coords);
+          this.store.commit('setMapZoom', 19);
+        }
       } else {
         // console.log('ZOOM TO SHAPE - NOW IT SHOULD BE ZOOMING TO THE SHAPE ON GEOCODE');
         // this.store.commit('setMapBoundsBasedOnShape', newShape);

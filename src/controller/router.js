@@ -125,13 +125,16 @@ class Router {
     if (!prevTopic || prevTopic !== nextTopic) {
       this.store.commit('setActiveTopic', nextTopic);
       this.store.commit('setActiveParcelLayer', this.activeParcelLayer());
-      const prevBasemap = this.store.state.map.basemap || null;
-      const nextTopicConfig = this.config.topics.filter(topic => {
-        return topic.key === nextTopic;
-      })[0] || {};
-      const nextBasemap = nextTopicConfig.parcels;
-      if (prevBasemap !== nextBasemap) {
-        this.store.commit('setBasemap', nextTopicConfig.parcels);
+
+      if (this.store.state.map) {
+        const prevBasemap = this.store.state.map.basemap || null;
+        const nextTopicConfig = this.config.topics.filter(topic => {
+          return topic.key === nextTopic;
+        })[0] || {};
+        const nextBasemap = nextTopicConfig.parcels;
+        if (prevBasemap !== nextBasemap) {
+          this.store.commit('setBasemap', nextTopicConfig.parcels);
+        }
       }
     }
 
