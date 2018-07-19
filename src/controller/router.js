@@ -37,7 +37,7 @@ class Router {
   }
 
   makeHash(address, topic) {
-    console.log('make hash', address, topic);
+    // console.log('make hash', address, topic);
 
     // must have an address
     if (!address || address.length === 0) {
@@ -64,6 +64,7 @@ class Router {
   }
 
   hashChanged() {
+    // console.log('hashChanged is running, this.store.state.activeTopic:', this.store.state.activeTopic);
     const location = window.location;
     const hash = location.hash;
 
@@ -92,14 +93,18 @@ class Router {
       nextTopic = decodeURIComponent(pathComps[1]);
     }
 
-    this.store.commit('setLastSearchMethod', 'geocode');
+    if (this.store.state.lastSearchMethod) {
+      this.store.commit('setLastSearchMethod', 'geocode');
+    }
 
     this.routeToAddress(nextAddress);
-    this.routeToTopic(nextTopic);
+    if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
+      this.routeToTopic(nextTopic);
+    }
   }
 
   routeToAddress(nextAddress) {
-    console.log('Router.routeToAddress', nextAddress);
+    // console.log('Router.routeToAddress', nextAddress);
 
     if (nextAddress) {
       // check against current address
@@ -107,6 +112,7 @@ class Router {
 
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
+        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
         this.dataManager.geocode(nextAddress)
                         // .then(this.didGeocode.bind(this));
       }
@@ -119,6 +125,7 @@ class Router {
 
   // this gets called when you click a topic header.
   routeToTopic(nextTopic, target) {
+    // console.log('router.js routeToTopic is running');
     // check against active topic
     const prevTopic = this.store.state.activeTopic;
 
@@ -150,7 +157,7 @@ class Router {
     const geocodeData = this.store.state.geocode.data;
 
     // make hash if there is geocode data
-    console.log('Router.didGeocode running - geocodeData:', geocodeData);
+    // console.log('Router.didGeocode running - geocodeData:', geocodeData);
     if (geocodeData) {
       let address;
 

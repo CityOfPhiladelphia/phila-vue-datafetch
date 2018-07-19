@@ -41,13 +41,15 @@ class Controller {
 
   handleSearchFormSubmit(value) {
     const input = value
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
-    this.store.commit('setLastSearchMethod', 'geocode');
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
     this.store.commit('setShouldShowAddressCandidateList', false);
-    if (this.store.state.map) {
+    if (this.store.state.lastSearchMethod) {
+      this.store.commit('setLastSearchMethod', 'geocode');
+    }
+    if (this.store.state.clickCoords) {
       this.store.commit('setClickCoords', null);
     }
 
@@ -86,7 +88,7 @@ class Controller {
   }
 
   handleMapClick(e) {
-    console.log('handle map click', e, this);
+    // console.log('handle map click', e, this);
 
     // TODO figure out why form submits via enter key are generating a map
     // click event and remove this
@@ -107,7 +109,7 @@ class Controller {
     // on the road
     // there is a callback after geocode to get dor parcels
     const activeParcelLayer = this.store.state.activeParcelLayer;
-    // console.log('activeParcelLayer', activeParcelLayer);
+    // console.log('in handleMapClick, latlng:', latLng, 'activeParcelLayer:', activeParcelLayer);
     this.dataManager.getParcelsByLatLng(latLng, activeParcelLayer);
   }
 

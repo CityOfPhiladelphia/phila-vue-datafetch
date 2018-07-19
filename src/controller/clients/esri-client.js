@@ -117,7 +117,7 @@ class EsriClient extends BaseClient {
 
       //this is a space holder
       const parameters = {};
-      console.log('about to call fetchBySpatialQuery');
+      // console.log('about to call fetchBySpatialQuery');
       this.fetchBySpatialQuery(dataSourceKey,
                                dataSourceUrl,
                                'within',
@@ -134,7 +134,7 @@ class EsriClient extends BaseClient {
   }
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
-    console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options);
+    // console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options);
 
     let query;
     if (relationship === 'where') {
@@ -160,7 +160,7 @@ class EsriClient extends BaseClient {
     }, query);
 
     query.run((error, featureCollection, response) => {
-      console.log('did get esri spatial query', response, error);
+      // console.log('did get esri spatial query', response, error);
 
       let features = (featureCollection || {}).features;
       const status = error ? 'error' : 'success';

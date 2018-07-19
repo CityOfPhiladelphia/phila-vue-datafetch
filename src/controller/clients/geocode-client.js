@@ -10,6 +10,7 @@ class GeocodeClient extends BaseClient {
     const store = this.store;
 
     const geocodeConfig = this.config.geocoder;
+    // console.log('geocode-client, geocodeConfig:', geocodeConfig);
     const url = geocodeConfig.url(input);
     const params = geocodeConfig.params;
 
@@ -67,7 +68,7 @@ class GeocodeClient extends BaseClient {
     // console.log('geocode error', error);
 
     const store = this.store;
-    
+
     store.commit('setGeocodeStatus', 'error');
     store.commit('setGeocodeData', null);
     store.commit('setGeocodeRelated', null);
