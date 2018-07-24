@@ -33,7 +33,11 @@ class Router {
   }
 
   activeParcelLayer() {
-    return this.activeTopicConfig().parcels || this.config.map.defaultBasemap;
+    if (this.config.map) {
+      return this.activeTopicConfig().parcels || this.config.map.defaultBasemap;
+    } else {
+      return this.activeTopicConfig().parcels;
+    }
   }
 
   makeHash(address, topic) {

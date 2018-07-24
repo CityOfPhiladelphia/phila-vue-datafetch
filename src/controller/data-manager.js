@@ -356,8 +356,12 @@ class DataManager {
 
       // reset other topic and map state
       if (this.config.topics) {
-        // console.log('about to setActiveTopic, config:', this.config.topics[0].key);
-        this.store.commit('setActiveTopic', this.config.topics[0].key);
+        if (this.config.defaultTopic || this.config.defaultTopic === null) {
+          this.store.commit('setActiveTopic', this.config.defaultTopic);
+        } else {
+          // console.log('about to setActiveTopic, config:', this.config.topics[0].key);
+          this.store.commit('setActiveTopic', this.config.topics[0].key);
+        }
       }
 
 
