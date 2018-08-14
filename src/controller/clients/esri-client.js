@@ -3,12 +3,10 @@ import axios from 'axios';
 // import * as turf from '@turf/turf';
 // import { point, polygon, distance, explode, nearest-point } from '@turf/turf';
 // import distance from '@turf/turf';
-// import {explode}'@turf/turf';
-// import '@turf/nearest-point';
 import { point, polygon } from '@turf/helpers';
 import distance from '@turf/distance';
-import '@turf/explode';
-import '@turf/nearest-point';
+import explode from '@turf/explode';
+import nearest from '@turf/nearest-point';
 
 import proj4 from 'proj4';
 import * as L from 'leaflet';
@@ -134,7 +132,7 @@ class EsriClient extends BaseClient {
   }
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
-    // console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options);
+    // console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
 
     let query;
     if (relationship === 'where') {
@@ -171,11 +169,11 @@ class EsriClient extends BaseClient {
 
         features = features.map(feature => {
           const featureCoords = feature.geometry.coordinates;
+          // console.log('featureCoords:', featureCoords);
           let dist;
           if (Array.isArray(featureCoords[0])) {
-            // console.log('featureCoords is array of coords:', featureCoords[0]);
-            let polygon = polygon([featureCoords[0]]);
-            const vertices = explode(polygon)
+            let polygonInstance = polygon([featureCoords[0]]);
+            const vertices = explode(polygonInstance)
             const closestVertex = nearest(from, vertices);
             dist = distance(from, closestVertex, { units: 'miles' })
           } else {
