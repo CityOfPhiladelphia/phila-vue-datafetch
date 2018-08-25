@@ -143,8 +143,13 @@ class Router {
           return topic.key === nextTopic;
         })[0] || {};
         const nextBasemap = nextTopicConfig.parcels;
+        const nextImagery = nextTopicConfig.imagery;
         if (prevBasemap !== nextBasemap) {
           this.store.commit('setBasemap', nextTopicConfig.parcels);
+        }
+        if (nextImagery) {
+          this.store.commit('setShouldShowImagery', true);
+          this.store.commit('setImagery', nextImagery);
         }
       }
     }
