@@ -5,6 +5,7 @@ import BaseClient from './base-client';
 class HttpClient extends BaseClient {
   evaluateParams(feature, dataSource) {
     const params = {};
+    if (!dataSource.options.params) { return params };
     const paramEntries = Object.entries(dataSource.options.params);
     const state = this.store.state;
 
