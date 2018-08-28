@@ -6,7 +6,9 @@ class BaseClient {
   }
 
   evaluateParams(feature, dataSource) {
+    // console.log('base-client evaluateParams is running')
     const params = {};
+    if (!dataSource.options.params) { return params };
     const paramEntries = Object.entries(dataSource.options.params);
     const state = this.store.state;
 
