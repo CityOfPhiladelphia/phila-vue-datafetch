@@ -3,26 +3,27 @@ import moment from 'moment';
 import BaseClient from './base-client';
 
 class HttpClient extends BaseClient {
-  evaluateParams(feature, dataSource) {
-    const params = {};
-    if (!dataSource.options.params) { return params };
-    const paramEntries = Object.entries(dataSource.options.params);
-    const state = this.store.state;
-
-    for (let [key, valOrGetter] of paramEntries) {
-      let val;
-
-      if (typeof valOrGetter === 'function') {
-        val = valOrGetter(feature, state);
-      } else {
-        val = valOrGetter;
-      }
-
-      params[key] = val;
-    }
-
-    return params;
-  }
+  // evaluateParams(feature, dataSource) {
+  //   console.log('http-client evaluateParams is running');
+  //   const params = {};
+  //   if (!dataSource.options.params) { return params };
+  //   const paramEntries = Object.entries(dataSource.options.params);
+  //   const state = this.store.state;
+  //
+  //   for (let [key, valOrGetter] of paramEntries) {
+  //     let val;
+  //
+  //     if (typeof valOrGetter === 'function') {
+  //       val = valOrGetter(feature, state);
+  //     } else {
+  //       val = valOrGetter;
+  //     }
+  //
+  //     params[key] = val;
+  //   }
+  //
+  //   return params;
+  // }
 
   fetch(feature, dataSource, dataSourceKey, targetIdFn) {
     let params = this.evaluateParams(feature, dataSource);
