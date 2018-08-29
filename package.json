@@ -1,7 +1,7 @@
 {
   "name": "@cityofphiladelphia/phila-vue-datafetch",
   "description": "the infrastructure needed for fetching data for a vue app",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "author": "City of Philadelphia <maps@phila.gov>",
   "scripts": {
     "build": "rollup -c rollup.config.js",
