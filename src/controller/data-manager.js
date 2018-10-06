@@ -387,11 +387,13 @@ class DataManager {
 
       // TODO/TEMP restructure state so parcels and geocode live in
       // state.sources? the following targets the dorDocuments data source.
-      const isDorParcels = (pathKeys.length === 1
-                            && pathKeys[0] === 'dorParcels');
+      const isDorParcels = (pathKeys.length === 2
+                            && pathKeys[1] === "dor");
+
+      // console.log('check data sources fetched', paths, 'pathKeys.length:', pathKeys.length, 'pathKeys[0]:', pathKeys[0], 'pathKeys[1]:', pathKeys[1], 'isDorParcels:', isDorParcels);
 
       if (isDorParcels) {
-        return state.dorParcels.status === 'success';
+        return state.parcels.dor.status === 'success';
       }
 
       // traverse state to get the parent of the data object we need to
