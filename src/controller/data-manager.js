@@ -355,7 +355,7 @@ class DataManager {
       }
 
       // reset other topic and map state
-      if (this.config.topics) {
+      if (this.config.topics.length) {
         if (this.config.defaultTopic || this.config.defaultTopic === null) {
           this.store.commit('setActiveTopic', this.config.defaultTopic);
         } else {
@@ -509,7 +509,7 @@ class DataManager {
     let coords, lat, lng, latlng;
     // if geocode fails
     if (!feature) {
-      // console.log('didGeocode - no geom', feature);
+      console.log('didGeocode - no geom');
       if (lastSearchMethod === 'reverseGeocode') {
         const clickCoords = this.store.state.clickCoords;
         coords = [clickCoords.lng, clickCoords.lat];
