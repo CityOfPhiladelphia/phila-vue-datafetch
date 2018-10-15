@@ -1,4 +1,5 @@
 import Controller from './controller';
+import pvdStore from './store';
 
 function controllerMixin(Vue, opts) {
   const controller = new Controller(opts);
@@ -10,4 +11,4 @@ function controllerMixin(Vue, opts) {
   });
 }
 
-export default controllerMixin;
+export default { controllerMixin, pvdStore };

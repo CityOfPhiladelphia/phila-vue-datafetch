@@ -86,12 +86,21 @@ class Router {
 
     // if there's no address, erase it
     if (!addressComp) {
+      this.routeToModal('');
       this.dataManager.resetGeocode();
       return;
     }
 
     const nextAddress = decodeURIComponent(addressComp);
     let nextTopic;
+
+    const modalKeys = this.config.modals || [];
+    // console.log('pathComps:', pathComps, 'modalKeys:', modalKeys);
+    if (modalKeys.includes(pathComps[0])) {
+      // console.log('if pathComps[0] is true');
+      this.routeToModal(pathComps[0]);
+      return;
+    }
 
     if (pathComps.length > 1) {
       nextTopic = decodeURIComponent(pathComps[1]);
@@ -103,13 +112,14 @@ class Router {
 
     this.routeToAddress(nextAddress);
     if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
-      this.routeToTopic(nextTopic);
+      if (this.config.topics.length) {
+        this.routeToTopic(nextTopic);
+      }
     }
   }
 
   routeToAddress(nextAddress) {
     // console.log('Router.routeToAddress', nextAddress);
-
     if (nextAddress) {
       // check against current address
       const prevAddress = this.getAddressFromState();
@@ -125,6 +135,11 @@ class Router {
 
   configForBasemap(key) {
     return this.config.map.basemaps[key];
+  }
+
+  routeToModal(selectedModal) {
+    // console.log('routeToModal is running, selectedModal:', selectedModal);
+    this.store.commit('setDidToggleModal', selectedModal);
   }
 
   // this gets called when you click a topic header.
