@@ -4380,7 +4380,9 @@
       // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
       var successFn = options.success;
 
-      //if (params.urlAddition)
+      if (params.urlAddition) {
+        delete params['urlAddition'];
+      }
 
       // if the data is not dependent on other data
       axios.get(url, { params: params }).then(function (response) {

@@ -39,7 +39,9 @@ class HttpClient extends BaseClient {
     // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
     const successFn = options.success;
 
-    //if (params.urlAddition)
+    if (params.urlAddition) {
+      delete params['urlAddition'];
+    }
 
     // if the data is not dependent on other data
     axios.get(url, { params }).then(response => {
