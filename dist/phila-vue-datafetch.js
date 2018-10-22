@@ -907,8 +907,6 @@
   Buffer.byteLength = byteLength;
 
   function slowToString (encoding, start, end) {
-    var this$1 = this;
-
     var loweredCase = false;
 
     // No need to verify that "this.length <= MAX_UINT32" since it's a read-only
@@ -948,27 +946,27 @@
     while (true) {
       switch (encoding) {
         case 'hex':
-          return hexSlice(this$1, start, end)
+          return hexSlice(this, start, end)
 
         case 'utf8':
         case 'utf-8':
-          return utf8Slice(this$1, start, end)
+          return utf8Slice(this, start, end)
 
         case 'ascii':
-          return asciiSlice(this$1, start, end)
+          return asciiSlice(this, start, end)
 
         case 'latin1':
         case 'binary':
-          return latin1Slice(this$1, start, end)
+          return latin1Slice(this, start, end)
 
         case 'base64':
-          return base64Slice(this$1, start, end)
+          return base64Slice(this, start, end)
 
         case 'ucs2':
         case 'ucs-2':
         case 'utf16le':
         case 'utf-16le':
-          return utf16leSlice(this$1, start, end)
+          return utf16leSlice(this, start, end)
 
         default:
           if (loweredCase) { throw new TypeError('Unknown encoding: ' + encoding) }
@@ -989,44 +987,38 @@
   }
 
   Buffer.prototype.swap16 = function swap16 () {
-    var this$1 = this;
-
     var len = this.length;
     if (len % 2 !== 0) {
       throw new RangeError('Buffer size must be a multiple of 16-bits')
     }
     for (var i = 0; i < len; i += 2) {
-      swap(this$1, i, i + 1);
+      swap(this, i, i + 1);
     }
     return this
   };
 
   Buffer.prototype.swap32 = function swap32 () {
-    var this$1 = this;
-
     var len = this.length;
     if (len % 4 !== 0) {
       throw new RangeError('Buffer size must be a multiple of 32-bits')
     }
     for (var i = 0; i < len; i += 4) {
-      swap(this$1, i, i + 3);
-      swap(this$1, i + 1, i + 2);
+      swap(this, i, i + 3);
+      swap(this, i + 1, i + 2);
     }
     return this
   };
 
   Buffer.prototype.swap64 = function swap64 () {
-    var this$1 = this;
-
     var len = this.length;
     if (len % 8 !== 0) {
       throw new RangeError('Buffer size must be a multiple of 64-bits')
     }
     for (var i = 0; i < len; i += 8) {
-      swap(this$1, i, i + 7);
-      swap(this$1, i + 1, i + 6);
-      swap(this$1, i + 2, i + 5);
-      swap(this$1, i + 3, i + 4);
+      swap(this, i, i + 7);
+      swap(this, i + 1, i + 6);
+      swap(this, i + 2, i + 5);
+      swap(this, i + 3, i + 4);
     }
     return this
   };
@@ -1295,8 +1287,6 @@
   }
 
   Buffer.prototype.write = function write$$1 (string, offset, length, encoding) {
-    var this$1 = this;
-
     // Buffer#write(string)
     if (offset === undefined) {
       encoding = 'utf8';
@@ -1337,28 +1327,28 @@
     for (;;) {
       switch (encoding) {
         case 'hex':
-          return hexWrite(this$1, string, offset, length)
+          return hexWrite(this, string, offset, length)
 
         case 'utf8':
         case 'utf-8':
-          return utf8Write(this$1, string, offset, length)
+          return utf8Write(this, string, offset, length)
 
         case 'ascii':
-          return asciiWrite(this$1, string, offset, length)
+          return asciiWrite(this, string, offset, length)
 
         case 'latin1':
         case 'binary':
-          return latin1Write(this$1, string, offset, length)
+          return latin1Write(this, string, offset, length)
 
         case 'base64':
           // Warning: maxLength not taken into account in base64Write
-          return base64Write(this$1, string, offset, length)
+          return base64Write(this, string, offset, length)
 
         case 'ucs2':
         case 'ucs-2':
         case 'utf16le':
         case 'utf-16le':
-          return ucs2Write(this$1, string, offset, length)
+          return ucs2Write(this, string, offset, length)
 
         default:
           if (loweredCase) { throw new TypeError('Unknown encoding: ' + encoding) }
@@ -1522,8 +1512,6 @@
   }
 
   Buffer.prototype.slice = function slice (start, end) {
-    var this$1 = this;
-
     var len = this.length;
     start = ~~start;
     end = end === undefined ? len : ~~end;
@@ -1552,7 +1540,7 @@
       var sliceLen = end - start;
       newBuf = new Buffer(sliceLen, undefined);
       for (var i = 0; i < sliceLen; ++i) {
-        newBuf[i] = this$1[i + start];
+        newBuf[i] = this[i + start];
       }
     }
 
@@ -1568,8 +1556,6 @@
   }
 
   Buffer.prototype.readUIntLE = function readUIntLE (offset, byteLength, noAssert) {
-    var this$1 = this;
-
     offset = offset | 0;
     byteLength = byteLength | 0;
     if (!noAssert) { checkOffset(offset, byteLength, this.length); }
@@ -1578,15 +1564,13 @@
     var mul = 1;
     var i = 0;
     while (++i < byteLength && (mul *= 0x100)) {
-      val += this$1[offset + i] * mul;
+      val += this[offset + i] * mul;
     }
 
     return val
   };
 
   Buffer.prototype.readUIntBE = function readUIntBE (offset, byteLength, noAssert) {
-    var this$1 = this;
-
     offset = offset | 0;
     byteLength = byteLength | 0;
     if (!noAssert) {
@@ -1596,7 +1580,7 @@
     var val = this[offset + --byteLength];
     var mul = 1;
     while (byteLength > 0 && (mul *= 0x100)) {
-      val += this$1[offset + --byteLength] * mul;
+      val += this[offset + --byteLength] * mul;
     }
 
     return val
@@ -1636,8 +1620,6 @@
   };
 
   Buffer.prototype.readIntLE = function readIntLE (offset, byteLength, noAssert) {
-    var this$1 = this;
-
     offset = offset | 0;
     byteLength = byteLength | 0;
     if (!noAssert) { checkOffset(offset, byteLength, this.length); }
@@ -1646,7 +1628,7 @@
     var mul = 1;
     var i = 0;
     while (++i < byteLength && (mul *= 0x100)) {
-      val += this$1[offset + i] * mul;
+      val += this[offset + i] * mul;
     }
     mul *= 0x80;
 
@@ -1656,8 +1638,6 @@
   };
 
   Buffer.prototype.readIntBE = function readIntBE (offset, byteLength, noAssert) {
-    var this$1 = this;
-
     offset = offset | 0;
     byteLength = byteLength | 0;
     if (!noAssert) { checkOffset(offset, byteLength, this.length); }
@@ -1666,7 +1646,7 @@
     var mul = 1;
     var val = this[offset + --i];
     while (i > 0 && (mul *= 0x100)) {
-      val += this$1[offset + --i] * mul;
+      val += this[offset + --i] * mul;
     }
     mul *= 0x80;
 
@@ -1738,8 +1718,6 @@
   }
 
   Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, byteLength, noAssert) {
-    var this$1 = this;
-
     value = +value;
     offset = offset | 0;
     byteLength = byteLength | 0;
@@ -1752,15 +1730,13 @@
     var i = 0;
     this[offset] = value & 0xFF;
     while (++i < byteLength && (mul *= 0x100)) {
-      this$1[offset + i] = (value / mul) & 0xFF;
+      this[offset + i] = (value / mul) & 0xFF;
     }
 
     return offset + byteLength
   };
 
   Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, byteLength, noAssert) {
-    var this$1 = this;
-
     value = +value;
     offset = offset | 0;
     byteLength = byteLength | 0;
@@ -1773,7 +1749,7 @@
     var mul = 1;
     this[offset + i] = value & 0xFF;
     while (--i >= 0 && (mul *= 0x100)) {
-      this$1[offset + i] = (value / mul) & 0xFF;
+      this[offset + i] = (value / mul) & 0xFF;
     }
 
     return offset + byteLength
@@ -1860,8 +1836,6 @@
   };
 
   Buffer.prototype.writeIntLE = function writeIntLE (value, offset, byteLength, noAssert) {
-    var this$1 = this;
-
     value = +value;
     offset = offset | 0;
     if (!noAssert) {
@@ -1875,18 +1849,16 @@
     var sub = 0;
     this[offset] = value & 0xFF;
     while (++i < byteLength && (mul *= 0x100)) {
-      if (value < 0 && sub === 0 && this$1[offset + i - 1] !== 0) {
+      if (value < 0 && sub === 0 && this[offset + i - 1] !== 0) {
         sub = 1;
       }
-      this$1[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
+      this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
     }
 
     return offset + byteLength
   };
 
   Buffer.prototype.writeIntBE = function writeIntBE (value, offset, byteLength, noAssert) {
-    var this$1 = this;
-
     value = +value;
     offset = offset | 0;
     if (!noAssert) {
@@ -1900,10 +1872,10 @@
     var sub = 0;
     this[offset + i] = value & 0xFF;
     while (--i >= 0 && (mul *= 0x100)) {
-      if (value < 0 && sub === 0 && this$1[offset + i + 1] !== 0) {
+      if (value < 0 && sub === 0 && this[offset + i + 1] !== 0) {
         sub = 1;
       }
-      this$1[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
+      this[offset + i] = ((value / mul) >> 0) - sub & 0xFF;
     }
 
     return offset + byteLength
@@ -2015,8 +1987,6 @@
 
   // copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
   Buffer.prototype.copy = function copy (target, targetStart, start, end) {
-    var this$1 = this;
-
     if (!start) { start = 0; }
     if (!end && end !== 0) { end = this.length; }
     if (targetStart >= target.length) { targetStart = target.length; }
@@ -2046,12 +2016,12 @@
     if (this === target && start < targetStart && targetStart < end) {
       // descending copy from end
       for (i = len - 1; i >= 0; --i) {
-        target[i + targetStart] = this$1[i + start];
+        target[i + targetStart] = this[i + start];
       }
     } else if (len < 1000 || !Buffer.TYPED_ARRAY_SUPPORT) {
       // ascending copy from start
       for (i = 0; i < len; ++i) {
-        target[i + targetStart] = this$1[i + start];
+        target[i + targetStart] = this[i + start];
       }
     } else {
       Uint8Array.prototype.set.call(
@@ -2069,8 +2039,6 @@
   //    buffer.fill(buffer[, offset[, end]])
   //    buffer.fill(string[, offset[, end]][, encoding])
   Buffer.prototype.fill = function fill (val, start, end, encoding) {
-    var this$1 = this;
-
     // Handle string cases:
     if (typeof val === 'string') {
       if (typeof start === 'string') {
@@ -2114,7 +2082,7 @@
     var i;
     if (typeof val === 'number') {
       for (i = start; i < end; ++i) {
-        this$1[i] = val;
+        this[i] = val;
       }
     } else {
       var bytes = internalIsBuffer(val)
@@ -2122,7 +2090,7 @@
         : utf8ToBytes(new Buffer(val, encoding).toString());
       var len = bytes.length;
       for (i = 0; i < end - start; ++i) {
-        this$1[i + start] = bytes[i % len];
+        this[i + start] = bytes[i % len];
       }
     }
 
@@ -2871,8 +2839,6 @@
   };
 
   Url.prototype.resolveObject = function(relative) {
-    var this$1 = this;
-
     if (isString(relative)) {
       var rel = new Url();
       rel.parse(relative, false, true);
@@ -2883,7 +2849,7 @@
     var tkeys = Object.keys(this);
     for (var tk = 0; tk < tkeys.length; tk++) {
       var tkey = tkeys[tk];
-      result[tkey] = this$1[tkey];
+      result[tkey] = this[tkey];
     }
 
     // hash is always overridden, no matter what.
@@ -4271,7 +4237,7 @@
 
   // the high-level purpose of this is: take an address, geocode it, and put
   // the result in state.
-  var GeocodeClient = (function (BaseClient$$1) {
+  var GeocodeClient = /*@__PURE__*/(function (BaseClient$$1) {
     function GeocodeClient () {
       BaseClient$$1.apply(this, arguments);
     }
@@ -4355,7 +4321,7 @@
     return GeocodeClient;
   }(BaseClient));
 
-  var HttpClient = (function (BaseClient$$1) {
+  var HttpClient = /*@__PURE__*/(function (BaseClient$$1) {
     function HttpClient () {
       BaseClient$$1.apply(this, arguments);
     }
@@ -4725,7 +4691,7 @@
 
   function objectWithoutProperties (obj, exclude) { var target = {}; for (var k in obj) if (Object.prototype.hasOwnProperty.call(obj, k) && exclude.indexOf(k) === -1) target[k] = obj[k]; return target; }
 
-  var EsriClient = (function (BaseClient$$1) {
+  var EsriClient = /*@__PURE__*/(function (BaseClient$$1) {
     function EsriClient () {
       BaseClient$$1.apply(this, arguments);
     }
@@ -5031,8 +4997,6 @@
 
 
   DataManager.prototype.fetchData = function fetchData () {
-      var this$1 = this;
-
     // console.log('\nFETCH DATA');
     // console.log('-----------');
 
@@ -5067,7 +5031,7 @@
         var dataSourceKey = ref[0];
         var dataSource = ref[1];
 
-        var state = this$1.store.state;
+        var state = this.store.state;
       var type = dataSource.type;
       var targetsDef = dataSource.targets;
 
@@ -5104,7 +5068,7 @@
         // if not, create them.
         if (shouldCreateTargets) {
           // console.log('should create targets', targetIds, stateTargetIds);
-          this$1.store.commit('createEmptySourceTargets', {
+          this.store.commit('createEmptySourceTargets', {
             key: dataSourceKey,
             targetIds: targetIds
           });
@@ -5131,7 +5095,7 @@
         // targetId && console.log('target:', targetId);
 
         // check if it's ready
-        var isReady = this$1.checkDataSourceReady(dataSourceKey, dataSource, targetId);
+        var isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
         if (!isReady) {
           // console.log('not ready');
           continue;
@@ -5145,13 +5109,13 @@
         if (targetId) {
           setSourceStatusOpts.targetId = targetId;
         }
-        this$1.store.commit('setSourceStatus', setSourceStatusOpts);
+        this.store.commit('setSourceStatus', setSourceStatusOpts);
 
         // TODO do this for all targets
         switch(type) {
           case 'http-get':
             // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
-            this$1.clients.http.fetch(target,
+            this.clients.http.fetch(target,
                                     dataSource,
                                     dataSourceKey,
                                     targetIdFn);
@@ -5159,7 +5123,7 @@
 
           case 'http-get-nearby':
           // console.log('http-get-nearby', dataSourceKey, targetIdFn)
-            this$1.clients.http.fetchNearby(target,
+            this.clients.http.fetchNearby(target,
                                           dataSource,
                                           dataSourceKey,
                                           targetIdFn);
@@ -5168,14 +5132,14 @@
           case 'esri':
             // console.log('esri', dataSourceKey)
             // TODO add targets id fn
-            this$1.clients.esri.fetch(target, dataSource, dataSourceKey);
+            this.clients.esri.fetch(target, dataSource, dataSourceKey);
             break;
 
             break;
           case 'esri-nearby':
             // console.log('esri-nearby', dataSourceKey)
             // TODO add targets id fn
-            this$1.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
+            this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
             break;
 
           default:
@@ -5226,8 +5190,6 @@
   };
 
   DataManager.prototype.resetData = function resetData () {
-        var this$1 = this;
-
       var dataSources = this.config.dataSources || {};
 
       for (var i = 0, list = Object.keys(dataSources); i < list.length; i += 1) {
@@ -5238,15 +5200,15 @@
 
         // null out existing data in state
         if (targetsDef) {
-          this$1.store.commit('clearSourceTargets', {
+          this.store.commit('clearSourceTargets', {
             key: dataSourceKey
           });
         } else {
-          this$1.store.commit('setSourceData', {
+          this.store.commit('setSourceData', {
             key: dataSourceKey,
             data: null
           });
-          this$1.store.commit('setSourceStatus', {
+          this.store.commit('setSourceStatus', {
             key: dataSourceKey,
             status: null
           });
@@ -5417,7 +5379,6 @@
   };
 
   DataManager.prototype.didGeocode = function didGeocode (feature$$1) {
-      var this$1 = this;
       var assign, assign$1;
 
     // console.log('DataManager.didGeocode:', feature);
@@ -5476,16 +5437,16 @@
         for (var i = 0, list = parcelLayers; i < list.length; i += 1) {
           var parcelLayer = list[i];
 
-            var configForParcelLayer = this$1.config.parcels[parcelLayer];
+            var configForParcelLayer = this.config.parcels[parcelLayer];
           var parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder;
           var parcelId = feature$$1.properties[parcelIdInGeocoder];
           if (parcelId && parcelId.length > 0) {
-            this$1.getParcelsById(parcelId, parcelLayer);
+            this.getParcelsById(parcelId, parcelLayer);
           } else {
             if (configForParcelLayer.getByLatLngIfIdFails) {
               // console.log(parcelLayer, 'Id failed - had to get by LatLng')
               console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
-              this$1.getParcelsByLatLng(latlng, parcelLayer);
+              this.getParcelsByLatLng(latlng, parcelLayer);
             }
           }
         }
@@ -5500,15 +5461,15 @@
         for (var i$1 = 0, list$1 = otherParcelLayers; i$1 < list$1.length; i$1 += 1) {
           var otherParcelLayer = list$1[i$1];
 
-            var configForOtherParcelLayer = this$1.config.parcels[otherParcelLayer];
+            var configForOtherParcelLayer = this.config.parcels[otherParcelLayer];
           var parcelIdInGeocoder$1 = configForOtherParcelLayer.parcelIdInGeocoder;
           var parcelId$1 = feature$$1.properties[parcelIdInGeocoder$1];
           if (parcelId$1 && parcelId$1.length > 0) {
-            this$1.getParcelsById(parcelId$1, otherParcelLayer);
+            this.getParcelsById(parcelId$1, otherParcelLayer);
           } else {
             if (configForOtherParcelLayer.getByLatLngIfIdFails) {
               console.log('in if lastSearchMethod === reverseGeocode, otherParcelLayer:', otherParcelLayer, 'Id failed - had to get by LatLng');
-              this$1.getParcelsByLatLng(latlng, otherParcelLayer);
+              this.getParcelsByLatLng(latlng, otherParcelLayer);
             }
           }
         }
@@ -5601,8 +5562,6 @@
   };
 
   DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch) {
-      var this$1 = this;
-
     // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     var configForParcelLayer = this.config.parcels[parcelLayer];
     var multipleAllowed = configForParcelLayer.multipleAllowed;
@@ -5696,10 +5655,10 @@
         // console.log('for let otherParcelLayer of otherParcelLayers is running');
         var otherParcelLayer = list$2[i$3];
 
-          var configForOtherParcelLayer = this$1.config.parcels[otherParcelLayer];
+          var configForOtherParcelLayer = this.config.parcels[otherParcelLayer];
         var otherMultipleAllowed = configForOtherParcelLayer.multipleAllowed;
-        this$1.setParcelsInState(otherParcelLayer, otherMultipleAllowed, null, []);
-        this$1.getParcelsByLatLng(latlng, otherParcelLayer, 'noFetch');
+        this.setParcelsInState(otherParcelLayer, otherMultipleAllowed, null, []);
+        this.getParcelsByLatLng(latlng, otherParcelLayer, 'noFetch');
       }
 
       // console.log('didGetParcels - shouldGeocode is running');
@@ -5814,8 +5773,6 @@
   };
 
   Controller.prototype.handleSearchFormSubmit = function handleSearchFormSubmit (value) {
-      var this$1 = this;
-
     var input = value;
     console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
@@ -5835,7 +5792,7 @@
     for (var i = 0, list = parcelLayers; i < list.length; i += 1) {
       var parcelLayer = list[i];
 
-        var configForParcelLayer = this$1.config.parcels[parcelLayer];
+        var configForParcelLayer = this.config.parcels[parcelLayer];
       var multipleAllowed = configForParcelLayer.multipleAllowed;
       var payload = (void 0);
       // pwd
@@ -5858,7 +5815,7 @@
         };
       }
       // update state
-      this$1.store.commit('setParcelData', payload);
+      this.store.commit('setParcelData', payload);
     }
 
     // tell router
