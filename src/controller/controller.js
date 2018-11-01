@@ -39,6 +39,13 @@ class Controller {
     this.dataManager.fetchMoreData(dataSource, highestPageRetrieved);
   }
 
+  handleConfigurableInputSubmit(value, process) {
+    console.log('controller handleConfigurableInputSubmit is running, value:', value, 'process:', process);
+    if (process === 'mapboard') {
+      this.handleSearchFormSubmit(value);
+    }
+  }
+
   handleSearchFormSubmit(value) {
     const input = value
     console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
