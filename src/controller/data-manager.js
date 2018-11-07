@@ -502,6 +502,7 @@ class DataManager {
     console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
       const input = this.store.state.geocode.input;
+      const didOwnerSearch = this.didOwnerSearch.bind(this);
       return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
     } else if (this.store.state.geocode.status === 'success') {
       this.didGeocode(feature);
