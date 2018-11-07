@@ -5504,6 +5504,7 @@
     console.log('didTryGeocode is running, feature:', feature$$1);
     if (this.store.state.geocode.status === 'error') {
       var input = this.store.state.geocode.input;
+      var didOwnerSearch = this.didOwnerSearch.bind(this);
       return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
     } else if (this.store.state.geocode.status === 'success') {
       this.didGeocode(feature$$1);
