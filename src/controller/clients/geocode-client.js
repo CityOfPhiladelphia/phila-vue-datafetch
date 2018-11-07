@@ -4,12 +4,19 @@ import BaseClient from './base-client';
 // the high-level purpose of this is: take an address, geocode it, and put
 // the result in state.
 class GeocodeClient extends BaseClient {
+  // fetch(input, category) {
   fetch(input) {
     // console.log('geocode client fetch', input);
 
     const store = this.store;
+    let geocodeConfig;
 
-    const geocodeConfig = this.config.geocoder;
+    // if (category === 'address') {
+    geocodeConfig = this.config.geocoder;
+    // } else if (category === 'owner') {
+    //   console.log('in geocode-client, category is owner');
+    //   geocodeConfig = this.config.ownerSearch;
+    // }
     // console.log('geocode-client, geocodeConfig:', geocodeConfig);
     const url = geocodeConfig.url(input);
     const params = geocodeConfig.params;

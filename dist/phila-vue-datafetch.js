@@ -3241,7 +3241,7 @@
     }
   };
 
-  Router.prototype.routeToAddress = function routeToAddress (nextAddress) {
+  Router.prototype.routeToAddress = function routeToAddress (nextAddress, searchCategory) {
     // console.log('Router.routeToAddress', nextAddress);
     if (nextAddress) {
       // check against current address
@@ -3250,9 +3250,26 @@
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
         // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
-        this.dataManager.geocode(nextAddress);
+        this.dataManager.geocode(nextAddress, searchCategory);
+        // this.dataManager.geocode(nextAddress, 'address')
                         // .then(this.didGeocode.bind(this));
       }
+    }
+  };
+
+  Router.prototype.routeToOwner = function routeToOwner (nextOwner, searchCategory) {
+    // console.log('Router.routeToAddress', nextAddress);
+    if (nextOwner) {
+      // check against current address
+      // const prevOwner = this.getAddressFromState();
+
+      // if the hash address is different, geocode
+      // if (!prevAddress || nextAddress !== prevAddress) {
+        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
+        this.dataManager.geocode(nextOwner, searchCategory);
+        // this.dataManager.geocode(nextOwner, 'owner')
+                        // .then(this.didGeocode.bind(this));
+      // }
     }
   };
 
@@ -4250,8 +4267,14 @@
       // console.log('geocode client fetch', input);
 
       var store = this.store;
+      var geocodeConfig;
 
-      var geocodeConfig = this.config.geocoder;
+      // if (category === 'address') {
+      geocodeConfig = this.config.geocoder;
+      // } else if (category === 'owner') {
+      //   console.log('in geocode-client, category is owner');
+      //   geocodeConfig = this.config.ownerSearch;
+      // }
       // console.log('geocode-client, geocodeConfig:', geocodeConfig);
       var url = geocodeConfig.url(input);
       var params = geocodeConfig.params;
@@ -4319,6 +4342,90 @@
     };
 
     return GeocodeClient;
+  }(BaseClient));
+
+  // the high-level purpose of this is: take a person, search AIS for them, and put
+  // the result in state.
+  var OwnerSearchClient = /*@__PURE__*/(function (BaseClient$$1) {
+    function OwnerSearchClient () {
+      BaseClient$$1.apply(this, arguments);
+    }
+
+    if ( BaseClient$$1 ) OwnerSearchClient.__proto__ = BaseClient$$1;
+    OwnerSearchClient.prototype = Object.create( BaseClient$$1 && BaseClient$$1.prototype );
+    OwnerSearchClient.prototype.constructor = OwnerSearchClient;
+
+    OwnerSearchClient.prototype.fetch = function fetch (input) {
+      // console.log('owner search client fetch', input);
+
+      var store = this.store;
+
+      var ownerSearchConfig = this.config.ownerSearch;
+      // console.log('owner search-client, ownerSearchConfig:', ownerSearchConfig);
+      var url = ownerSearchConfig.url(input);
+      var params = ownerSearchConfig.params;
+
+      // update state
+      this.store.commit('setOwnerSearchStatus', 'waiting');
+      // console.log('OWNER SEARCH CLIENT setting last search method to owner search');
+      // this.store.commit('setLastSearchMethod', 'owner search');
+
+      var success = this.success.bind(this);
+      var error = this.error.bind(this);
+
+      // return a promise that can accept further chaining
+      return axios.get(url, { params: params })
+        .then(success)
+        .catch(error);
+    };
+
+    OwnerSearchClient.prototype.success = function success (response) {
+      console.log('owner search success', response.config.url);
+
+      var store = this.store;
+      var data = response.data;
+      var url = response.config.url;
+      // console.log(url)
+
+      // TODO handle multiple results
+
+      if (!data.features || data.features.length < 1) {
+        // console.log('owner search got no features', data);
+
+        return;
+      }
+
+      // TODO do some checking here
+      // const feature = data.features[0];
+      // let relatedFeatures = [];
+      // for (let relatedFeature of data.features.slice(1)){
+      //   if (!!feature.properties.address_high) {
+      //     if (relatedFeature.properties.address_high) {
+      //       relatedFeatures.push(relatedFeature);
+      //     }
+      //   } else {
+      //     relatedFeatures.push(relatedFeature);
+      //   }
+      // }
+
+      store.commit('setOwnerSearchData', data.features);
+      // store.commit('setOwnerSearchRelated', relatedFeatures);
+      store.commit('setOwnerSearchStatus', 'success');
+
+      return data.features;
+    };
+
+    OwnerSearchClient.prototype.error = function error (error$1) {
+      console.log('owner search error', error$1);
+
+      var store = this.store;
+
+      store.commit('setOwnerSearchStatus', 'error');
+      store.commit('setOwnerSearchData', null);
+      // store.commit('setOwnerSearchRelated', null);
+    };
+
+    return OwnerSearchClient;
   }(BaseClient));
 
   var HttpClient = /*@__PURE__*/(function (BaseClient$$1) {
@@ -4913,6 +5020,7 @@
     // response back to this?
     var clientOpts = { config: config, store: store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
+    this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
   };
@@ -5372,16 +5480,40 @@
   };
 
   /* GEOCODING */
-  DataManager.prototype.geocode = function geocode (address) {
-    // console.log('data-manager geocode is running, address:', address);
-    var didGeocode = this.didGeocode.bind(this);
-    return this.clients.geocode.fetch(address).then(didGeocode);
+  DataManager.prototype.geocode = function geocode (input, category) {
+    console.log('data-manager geocode is running, input:', input, 'category:', category);
+    if (category === 'address') {
+      var didGeocode = this.didGeocode.bind(this);
+      return this.clients.geocode.fetch(input).then(didGeocode);
+    } else if (category === 'owner') {
+      console.log('category is owner');
+      var didOwnerSearch = this.didOwnerSearch.bind(this);
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+    } else if (category == null) {
+      console.log('no category');
+      var didTryGeocode = this.didTryGeocode.bind(this);
+      var test = this.clients.geocode.fetch(input).then(didTryGeocode);
+    }
+  };
+
+  DataManager.prototype.didOwnerSearch = function didOwnerSearch () {
+    console.log('callback from owner search is running');
+  };
+
+  DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
+    console.log('didTryGeocode is running, feature:', feature$$1);
+    if (this.store.state.geocode.status === 'error') {
+      var input = this.store.state.geocode.input;
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+    } else if (this.store.state.geocode.status === 'success') {
+      this.didGeocode(feature$$1);
+    }
   };
 
   DataManager.prototype.didGeocode = function didGeocode (feature$$1) {
       var assign, assign$1;
 
-    // console.log('DataManager.didGeocode:', feature);
+    console.log('DataManager.didGeocode:', feature$$1);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {
@@ -5768,23 +5900,43 @@
     this.router.hashChanged();
   };
 
+  Controller.prototype.test = function test () {
+    console.log('controller test is firing');
+  };
+
   Controller.prototype.getMoreRecords = function getMoreRecords (dataSource, highestPageRetrieved) {
     this.dataManager.fetchMoreData(dataSource, highestPageRetrieved);
   };
 
-  Controller.prototype.handleConfigurableInputSubmit = function handleConfigurableInputSubmit (value, process) {
-    console.log('controller handleConfigurableInputSubmit is running, value:', value, 'process:', process);
+  Controller.prototype.filterInputSubmit = function filterInputSubmit (value, process, searchCategory) {
+    console.log('controller filterInputSubmit is running, value:', value, 'process:', process);
     if (process === 'mapboard') {
       this.handleSearchFormSubmit(value);
+    } else {
+      this.handleConfigurableInputSubmit(value, searchCategory);
     }
   };
 
-  Controller.prototype.handleSearchFormSubmit = function handleSearchFormSubmit (value) {
+  Controller.prototype.handleConfigurableInputSubmit = function handleConfigurableInputSubmit (value, searchCategory) {
+    console.log('controller handleConfigurableInputSubmit is running, value:', value, 'searchCategory:', searchCategory);
+    if (searchCategory === 'address') {
+      this.handleSearchFormSubmit(value, searchCategory);
+    } else if (searchCategory === 'owner') {
+      console.log('searchCategory is owner');
+      this.handleSearchFormSubmit(value, searchCategory);
+    }
+  };
+
+  Controller.prototype.handleSearchFormSubmit = function handleSearchFormSubmit (value, searchCategory) {
     var input = value;
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
-    this.store.commit('setGeocodeInput', input);
+    if (!searchCategory || searchCategory === 'address') {
+      this.store.commit('setGeocodeInput', input);
+    } else if (searchCategory === 'owner') {
+      this.store.commit('setOwnerSearchInput', input);
+    }
     this.store.commit('setShouldShowAddressCandidateList', false);
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -5826,7 +5978,13 @@
     }
 
     // tell router
-    this.router.routeToAddress(input);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
+    if (!searchCategory || searchCategory === 'address') {
+      this.router.routeToAddress(input, searchCategory);
+    } else if (searchCategory === 'owner') {
+      console.log('searchCategory is owner');
+      this.router.routeToOwner(input, searchCategory);
+    }
   };
 
   Controller.prototype.handleMapClick = function handleMapClick (e) {
@@ -5923,6 +6081,11 @@
       data: null,
       input: null,
       related: null,
+    },
+    ownerSearch: {
+      status: null,
+      data: null,
+      input: null,
     },
     lastSearchMethod: 'geocode',
   };
@@ -6116,6 +6279,15 @@
         },
         setGeocodeInput: function setGeocodeInput(state, payload) {
           state.geocode.input = payload;
+        },
+        setOwnerSearchStatus: function setOwnerSearchStatus(state, payload) {
+          state.ownerSearch.status = payload;
+        },
+        setOwnerSearchData: function setOwnerSearchData(state, payload) {
+          state.ownerSearch.data = payload;
+        },
+        setOwnerSearchInput: function setOwnerSearchInput(state, payload) {
+          state.ownerSearch.input = payload;
         },
         setBasemap: function setBasemap(state, payload) {
           state.map.basemap = payload;

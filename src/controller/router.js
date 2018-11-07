@@ -118,7 +118,7 @@ class Router {
     }
   }
 
-  routeToAddress(nextAddress) {
+  routeToAddress(nextAddress, searchCategory) {
     // console.log('Router.routeToAddress', nextAddress);
     if (nextAddress) {
       // check against current address
@@ -127,9 +127,26 @@ class Router {
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
         // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
-        this.dataManager.geocode(nextAddress)
+        this.dataManager.geocode(nextAddress, searchCategory);
+        // this.dataManager.geocode(nextAddress, 'address')
                         // .then(this.didGeocode.bind(this));
       }
+    }
+  }
+
+  routeToOwner(nextOwner, searchCategory) {
+    // console.log('Router.routeToAddress', nextAddress);
+    if (nextOwner) {
+      // check against current address
+      // const prevOwner = this.getAddressFromState();
+
+      // if the hash address is different, geocode
+      // if (!prevAddress || nextAddress !== prevAddress) {
+        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
+        this.dataManager.geocode(nextOwner, searchCategory);
+        // this.dataManager.geocode(nextOwner, 'owner')
+                        // .then(this.didGeocode.bind(this));
+      // }
     }
   }
 

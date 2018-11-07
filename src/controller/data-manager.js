@@ -13,6 +13,7 @@ import distance from '@turf/distance';
 import area from '@turf/area';
 import {
   GeocodeClient,
+  OwnerSearchClient,
   HttpClient,
   EsriClient
 } from './clients';
@@ -31,6 +32,7 @@ class DataManager {
     // response back to this?
     const clientOpts = { config, store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
+    this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
   }
@@ -476,14 +478,38 @@ class DataManager {
   }
 
   /* GEOCODING */
-  geocode(address) {
-    // console.log('data-manager geocode is running, address:', address);
-    const didGeocode = this.didGeocode.bind(this);
-    return this.clients.geocode.fetch(address).then(didGeocode);
+  geocode(input, category) {
+    console.log('data-manager geocode is running, input:', input, 'category:', category);
+    if (category === 'address') {
+      const didGeocode = this.didGeocode.bind(this);
+      return this.clients.geocode.fetch(input).then(didGeocode);
+    } else if (category === 'owner') {
+      console.log('category is owner');
+      const didOwnerSearch = this.didOwnerSearch.bind(this);
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+    } else if (category == null) {
+      console.log('no category');
+      const didTryGeocode = this.didTryGeocode.bind(this);
+      const test = this.clients.geocode.fetch(input).then(didTryGeocode);
+    }
+  }
+
+  didOwnerSearch() {
+    console.log('callback from owner search is running');
+  }
+
+  didTryGeocode(feature) {
+    console.log('didTryGeocode is running, feature:', feature);
+    if (this.store.state.geocode.status === 'error') {
+      const input = this.store.state.geocode.input;
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+    } else if (this.store.state.geocode.status === 'success') {
+      this.didGeocode(feature);
+    }
   }
 
   didGeocode(feature) {
-    // console.log('DataManager.didGeocode:', feature);
+    console.log('DataManager.didGeocode:', feature);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {

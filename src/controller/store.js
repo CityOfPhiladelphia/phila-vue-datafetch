@@ -16,6 +16,11 @@ const initialState = {
     input: null,
     related: null,
   },
+  ownerSearch: {
+    status: null,
+    data: null,
+    input: null,
+  },
   lastSearchMethod: 'geocode',
 };
 
@@ -200,6 +205,15 @@ const pvdStore = {
       },
       setGeocodeInput(state, payload) {
         state.geocode.input = payload;
+      },
+      setOwnerSearchStatus(state, payload) {
+        state.ownerSearch.status = payload;
+      },
+      setOwnerSearchData(state, payload) {
+        state.ownerSearch.data = payload;
+      },
+      setOwnerSearchInput(state, payload) {
+        state.ownerSearch.input = payload;
       },
       setBasemap(state, payload) {
         state.map.basemap = payload;
