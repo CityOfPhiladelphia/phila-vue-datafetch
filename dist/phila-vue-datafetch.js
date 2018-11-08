@@ -5508,6 +5508,9 @@
       return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
     } else if (this.store.state.geocode.status === 'success') {
       this.didGeocode(feature$$1);
+      this.store.commit('setOwnerSearchStatus', null);
+      this.store.commit('setOwnerSearchData', null);
+      this.store.commit('setOwnerSearchInput', null);
     }
   };
 
