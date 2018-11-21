@@ -4340,29 +4340,29 @@
       return feature;
     };
 
-    GeocodeClient.prototype.assignFeatureIds = function assignFeatureIds (features, dataSourceKey, topicId) {
-      var featuresWithIds = [];
-
-      // REVIEW this was not working with Array.map for some reason
-      // it was returning an object when fetchJson was used
-      // that is now converted to an array in fetchJson
-      for (var i = 0; i < features.length; i++) {
-        var suffix = (topicId ? topicId + '-' : '') + i;
-        var id = "feat-" + dataSourceKey + "-" + suffix;
-        var feature = features[i];
-        // console.log(dataSourceKey, feature);
-        try {
-          feature._featureId = id;
-        }
-        catch (e) {
-          console.warn(e);
-        }
-        featuresWithIds.push(feature);
-      }
-
-      // console.log(dataSourceKey, features, featuresWithIds);
-      return featuresWithIds;
-    };
+    // assignFeatureIds(features, dataSourceKey, topicId) {
+    //   const featuresWithIds = [];
+    //
+    //   // REVIEW this was not working with Array.map for some reason
+    //   // it was returning an object when fetchJson was used
+    //   // that is now converted to an array in fetchJson
+    //   for (let i = 0; i < features.length; i++) {
+    //     const suffix = (topicId ? topicId + '-' : '') + i;
+    //     const id = `feat-${dataSourceKey}-${suffix}`;
+    //     const feature = features[i];
+    //     // console.log(dataSourceKey, feature);
+    //     try {
+    //       feature._featureId = id;
+    //     }
+    //     catch (e) {
+    //       console.warn(e);
+    //     }
+    //     featuresWithIds.push(feature);
+    //   }
+    //
+    //   // console.log(dataSourceKey, features, featuresWithIds);
+    //   return featuresWithIds;
+    // }
 
     GeocodeClient.prototype.error = function error (error$1) {
       // console.log('geocode error', error);
@@ -4428,6 +4428,9 @@
         return;
       }
 
+      var features = data.features;
+      features = this.assignFeatureIds(features, 'owner');
+
       // TODO do some checking here
       // const feature = data.features[0];
       // let relatedFeatures = [];
@@ -4441,11 +4444,12 @@
       //   }
       // }
 
-      store.commit('setOwnerSearchData', data.features);
+      store.commit('setOwnerSearchData', features);
+      // store.commit('setOwnerSearchData', data.features);
       // store.commit('setOwnerSearchRelated', relatedFeatures);
       store.commit('setOwnerSearchStatus', 'success');
 
-      return data.features;
+      return features;
     };
 
     OwnerSearchClient.prototype.error = function error (error$1) {

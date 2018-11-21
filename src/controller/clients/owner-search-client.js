@@ -44,6 +44,9 @@ class OwnerSearchClient extends BaseClient {
       return;
     }
 
+    let features = data.features;
+    features = this.assignFeatureIds(features, 'owner');
+
     // TODO do some checking here
     // const feature = data.features[0];
     // let relatedFeatures = [];
@@ -57,11 +60,12 @@ class OwnerSearchClient extends BaseClient {
     //   }
     // }
 
-    store.commit('setOwnerSearchData', data.features);
+    store.commit('setOwnerSearchData', features);
+    // store.commit('setOwnerSearchData', data.features);
     // store.commit('setOwnerSearchRelated', relatedFeatures);
     store.commit('setOwnerSearchStatus', 'success');
 
-    return data.features;
+    return features;
   }
 
   error(error) {

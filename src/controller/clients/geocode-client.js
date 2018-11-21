@@ -80,29 +80,29 @@ class GeocodeClient extends BaseClient {
     return feature;
   }
 
-  assignFeatureIds(features, dataSourceKey, topicId) {
-    const featuresWithIds = [];
-
-    // REVIEW this was not working with Array.map for some reason
-    // it was returning an object when fetchJson was used
-    // that is now converted to an array in fetchJson
-    for (let i = 0; i < features.length; i++) {
-      const suffix = (topicId ? topicId + '-' : '') + i;
-      const id = `feat-${dataSourceKey}-${suffix}`;
-      const feature = features[i];
-      // console.log(dataSourceKey, feature);
-      try {
-        feature._featureId = id;
-      }
-      catch (e) {
-        console.warn(e);
-      }
-      featuresWithIds.push(feature);
-    }
-
-    // console.log(dataSourceKey, features, featuresWithIds);
-    return featuresWithIds;
-  }
+  // assignFeatureIds(features, dataSourceKey, topicId) {
+  //   const featuresWithIds = [];
+  //
+  //   // REVIEW this was not working with Array.map for some reason
+  //   // it was returning an object when fetchJson was used
+  //   // that is now converted to an array in fetchJson
+  //   for (let i = 0; i < features.length; i++) {
+  //     const suffix = (topicId ? topicId + '-' : '') + i;
+  //     const id = `feat-${dataSourceKey}-${suffix}`;
+  //     const feature = features[i];
+  //     // console.log(dataSourceKey, feature);
+  //     try {
+  //       feature._featureId = id;
+  //     }
+  //     catch (e) {
+  //       console.warn(e);
+  //     }
+  //     featuresWithIds.push(feature);
+  //   }
+  //
+  //   // console.log(dataSourceKey, features, featuresWithIds);
+  //   return featuresWithIds;
+  // }
 
   error(error) {
     // console.log('geocode error', error);
