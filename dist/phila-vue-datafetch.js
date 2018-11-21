@@ -4309,10 +4309,19 @@
         return;
       }
 
+      var features = data.features;
+      features = this.assignFeatureIds(features, 'geocode');
+
       // TODO do some checking here
-      var feature = data.features[0];
+      // let feature = data.features[0];
+      var feature = features[0];
+      // let properties = feature.properties
+      // console.log('geocode-client, feature:', feature);
+      // properties = this.assignFeatureIds(properties, 'geocode');
+      // feature.properties = properties;
       var relatedFeatures = [];
-      for (var i = 0, list = data.features.slice(1); i < list.length; i += 1){
+      for (var i = 0, list = features.slice(1); i < list.length; i += 1){
+      // for (let relatedFeature of data.features.slice(1)){
         var relatedFeature = list[i];
 
         if (!!feature.properties.address_high) {
@@ -4329,6 +4338,30 @@
       store.commit('setGeocodeStatus', 'success');
 
       return feature;
+    };
+
+    GeocodeClient.prototype.assignFeatureIds = function assignFeatureIds (features, dataSourceKey, topicId) {
+      var featuresWithIds = [];
+
+      // REVIEW this was not working with Array.map for some reason
+      // it was returning an object when fetchJson was used
+      // that is now converted to an array in fetchJson
+      for (var i = 0; i < features.length; i++) {
+        var suffix = (topicId ? topicId + '-' : '') + i;
+        var id = "feat-" + dataSourceKey + "-" + suffix;
+        var feature = features[i];
+        // console.log(dataSourceKey, feature);
+        try {
+          feature._featureId = id;
+        }
+        catch (e) {
+          console.warn(e);
+        }
+        featuresWithIds.push(feature);
+      }
+
+      // console.log(dataSourceKey, features, featuresWithIds);
+      return featuresWithIds;
     };
 
     GeocodeClient.prototype.error = function error (error$1) {
@@ -5266,7 +5299,7 @@
     var stateData = dataOrNull;
     // console.log('data-manager DID FETCH DATA:', key, targetId || '', data);
     var rows;
-    if (stateData.rows) {
+    if (stateData) {
       rows = stateData.rows;
     }
 
@@ -5274,7 +5307,7 @@
     if (Array.isArray(stateData)) {
       // console.log('Array.isArray is true');
       stateData = this.assignFeatureIds(stateData, key, targetId);
-    } else {
+    } else if (stateData) {
       // console.log('Array.isArray is not true');
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
@@ -5440,6 +5473,9 @@
   };
 
   DataManager.prototype.assignFeatureIds = function assignFeatureIds (features, dataSourceKey, topicId) {
+    if (!features) {
+      return;
+    }
     var featuresWithIds = [];
 
     // REVIEW this was not working with Array.map for some reason

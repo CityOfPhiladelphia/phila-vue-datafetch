@@ -272,7 +272,7 @@ class DataManager {
     let stateData = dataOrNull;
     // console.log('data-manager DID FETCH DATA:', key, targetId || '', data);
     let rows;
-    if (stateData.rows) {
+    if (stateData) {
       rows = stateData.rows;
     }
 
@@ -280,7 +280,7 @@ class DataManager {
     if (Array.isArray(stateData)) {
       // console.log('Array.isArray is true');
       stateData = this.assignFeatureIds(stateData, key, targetId);
-    } else {
+    } else if (stateData) {
       // console.log('Array.isArray is not true');
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
@@ -442,6 +442,9 @@ class DataManager {
   }
 
   assignFeatureIds(features, dataSourceKey, topicId) {
+    if (!features) {
+      return;
+    }
     const featuresWithIds = [];
 
     // REVIEW this was not working with Array.map for some reason

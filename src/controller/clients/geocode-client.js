@@ -51,10 +51,19 @@ class GeocodeClient extends BaseClient {
       return;
     }
 
+    let features = data.features;
+    features = this.assignFeatureIds(features, 'geocode');
+
     // TODO do some checking here
-    const feature = data.features[0];
+    // let feature = data.features[0];
+    let feature = features[0];
+    // let properties = feature.properties
+    // console.log('geocode-client, feature:', feature);
+    // properties = this.assignFeatureIds(properties, 'geocode');
+    // feature.properties = properties;
     let relatedFeatures = [];
-    for (let relatedFeature of data.features.slice(1)){
+    for (let relatedFeature of features.slice(1)){
+    // for (let relatedFeature of data.features.slice(1)){
       if (!!feature.properties.address_high) {
         if (relatedFeature.properties.address_high) {
           relatedFeatures.push(relatedFeature);
@@ -69,6 +78,30 @@ class GeocodeClient extends BaseClient {
     store.commit('setGeocodeStatus', 'success');
 
     return feature;
+  }
+
+  assignFeatureIds(features, dataSourceKey, topicId) {
+    const featuresWithIds = [];
+
+    // REVIEW this was not working with Array.map for some reason
+    // it was returning an object when fetchJson was used
+    // that is now converted to an array in fetchJson
+    for (let i = 0; i < features.length; i++) {
+      const suffix = (topicId ? topicId + '-' : '') + i;
+      const id = `feat-${dataSourceKey}-${suffix}`;
+      const feature = features[i];
+      // console.log(dataSourceKey, feature);
+      try {
+        feature._featureId = id;
+      }
+      catch (e) {
+        console.warn(e);
+      }
+      featuresWithIds.push(feature);
+    }
+
+    // console.log(dataSourceKey, features, featuresWithIds);
+    return featuresWithIds;
   }
 
   error(error) {
