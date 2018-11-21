@@ -5261,14 +5261,22 @@
   };
 
   DataManager.prototype.didFetchData = function didFetchData (key, status, data, targetId) {
-    // console.log('DID FETCH DATA:', key, targetId || '', data);
 
     var dataOrNull = status === 'error' ? null : data;
     var stateData = dataOrNull;
+    // console.log('data-manager DID FETCH DATA:', key, targetId || '', data);
+    var rows;
+    if (stateData.rows) {
+      rows = stateData.rows;
+    }
 
     // if this is an array, assign feature ids
     if (Array.isArray(stateData)) {
+      // console.log('Array.isArray is true');
       stateData = this.assignFeatureIds(stateData, key, targetId);
+    } else {
+      // console.log('Array.isArray is not true');
+      stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
 
     // does this data source have targets?
