@@ -278,10 +278,8 @@ class DataManager {
 
     // if this is an array, assign feature ids
     if (Array.isArray(stateData)) {
-      console.log('Array.isArray is true');
       stateData = this.assignFeatureIds(stateData, key, targetId);
     } else if (stateData) {
-      console.log('Array.isArray is not true');
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
 
@@ -443,9 +441,7 @@ class DataManager {
   }
 
   assignFeatureIds(features, dataSourceKey, topicId) {
-    console.log('assignFeatureIds is running, features:', features, 'dataSourceKey:', dataSourceKey, 'topicId:', topicId);
     if (!features) {
-      console.log('assignFeatureIds !features is true');
       return;
     }
     const featuresWithIds = [];
@@ -453,7 +449,6 @@ class DataManager {
     // REVIEW this was not working with Array.map for some reason
     // it was returning an object when fetchJson was used
     // that is now converted to an array in fetchJson
-    console.log('assignFeatureIds is running, features:', features, 'dataSourceKey:', dataSourceKey, 'topicId:', topicId);
     for (let i = 0; i < features.length; i++) {
       const suffix = (topicId ? topicId + '-' : '') + i;
       const id = `feat-${dataSourceKey}-${suffix}`;
@@ -494,16 +489,16 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input, category) {
-    console.log('data-manager geocode is running, input:', input, 'category:', category);
+    // console.log('data-manager geocode is running, input:', input, 'category:', category);
     if (category === 'address') {
       const didGeocode = this.didGeocode.bind(this);
       return this.clients.geocode.fetch(input).then(didGeocode);
     } else if (category === 'owner') {
-      console.log('category is owner');
+      // console.log('category is owner');
       const didOwnerSearch = this.didOwnerSearch.bind(this);
       return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
     } else if (category == null) {
-      console.log('no category');
+      // console.log('no category');
       const didTryGeocode = this.didTryGeocode.bind(this);
       const test = this.clients.geocode.fetch(input).then(didTryGeocode);
     }

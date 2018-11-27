@@ -4269,20 +4269,12 @@
       var store = this.store;
       var geocodeConfig;
 
-      // if (category === 'address') {
       geocodeConfig = this.config.geocoder;
-      // } else if (category === 'owner') {
-      //   console.log('in geocode-client, category is owner');
-      //   geocodeConfig = this.config.ownerSearch;
-      // }
-      // console.log('geocode-client, geocodeConfig:', geocodeConfig);
       var url = geocodeConfig.url(input);
       var params = geocodeConfig.params;
 
       // update state
       this.store.commit('setGeocodeStatus', 'waiting');
-      // console.log('GEOCODE CLIENT setting last search method to geocode');
-      // this.store.commit('setLastSearchMethod', 'geocode');
 
       var success = this.success.bind(this);
       var error = this.error.bind(this);
@@ -4294,40 +4286,25 @@
     };
 
     GeocodeClient.prototype.success = function success (response) {
-      console.log('geocode success', response.config.url);
-
       var store = this.store;
       var data = response.data;
       var url = response.config.url;
-      // console.log(url)
 
       // TODO handle multiple results
 
       if (!data.features || data.features.length < 1) {
-        // console.log('geocode got no features', data);
-
         return;
       }
 
       var features = data.features;
-      console.log('geocode success assignFeatureIds is called with features 1:', features);
       features = this.assignFeatureIds(features, 'geocode');
-      console.log('geocode success assignFeatureIds is called with features 2:', features);
 
       // TODO do some checking here
-      // let feature = data.features[0];
       var feature = features[0];
-      // let properties = feature.properties
-      // console.log('geocode-client, feature:', feature);
-      // properties = this.assignFeatureIds(properties, 'geocode');
-      // feature.properties = properties;
       var relatedFeatures = [];
-      console.log('geocode success related features:', relatedFeatures, 'features.slice(1):', features.slice(1));
       for (var i = 0, list = features.slice(1); i < list.length; i += 1){
         var relatedFeature = list[i];
 
-        console.log('geocode success for loop relatedFeature:', relatedFeature);
-      // for (let relatedFeature of data.features.slice(1)){
         if (!!feature.properties.address_high) {
           if (relatedFeature.properties.address_high) {
             relatedFeatures.push(relatedFeature);
@@ -4336,44 +4313,14 @@
           relatedFeatures.push(relatedFeature);
         }
       }
-      console.log('geocode success related features:', relatedFeatures);
-
       store.commit('setGeocodeData', feature);
       store.commit('setGeocodeRelated', relatedFeatures);
       store.commit('setGeocodeStatus', 'success');
-
       return feature;
     };
 
-    // assignFeatureIds(features, dataSourceKey, topicId) {
-    //   const featuresWithIds = [];
-    //
-    //   // REVIEW this was not working with Array.map for some reason
-    //   // it was returning an object when fetchJson was used
-    //   // that is now converted to an array in fetchJson
-    //   for (let i = 0; i < features.length; i++) {
-    //     const suffix = (topicId ? topicId + '-' : '') + i;
-    //     const id = `feat-${dataSourceKey}-${suffix}`;
-    //     const feature = features[i];
-    //     // console.log(dataSourceKey, feature);
-    //     try {
-    //       feature._featureId = id;
-    //     }
-    //     catch (e) {
-    //       console.warn(e);
-    //     }
-    //     featuresWithIds.push(feature);
-    //   }
-    //
-    //   // console.log(dataSourceKey, features, featuresWithIds);
-    //   return featuresWithIds;
-    // }
-
     GeocodeClient.prototype.error = function error (error$1) {
-      // console.log('geocode error', error);
-
       var store = this.store;
-
       store.commit('setGeocodeStatus', 'error');
       store.commit('setGeocodeData', null);
       store.commit('setGeocodeRelated', null);
@@ -5314,10 +5261,8 @@
 
     // if this is an array, assign feature ids
     if (Array.isArray(stateData)) {
-      console.log('Array.isArray is true');
       stateData = this.assignFeatureIds(stateData, key, targetId);
     } else if (stateData) {
-      console.log('Array.isArray is not true');
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
 
@@ -5483,9 +5428,7 @@
   };
 
   DataManager.prototype.assignFeatureIds = function assignFeatureIds (features, dataSourceKey, topicId) {
-    console.log('assignFeatureIds is running, features:', features, 'dataSourceKey:', dataSourceKey, 'topicId:', topicId);
     if (!features) {
-      console.log('assignFeatureIds !features is true');
       return;
     }
     var featuresWithIds = [];
@@ -5493,7 +5436,6 @@
     // REVIEW this was not working with Array.map for some reason
     // it was returning an object when fetchJson was used
     // that is now converted to an array in fetchJson
-    console.log('assignFeatureIds is running, features:', features, 'dataSourceKey:', dataSourceKey, 'topicId:', topicId);
     for (var i = 0; i < features.length; i++) {
       var suffix = (topicId ? topicId + '-' : '') + i;
       var id = "feat-" + dataSourceKey + "-" + suffix;
@@ -5538,16 +5480,16 @@
 
   /* GEOCODING */
   DataManager.prototype.geocode = function geocode (input, category) {
-    console.log('data-manager geocode is running, input:', input, 'category:', category);
+    // console.log('data-manager geocode is running, input:', input, 'category:', category);
     if (category === 'address') {
       var didGeocode = this.didGeocode.bind(this);
       return this.clients.geocode.fetch(input).then(didGeocode);
     } else if (category === 'owner') {
-      console.log('category is owner');
+      // console.log('category is owner');
       var didOwnerSearch = this.didOwnerSearch.bind(this);
       return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
     } else if (category == null) {
-      console.log('no category');
+      // console.log('no category');
       var didTryGeocode = this.didTryGeocode.bind(this);
       var test = this.clients.geocode.fetch(input).then(didTryGeocode);
     }
