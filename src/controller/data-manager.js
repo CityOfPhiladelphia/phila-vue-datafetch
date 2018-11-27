@@ -278,10 +278,10 @@ class DataManager {
 
     // if this is an array, assign feature ids
     if (Array.isArray(stateData)) {
-      // console.log('Array.isArray is true');
+      console.log('Array.isArray is true');
       stateData = this.assignFeatureIds(stateData, key, targetId);
     } else if (stateData) {
-      // console.log('Array.isArray is not true');
+      console.log('Array.isArray is not true');
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
 
@@ -339,6 +339,7 @@ class DataManager {
     // this gets called when the current geocoded address is wiped out, such as
     // when you click on the "Atlas" title and it navigates to an empty hash
     resetGeocode() {
+      console.log('resetGeocode is running');
       // reset geocode
       this.store.commit('setGeocodeStatus', null);
       this.store.commit('setGeocodeData', null);
@@ -442,7 +443,9 @@ class DataManager {
   }
 
   assignFeatureIds(features, dataSourceKey, topicId) {
+    console.log('assignFeatureIds is running, features:', features, 'dataSourceKey:', dataSourceKey, 'topicId:', topicId);
     if (!features) {
+      console.log('assignFeatureIds !features is true');
       return;
     }
     const featuresWithIds = [];
@@ -450,6 +453,7 @@ class DataManager {
     // REVIEW this was not working with Array.map for some reason
     // it was returning an object when fetchJson was used
     // that is now converted to an array in fetchJson
+    console.log('assignFeatureIds is running, features:', features, 'dataSourceKey:', dataSourceKey, 'topicId:', topicId);
     for (let i = 0; i < features.length; i++) {
       const suffix = (topicId ? topicId + '-' : '') + i;
       const id = `feat-${dataSourceKey}-${suffix}`;
@@ -531,7 +535,7 @@ class DataManager {
         this.store.commit('setMapZoom', 19);
         this.store.commit('setMapCenter', feature.geometry.coordinates);
       }
-      return;
+      return
     }
 
     const activeParcelLayer = this.store.state.activeParcelLayer;
