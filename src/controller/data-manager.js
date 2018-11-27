@@ -743,24 +743,29 @@ class DataManager {
 
     // use turf to get area and perimeter of all parcels returned
     for (let featureSorted of featuresSorted) {
-      // const turfPolygon = polygon(featureSorted.geometry.coordinates);
-      const turfPolygon = polygon(featureSorted.geometry.coordinates);
-      let turfCoordinates = []
-      for (let coordinate of featureSorted.geometry.coordinates[0]) {
-        // console.log('coordinate:', coordinate);
-        turfCoordinates.push(point(coordinate));
+
+      let coords = featureSorted.geometry.coordinates;
+
+      // console.log('featureSorted:', featureSorted, 'coords.length:', coords.length);
+      if (coords.length > 1) {
+        let distances = [];
+        let areas = [];
+        for (let coordsSet of coords) {
+          // console.log('coordsSet:', coordsSet);
+          const turfPolygon = polygon(coordsSet);
+          distances.push(this.getDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
+          areas.push(area(turfPolygon) * 10.7639);
+        }
+        featureSorted.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
+        featureSorted.properties.TURF_AREA = areas.reduce(function(acc, val) { return acc + val; });
+      } else {
+        // console.log('coords:', coords);
+        const turfPolygon = polygon(coords);
+        let distances = this.getDistances(coords);
+        featureSorted.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
+        featureSorted.properties.TURF_AREA = area(turfPolygon) * 10.7639;
       }
-
-      let distances = []
-      for (let i=0; i<turfCoordinates.length - 1; i++) {
-        distances[i] = distance(turfCoordinates[i], turfCoordinates[i+1], {units: 'feet'})
-      }
-
-      // console.log('coordinates:', featureSorted.geometry.coordinates, 'turfCoordinates:', turfCoordinates, 'distances:', distances);
-
-      // turf area is returned in square meters - conversion is to square feet
-      featureSorted.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
-      featureSorted.properties.TURF_AREA = area(turfPolygon) * 10.7639;
+      // console.log('after calcs, featureSorted:', featureSorted);
     }
 
     // at this point there is definitely a feature or features - put it in state
@@ -807,6 +812,18 @@ class DataManager {
         this.fetchData();
       }
     }
+  }
+
+  getDistances(coords) {
+    let turfCoordinates = []
+    for (let coordinate of coords[0]) {
+      turfCoordinates.push(point(coordinate));
+    }
+    let distances = [];
+    for (let i=0; i<turfCoordinates.length - 1; i++) {
+      distances[i] = distance(turfCoordinates[i], turfCoordinates[i+1], {units: 'feet'});
+    }
+    return distances;
   }
 
   setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted) {
