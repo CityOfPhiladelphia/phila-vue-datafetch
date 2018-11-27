@@ -4264,7 +4264,7 @@
     GeocodeClient.prototype.constructor = GeocodeClient;
 
     GeocodeClient.prototype.fetch = function fetch (input) {
-      // console.log('geocode client fetch', input);
+      console.log('geocode client fetch', input);
 
       var store = this.store;
       var geocodeConfig;
@@ -4294,7 +4294,7 @@
     };
 
     GeocodeClient.prototype.success = function success (response) {
-      // console.log('geocode success', response.config.url);
+      console.log('geocode success', response.config.url);
 
       var store = this.store;
       var data = response.data;
@@ -4310,7 +4310,9 @@
       }
 
       var features = data.features;
+      console.log('geocode success assignFeatureIds is called with features 1:', features);
       features = this.assignFeatureIds(features, 'geocode');
+      console.log('geocode success assignFeatureIds is called with features 2:', features);
 
       // TODO do some checking here
       // let feature = data.features[0];
@@ -4320,10 +4322,12 @@
       // properties = this.assignFeatureIds(properties, 'geocode');
       // feature.properties = properties;
       var relatedFeatures = [];
+      console.log('geocode success related features:', relatedFeatures, 'features.slice(1):', features.slice(1));
       for (var i = 0, list = features.slice(1); i < list.length; i += 1){
-      // for (let relatedFeature of data.features.slice(1)){
         var relatedFeature = list[i];
 
+        console.log('geocode success for loop relatedFeature:', relatedFeature);
+      // for (let relatedFeature of data.features.slice(1)){
         if (!!feature.properties.address_high) {
           if (relatedFeature.properties.address_high) {
             relatedFeatures.push(relatedFeature);
@@ -4332,6 +4336,7 @@
           relatedFeatures.push(relatedFeature);
         }
       }
+      console.log('geocode success related features:', relatedFeatures);
 
       store.commit('setGeocodeData', feature);
       store.commit('setGeocodeRelated', relatedFeatures);
@@ -4389,7 +4394,7 @@
     OwnerSearchClient.prototype.constructor = OwnerSearchClient;
 
     OwnerSearchClient.prototype.fetch = function fetch (input) {
-      // console.log('owner search client fetch', input);
+      console.log('owner search client fetch', input);
 
       var store = this.store;
 
@@ -5309,10 +5314,10 @@
 
     // if this is an array, assign feature ids
     if (Array.isArray(stateData)) {
-      // console.log('Array.isArray is true');
+      console.log('Array.isArray is true');
       stateData = this.assignFeatureIds(stateData, key, targetId);
     } else if (stateData) {
-      // console.log('Array.isArray is not true');
+      console.log('Array.isArray is not true');
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
 
@@ -5372,6 +5377,7 @@
     // this gets called when the current geocoded address is wiped out, such as
     // when you click on the "Atlas" title and it navigates to an empty hash
     DataManager.prototype.resetGeocode = function resetGeocode () {
+      console.log('resetGeocode is running');
       // reset geocode
       this.store.commit('setGeocodeStatus', null);
       this.store.commit('setGeocodeData', null);
@@ -5477,7 +5483,9 @@
   };
 
   DataManager.prototype.assignFeatureIds = function assignFeatureIds (features, dataSourceKey, topicId) {
+    console.log('assignFeatureIds is running, features:', features, 'dataSourceKey:', dataSourceKey, 'topicId:', topicId);
     if (!features) {
+      console.log('assignFeatureIds !features is true');
       return;
     }
     var featuresWithIds = [];
@@ -5485,6 +5493,7 @@
     // REVIEW this was not working with Array.map for some reason
     // it was returning an object when fetchJson was used
     // that is now converted to an array in fetchJson
+    console.log('assignFeatureIds is running, features:', features, 'dataSourceKey:', dataSourceKey, 'topicId:', topicId);
     for (var i = 0; i < features.length; i++) {
       var suffix = (topicId ? topicId + '-' : '') + i;
       var id = "feat-" + dataSourceKey + "-" + suffix;
@@ -5572,7 +5581,7 @@
         this.store.commit('setMapZoom', 19);
         this.store.commit('setMapCenter', feature$$1.geometry.coordinates);
       }
-      return;
+      return
     }
 
     var activeParcelLayer = this.store.state.activeParcelLayer;

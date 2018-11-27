@@ -6,7 +6,7 @@ import BaseClient from './base-client';
 class GeocodeClient extends BaseClient {
   // fetch(input, category) {
   fetch(input) {
-    // console.log('geocode client fetch', input);
+    console.log('geocode client fetch', input);
 
     const store = this.store;
     let geocodeConfig;
@@ -36,7 +36,7 @@ class GeocodeClient extends BaseClient {
   }
 
   success(response) {
-    // console.log('geocode success', response.config.url);
+    console.log('geocode success', response.config.url);
 
     const store = this.store;
     const data = response.data;
@@ -52,7 +52,9 @@ class GeocodeClient extends BaseClient {
     }
 
     let features = data.features;
+    console.log('geocode success assignFeatureIds is called with features 1:', features);
     features = this.assignFeatureIds(features, 'geocode');
+    console.log('geocode success assignFeatureIds is called with features 2:', features);
 
     // TODO do some checking here
     // let feature = data.features[0];
@@ -62,7 +64,9 @@ class GeocodeClient extends BaseClient {
     // properties = this.assignFeatureIds(properties, 'geocode');
     // feature.properties = properties;
     let relatedFeatures = [];
+    console.log('geocode success related features:', relatedFeatures, 'features.slice(1):', features.slice(1));
     for (let relatedFeature of features.slice(1)){
+      console.log('geocode success for loop relatedFeature:', relatedFeature);
     // for (let relatedFeature of data.features.slice(1)){
       if (!!feature.properties.address_high) {
         if (relatedFeature.properties.address_high) {
@@ -72,6 +76,7 @@ class GeocodeClient extends BaseClient {
         relatedFeatures.push(relatedFeature);
       }
     }
+    console.log('geocode success related features:', relatedFeatures);
 
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);

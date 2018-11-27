@@ -5,7 +5,7 @@ import BaseClient from './base-client';
 // the result in state.
 class OwnerSearchClient extends BaseClient {
   fetch(input) {
-    // console.log('owner search client fetch', input);
+    console.log('owner search client fetch', input);
 
     const store = this.store;
 
