@@ -5602,29 +5602,34 @@
     }
 
     // use turf to get area and perimeter of all parcels returned
-    for (var i$2 = 0, list$1 = featuresSorted; i$2 < list$1.length; i$2 += 1) {
-      // const turfPolygon = polygon(featureSorted.geometry.coordinates);
-      var featureSorted = list$1[i$2];
+    for (var i$1 = 0, list$1 = featuresSorted; i$1 < list$1.length; i$1 += 1) {
 
-        var turfPolygon = polygon(featureSorted.geometry.coordinates);
-      var turfCoordinates = [];
-      for (var i$1 = 0, list = featureSorted.geometry.coordinates[0]; i$1 < list.length; i$1 += 1) {
-        // console.log('coordinate:', coordinate);
-        var coordinate = list[i$1];
+      var featureSorted = list$1[i$1];
 
-          turfCoordinates.push(point(coordinate));
+        var coords = featureSorted.geometry.coordinates;
+
+      // console.log('featureSorted:', featureSorted, 'coords.length:', coords.length);
+      if (coords.length > 1) {
+        var distances = [];
+        var areas = [];
+        for (var i = 0, list = coords; i < list.length; i += 1) {
+          // console.log('coordsSet:', coordsSet);
+          var coordsSet = list[i];
+
+            var turfPolygon = polygon(coordsSet);
+          distances.push(this.getDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
+          areas.push(area(turfPolygon) * 10.7639);
+        }
+        featureSorted.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
+        featureSorted.properties.TURF_AREA = areas.reduce(function(acc, val) { return acc + val; });
+      } else {
+        // console.log('coords:', coords);
+        var turfPolygon$1 = polygon(coords);
+        var distances$1 = this.getDistances(coords);
+        featureSorted.properties.TURF_PERIMETER = distances$1.reduce(function(acc, val) { return acc + val; });
+        featureSorted.properties.TURF_AREA = area(turfPolygon$1) * 10.7639;
       }
-
-      var distances = [];
-      for (var i=0; i<turfCoordinates.length - 1; i++) {
-        distances[i] = distance(turfCoordinates[i], turfCoordinates[i+1], {units: 'feet'});
-      }
-
-      // console.log('coordinates:', featureSorted.geometry.coordinates, 'turfCoordinates:', turfCoordinates, 'distances:', distances);
-
-      // turf area is returned in square meters - conversion is to square feet
-      featureSorted.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
-      featureSorted.properties.TURF_AREA = area(turfPolygon) * 10.7639;
+      // console.log('after calcs, featureSorted:', featureSorted);
     }
 
     // at this point there is definitely a feature or features - put it in state
@@ -5645,15 +5650,16 @@
       // 2. attempt to replace
       // if (lastSearchMethod === 'reverseGeocode') { // || !configForParcelLayer.wipeOutOtherParcelsOnReverseGeocodeOnly) {
       var clickCoords = this.store.state.clickCoords;
-      var coords = [clickCoords.lng, clickCoords.lat];
-      var lng = coords[0];
-        var lat = coords[1];
+      var coords$1 = [clickCoords.lng, clickCoords.lat];
+      var ref = coords$1;
+        var lng = ref[0];
+        var lat = ref[1];
       var latlng = L.latLng(lat, lng);
 
       // console.log('didGetParcels is wiping out the', otherParcelLayers, 'parcels in state');
-      for (var i$3 = 0, list$2 = otherParcelLayers; i$3 < list$2.length; i$3 += 1) {
+      for (var i$2 = 0, list$2 = otherParcelLayers; i$2 < list$2.length; i$2 += 1) {
         // console.log('for let otherParcelLayer of otherParcelLayers is running');
-        var otherParcelLayer = list$2[i$3];
+        var otherParcelLayer = list$2[i$2];
 
           var configForOtherParcelLayer = this.config.parcels[otherParcelLayer];
         var otherMultipleAllowed = configForOtherParcelLayer.multipleAllowed;
@@ -5674,6 +5680,20 @@
         this.fetchData();
       }
     }
+  };
+
+  DataManager.prototype.getDistances = function getDistances (coords) {
+    var turfCoordinates = [];
+    for (var i$1 = 0, list = coords[0]; i$1 < list.length; i$1 += 1) {
+      var coordinate = list[i$1];
+
+        turfCoordinates.push(point(coordinate));
+    }
+    var distances = [];
+    for (var i=0; i<turfCoordinates.length - 1; i++) {
+      distances[i] = distance(turfCoordinates[i], turfCoordinates[i+1], {units: 'feet'});
+    }
+    return distances;
   };
 
   DataManager.prototype.setParcelsInState = function setParcelsInState (parcelLayer, multipleAllowed, feature$$1, featuresSorted) {
