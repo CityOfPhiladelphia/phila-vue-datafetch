@@ -3330,6 +3330,11 @@
       } else if (geocodeData.properties.street_address) {
         address = geocodeData.properties.street_address;
       }
+
+      if (this.config.router.returnToDefaultTopicOnGeocode) {
+        this.store.commit('setActiveTopic', this.config.defaultTopic);
+      }
+
       var topic = this.store.state.activeTopic;
 
       // REVIEW this is only pushing state when routing is turned on. but maybe we
