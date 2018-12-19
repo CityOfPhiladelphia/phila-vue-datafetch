@@ -88,30 +88,19 @@ class Controller {
       const multipleAllowed = configForParcelLayer.multipleAllowed;
       let payload;
       // pwd
-      if (!multipleAllowed) {
-        payload = {
-          parcelLayer: parcelLayer,
-          multipleAllowed,
-          data: null
-        }
-      // dor
-      } else {
-        payload = {
-          parcelLayer: parcelLayer,
-          multipleAllowed,
-          data: [],
-          status: null,
-          activeParcel: null,
-          activeAddress: null,
-          activeMapreg: null
-        }
+
+      payload = {
+        parcelLayer: parcelLayer,
+        multipleAllowed,
+        data: null
       }
+
       // update state
       this.store.commit('setParcelData', payload);
     }
 
     // tell router
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
     if (!searchCategory || searchCategory === 'address') {
       this.router.routeToAddress(input, searchCategory);
     } else if (searchCategory === 'owner') {
@@ -136,14 +125,9 @@ class Controller {
     this.store.commit('setClickCoords', latLng);
     this.store.commit('setGeocodeInput', null);
 
-    // if click is on a topic with pwd parcels, you do not want to find dor parcels unless the
-    // click was actually on a pwd parcel that could be geocoded, because just running
-    // getDorParcelsByLatLng changes the Deeds topic in the UI, and the click could have been
-    // on the road
-    // there is a callback after geocode to get dor parcels
-    const activeParcelLayer = this.store.state.activeParcelLayer;
-    // console.log('in handleMapClick, latlng:', latLng, 'activeParcelLayer:', activeParcelLayer);
-    this.dataManager.getParcelsByLatLng(latLng, activeParcelLayer);
+    const parcels = this.store.state.parcels;
+    console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+    this.dataManager.getParcelsByLatLng(latLng, parcels);
   }
 
   // util for making sure topic headers are visible after clicking on one

@@ -5,7 +5,6 @@ const initialState = {
   // DataManager.resetGeocode, which is called by Router.hashChanged on app
   // load.
   activeTopic: '',
-  activeParcelLayer: '',
   clickCoords: null,
   // should addresscandidate be here if neither pvm or pvc were included?
   shouldShowAddressCandidateList: false,
@@ -26,7 +25,7 @@ const initialState = {
 
 const pvdStore = {
   createSources(config) {
-    console.log('createSources is running, config:', config);
+    // console.log('createSources is running, config:', config);
     const sourceKeys = Object.keys(config.dataSources || {});
     const sources = sourceKeys.reduce((o, key) => {
       let val;
@@ -55,27 +54,7 @@ const pvdStore = {
   createParcels(config) {
     const parcelKeys = Object.keys(config.parcels || {});
     const parcels = parcelKeys.reduce((o, key) => {
-      let val;
-      if (config.parcels[key].multipleAllowed) {
-        val = {
-          data: [],
-          status: null,
-          activeParcel: null,
-          activeAddress: null,
-          activeMapreg: null
-        };
-      } else {
-        val = null;
-        // val = {
-        //   geometry: null,
-        //   id: null,
-        //   properties: null,
-        //   type: null
-        // };
-      }
-
-      o[key] = val;
-
+      o[key] = null;
       return o;
     }, {});
     return parcels;
@@ -84,9 +63,6 @@ const pvdStore = {
   store: {
     state: initialState,
     mutations: {
-      setActiveParcelLayer(state, payload) {
-        state.activeParcelLayer = payload;
-      },
       setActiveTopic(state, payload) {
         state.activeTopic = payload;
       },
@@ -179,17 +155,9 @@ const pvdStore = {
       },
       setParcelData(state, payload) {
         // console.log('store setParcelData payload:', payload);
-        const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg } = payload || {};
-        // console.log('store setParcelData parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
-        if (!multipleAllowed) {
-          state.parcels[parcelLayer] = data;
-        } else {
-          state.parcels[parcelLayer].data = data;
-          state.parcels[parcelLayer].status = status;
-          state.parcels[parcelLayer].activeParcel = activeParcel;
-          state.parcels[parcelLayer].activeAddress = activeAddress;
-          state.parcels[parcelLayer].activeMapreg = activeMapreg;
-        }
+        const { parcelLayer, data,  status, activeParcel, activeAddress, activeMapreg } = payload || {};
+        // console.log('store setParcelData parcelLayer:', parcelLayer, 'data:', data, 'status:', status, 'activeParcel:', activeParcel);
+        state.parcels[parcelLayer] = data;
       },
       setLastSearchMethod(state, payload) {
         state.lastSearchMethod = payload;

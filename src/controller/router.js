@@ -32,14 +32,6 @@ class Router {
     return config || {};
   }
 
-  activeParcelLayer() {
-    if (this.config.map) {
-      return this.activeTopicConfig().parcels || this.config.map.defaultBasemap;
-    } else {
-      return this.activeTopicConfig().parcels;
-    }
-  }
-
   makeHash(address, topic) {
     // console.log('make hash', address, topic);
 
@@ -167,7 +159,6 @@ class Router {
 
     if (!prevTopic || prevTopic !== nextTopic) {
       this.store.commit('setActiveTopic', nextTopic);
-      this.store.commit('setActiveParcelLayer', this.activeParcelLayer());
 
       if (this.store.state.map) {
         const prevBasemap = this.store.state.map.basemap || null;
