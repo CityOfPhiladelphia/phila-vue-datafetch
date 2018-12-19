@@ -5323,7 +5323,6 @@
       if (this.config.parcels) {
         this.store.commit('setParcelData', {
           parcelLayer: 'pwd',
-          multipleAllowed: false,
           data: null
         });
         this.store.commit('parcel', 'pwd');
@@ -5724,13 +5723,12 @@
     return distances;
   };
 
-  DataManager.prototype.setParcelsInState = function setParcelsInState (parcelLayer, multipleAllowed, feature$$1, featuresSorted) {
+  DataManager.prototype.setParcelsInState = function setParcelsInState (parcelLayer, feature$$1, featuresSorted) {
     var payload;
     // pwd
 
     payload = {
       parcelLayer: parcelLayer,
-      multipleAllowed: multipleAllowed,
       data: feature$$1
     };
 
@@ -5854,13 +5852,11 @@
       var parcelLayer = list[i];
 
         var configForParcelLayer = this.config.parcels[parcelLayer];
-      var multipleAllowed = configForParcelLayer.multipleAllowed;
       var payload = (void 0);
       // pwd
 
       payload = {
         parcelLayer: parcelLayer,
-        multipleAllowed: multipleAllowed,
         data: null
       };
 

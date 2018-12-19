@@ -347,7 +347,6 @@ class DataManager {
       if (this.config.parcels) {
         this.store.commit('setParcelData', {
           parcelLayer: 'pwd',
-          multipleAllowed: false,
           data: null
         });
         this.store.commit('parcel', 'pwd');
@@ -733,13 +732,12 @@ class DataManager {
     return distances;
   }
 
-  setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted) {
+  setParcelsInState(parcelLayer, feature, featuresSorted) {
     let payload;
     // pwd
 
     payload = {
       parcelLayer,
-      multipleAllowed,
       data: feature
     }
 

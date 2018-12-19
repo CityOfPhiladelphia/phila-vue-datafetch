@@ -85,13 +85,11 @@ class Controller {
 
     for (let parcelLayer of parcelLayers) {
       const configForParcelLayer = this.config.parcels[parcelLayer];
-      const multipleAllowed = configForParcelLayer.multipleAllowed;
       let payload;
       // pwd
 
       payload = {
         parcelLayer: parcelLayer,
-        multipleAllowed,
         data: null
       }
 
