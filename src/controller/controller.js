@@ -81,21 +81,13 @@ class Controller {
     }
 
     // clear out state
-    const parcelLayers = Object.keys(this.config.parcels || {});
-
-    for (let parcelLayer of parcelLayers) {
-      const configForParcelLayer = this.config.parcels[parcelLayer];
-      let payload;
-      // pwd
-
-      payload = {
-        parcelLayer: parcelLayer,
-        data: null
-      }
-
-      // update state
-      this.store.commit('setParcelData', payload);
+    const parcelLayer = Object.keys(this.config.parcels || {});
+    let payload = {
+      parcelLayer: parcelLayer,
+      data: null
     }
+    // update state
+    this.store.commit('setParcelData', payload);
 
     // tell router
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);

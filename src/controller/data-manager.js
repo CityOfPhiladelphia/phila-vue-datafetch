@@ -345,11 +345,8 @@ class DataManager {
 
       // reset parcels
       if (this.config.parcels) {
-        this.store.commit('setParcelData', {
-          parcelLayer: 'pwd',
-          data: null
-        });
-        this.store.commit('parcel', 'pwd');
+        this.store.commit('setParcelData');
+        this.store.commit('parcel');
       }
 
       // reset other topic and map state
@@ -542,20 +539,17 @@ class DataManager {
     // (unless it fails and you are allowed to get them by LatLng on failure)
     if (lastSearchMethod === 'geocode') {
       if (feature) {
-        // console.log('didGeocode lastSearchMethod:', lastSearchMethod, '- attempting to get all parcel layers:', parcelLayers, ' by ID');
-        // loop through the parcels, and get them by their ids
-        for (let parcelLayer of parcelLayers) {
-          const configForParcelLayer = this.config.parcels[parcelLayer];
-          const parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder
-          const parcelId = feature.properties[parcelIdInGeocoder];
-          if (parcelId && parcelId.length > 0) {
-            this.getParcelsById(parcelId, parcelLayer);
-          } else {
-            if (configForParcelLayer.getByLatLngIfIdFails) {
-              // console.log(parcelLayer, 'Id failed - had to get by LatLng')
-              console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
-              this.getParcelsByLatLng(latlng, parcelLayer);
-            }
+
+        const configForParcelLayer = this.config.parcels[parcelLayers];
+        const parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder
+        const parcelId = feature.properties[parcelIdInGeocoder];
+        if (parcelId && parcelId.length > 0) {
+          this.getParcelsById(parcelId, parcelLayers);
+        } else {
+          if (configForParcelLayer.getByLatLngIfIdFails) {
+            // console.log(parcelLayer, 'Id failed - had to get by LatLng')
+            console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayers);
+            this.getParcelsByLatLng(latlng, parcelLayers);
           }
         }
       }
@@ -655,16 +649,13 @@ class DataManager {
     }
 
     const features = featureCollection.features;
-
     if (features.length === 0) {
       return;
     }
 
-    const featuresSorted = this.sortDorParcelFeatures(features);
     let feature = features[0];
-
-    // use turf to get area and perimeter of all parcels returned
     let coords = feature.geometry.coordinates;
+    // use turf to get area and perimeter of all parcels returned
 
     // console.log('feature:', feature, 'coords.length:', coords.length);
     if (coords.length > 1) {
@@ -688,7 +679,7 @@ class DataManager {
     // console.log('after calcs, feature:', feature);
 
     // at this point there is definitely a feature or features - put it in state
-    this.setParcelsInState(parcelLayer, feature, featuresSorted);
+    this.setParcelsInState(parcelLayer, feature);
 
     // shouldGeocode - true only if:
     // 1. didGetParcels is running because the map was clicked (lastSearchMethod = reverseGeocode)
@@ -732,7 +723,7 @@ class DataManager {
     return distances;
   }
 
-  setParcelsInState(parcelLayer, feature, featuresSorted) {
+  setParcelsInState(parcelLayer, feature) {
     let payload;
     // pwd
 
@@ -743,38 +734,6 @@ class DataManager {
 
     // update state
     this.store.commit('setParcelData', payload);
-  }
-
-  sortDorParcelFeatures(features) {
-    // map parcel status to a numeric priority
-    // (basically so remainders come before inactives)
-    const STATUS_PRIORITY = {
-      1: 1,
-      2: 3,
-      3: 2
-    }
-
-    // first sort by mapreg (descending)
-    features.sort((a, b) => {
-      const mapregA = a.properties.MAPREG;
-      const mapregB = b.properties.MAPREG;
-
-      if (mapregA < mapregB) return 1;
-      if (mapregA > mapregB) return -1;
-      return 0;
-    });
-
-    // then sort by status
-    features.sort((a, b) => {
-      const statusA = STATUS_PRIORITY[a.properties.STATUS];
-      const statusB = STATUS_PRIORITY[b.properties.STATUS];
-
-      if (statusA < statusB) return -1;
-      if (statusA > statusB) return 1;
-      return 0;
-    });
-
-    return features;
   }
 }
 

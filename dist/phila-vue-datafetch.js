@@ -5321,11 +5321,8 @@
 
       // reset parcels
       if (this.config.parcels) {
-        this.store.commit('setParcelData', {
-          parcelLayer: 'pwd',
-          data: null
-        });
-        this.store.commit('parcel', 'pwd');
+        this.store.commit('setParcelData');
+        this.store.commit('parcel');
       }
 
       // reset other topic and map state
@@ -5526,22 +5523,17 @@
     // (unless it fails and you are allowed to get them by LatLng on failure)
     if (lastSearchMethod === 'geocode') {
       if (feature$$1) {
-        // console.log('didGeocode lastSearchMethod:', lastSearchMethod, '- attempting to get all parcel layers:', parcelLayers, ' by ID');
-        // loop through the parcels, and get them by their ids
-        for (var i = 0, list = parcelLayers; i < list.length; i += 1) {
-          var parcelLayer = list[i];
 
-            var configForParcelLayer = this.config.parcels[parcelLayer];
-          var parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder;
-          var parcelId = feature$$1.properties[parcelIdInGeocoder];
-          if (parcelId && parcelId.length > 0) {
-            this.getParcelsById(parcelId, parcelLayer);
-          } else {
-            if (configForParcelLayer.getByLatLngIfIdFails) {
-              // console.log(parcelLayer, 'Id failed - had to get by LatLng')
-              console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
-              this.getParcelsByLatLng(latlng, parcelLayer);
-            }
+        var configForParcelLayer = this.config.parcels[parcelLayers];
+        var parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder;
+        var parcelId = feature$$1.properties[parcelIdInGeocoder];
+        if (parcelId && parcelId.length > 0) {
+          this.getParcelsById(parcelId, parcelLayers);
+        } else {
+          if (configForParcelLayer.getByLatLngIfIdFails) {
+            // console.log(parcelLayer, 'Id failed - had to get by LatLng')
+            console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayers);
+            this.getParcelsByLatLng(latlng, parcelLayers);
           }
         }
       }
@@ -5640,16 +5632,13 @@
     }
 
     var features = featureCollection$$1.features;
-
     if (features.length === 0) {
       return;
     }
 
-    var featuresSorted = this.sortDorParcelFeatures(features);
     var feature$$1 = features[0];
-
-    // use turf to get area and perimeter of all parcels returned
     var coords = feature$$1.geometry.coordinates;
+    // use turf to get area and perimeter of all parcels returned
 
     // console.log('feature:', feature, 'coords.length:', coords.length);
     if (coords.length > 1) {
@@ -5675,7 +5664,7 @@
     // console.log('after calcs, feature:', feature);
 
     // at this point there is definitely a feature or features - put it in state
-    this.setParcelsInState(parcelLayer, feature$$1, featuresSorted);
+    this.setParcelsInState(parcelLayer, feature$$1);
 
     // shouldGeocode - true only if:
     // 1. didGetParcels is running because the map was clicked (lastSearchMethod = reverseGeocode)
@@ -5723,7 +5712,7 @@
     return distances;
   };
 
-  DataManager.prototype.setParcelsInState = function setParcelsInState (parcelLayer, feature$$1, featuresSorted) {
+  DataManager.prototype.setParcelsInState = function setParcelsInState (parcelLayer, feature$$1) {
     var payload;
     // pwd
 
@@ -5734,38 +5723,6 @@
 
     // update state
     this.store.commit('setParcelData', payload);
-  };
-
-  DataManager.prototype.sortDorParcelFeatures = function sortDorParcelFeatures (features) {
-    // map parcel status to a numeric priority
-    // (basically so remainders come before inactives)
-    var STATUS_PRIORITY = {
-      1: 1,
-      2: 3,
-      3: 2
-    };
-
-    // first sort by mapreg (descending)
-    features.sort(function (a, b) {
-      var mapregA = a.properties.MAPREG;
-      var mapregB = b.properties.MAPREG;
-
-      if (mapregA < mapregB) { return 1; }
-      if (mapregA > mapregB) { return -1; }
-      return 0;
-    });
-
-    // then sort by status
-    features.sort(function (a, b) {
-      var statusA = STATUS_PRIORITY[a.properties.STATUS];
-      var statusB = STATUS_PRIORITY[b.properties.STATUS];
-
-      if (statusA < statusB) { return -1; }
-      if (statusA > statusB) { return 1; }
-      return 0;
-    });
-
-    return features;
   };
 
   /*
@@ -5846,23 +5803,13 @@
     }
 
     // clear out state
-    var parcelLayers = Object.keys(this.config.parcels || {});
-
-    for (var i = 0, list = parcelLayers; i < list.length; i += 1) {
-      var parcelLayer = list[i];
-
-        var configForParcelLayer = this.config.parcels[parcelLayer];
-      var payload = (void 0);
-      // pwd
-
-      payload = {
-        parcelLayer: parcelLayer,
-        data: null
-      };
-
-      // update state
-      this.store.commit('setParcelData', payload);
-    }
+    var parcelLayer = Object.keys(this.config.parcels || {});
+    var payload = {
+      parcelLayer: parcelLayer,
+      data: null
+    };
+    // update state
+    this.store.commit('setParcelData', payload);
 
     // tell router
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
@@ -6103,16 +6050,11 @@
           state.map.zoom = payload;
         },
         setParcelData: function setParcelData(state, payload) {
-          // console.log('store setParcelData payload:', payload);
+          console.log('payload :', payload);
           var ref = payload || {};
-          var parcelLayer = ref.parcelLayer;
           var data = ref.data;
-          var status = ref.status;
-          var activeParcel = ref.activeParcel;
-          var activeAddress = ref.activeAddress;
-          var activeMapreg = ref.activeMapreg;
           // console.log('store setParcelData parcelLayer:', parcelLayer, 'data:', data, 'status:', status, 'activeParcel:', activeParcel);
-          state.parcels[parcelLayer] = data;
+          state.parcels.pwd = data;
         },
         setLastSearchMethod: function setLastSearchMethod(state, payload) {
           state.lastSearchMethod = payload;

@@ -154,10 +154,10 @@ const pvdStore = {
         state.map.zoom = payload;
       },
       setParcelData(state, payload) {
-        // console.log('store setParcelData payload:', payload);
-        const { parcelLayer, data,  status, activeParcel, activeAddress, activeMapreg } = payload || {};
+        console.log('payload :', payload);
+        const { data } = payload || {};
         // console.log('store setParcelData parcelLayer:', parcelLayer, 'data:', data, 'status:', status, 'activeParcel:', activeParcel);
-        state.parcels[parcelLayer] = data;
+        state.parcels.pwd = data;
       },
       setLastSearchMethod(state, payload) {
         state.lastSearchMethod = payload;
