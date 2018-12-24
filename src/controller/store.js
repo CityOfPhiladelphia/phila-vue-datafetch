@@ -1,10 +1,7 @@
 
 
 const initialState = {
-  // this gets set to the parcel layer for the default (aka first) topic in
-  // DataManager.resetGeocode, which is called by Router.hashChanged on app
-  // load.
-  activeTopic: '',
+
   clickCoords: null,
   // should addresscandidate be here if neither pvm or pvc were included?
   shouldShowAddressCandidateList: false,
@@ -63,9 +60,6 @@ const pvdStore = {
   store: {
     state: initialState,
     mutations: {
-      setActiveTopic(state, payload) {
-        state.activeTopic = payload;
-      },
       setClickCoords(state, payload) {
         state.clickCoords = payload;
       },
@@ -154,7 +148,7 @@ const pvdStore = {
         state.map.zoom = payload;
       },
       setParcelData(state, payload) {
-        console.log('payload :', payload);
+        // console.log('payload :', payload);
         const { data } = payload || {};
         // console.log('store setParcelData parcelLayer:', parcelLayer, 'data:', data, 'status:', status, 'activeParcel:', activeParcel);
         state.parcels.pwd = data;

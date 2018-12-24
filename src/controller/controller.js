@@ -116,57 +116,8 @@ class Controller {
     this.store.commit('setGeocodeInput', null);
 
     const parcels = this.store.state.parcels;
-    console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+    // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
-  }
-
-  // util for making sure topic headers are visible after clicking on one
-  // adapted from: https://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport/7557433#7557433
-  // REVIEW this is returning true even when the topic header isn't visible,
-  // probably because of a timing issue. it's good enough without this check for
-  // now. commenting out.
-  // isElementInViewport(el) {
-  //   const rect = el.getBoundingClientRect();
-  //
-  //   // check visibility of each side of bounding rect
-  //   const topVisible = rect.top >= 0;
-  //   const leftVisible = rect.left >= 0;
-  //   const bottomVisible = rect.bottom <= (
-  //     window.innerHeight || document.documentElement.clientHeight
-  //   );
-  //   const rightVisible = rect.right <= (
-  //     window.innerWidth || document.documentElement.clientWidth
-  //   );
-  //
-  //   return (topVisible && leftVisible && bottomVisible && rightVisible);
-  // }
-
-  handleTopicHeaderClick(topic) {
-    // console.log('Controller.handleTopicHeaderClick', topic);
-
-    this.router.routeToTopic(topic);//.then(function(targetExists) {
-
-    /*
-    scroll to top of topic header
-    */
-
-    // get element
-    const els = document.querySelectorAll(`[data-topic-key='${topic}']`);
-    const el = els.length === 1 && els[0];
-
-    // handle null el - this shouldn't happen, but just in case
-    if (!el) return;
-
-    Vue.nextTick(() => {
-      // REVIEW this check is returning true even when the header el isn't
-      // really visible, probbaly because of a timing issue. it works well
-      // enough without it. commenting out for now.
-      // const visible = this.isElementInViewport(el);
-
-      // if (!visible) {
-        el.scrollIntoView();
-      // }
-    });
   }
 
   goToDefaultAddress(address) {

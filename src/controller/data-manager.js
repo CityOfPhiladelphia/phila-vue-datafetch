@@ -39,28 +39,12 @@ class DataManager {
 
   /* STATE HELPERS */
 
-  // REVIEW maybe the getXXXParcelsById methods should just take an argument
-
-  activeTopicConfig() {
-    const key = this.store.state.activeTopic;
-    let config;
-
-    // if no active topic, return null
-    if (key) {
-      config = this.config.topics.filter((topic) => {
-        return topic.key === key;
-      })[0];
-    }
-
-    return config || {};
-  }
 
   /* DATA FETCHING METHODS */
 
   fetchMoreData(dataSourceKey, highestPageRetrieved) {
     const feature = this.store.state.geocode.data;
     const dataSource = this.config.dataSources[dataSourceKey];
-
     const state = this.store.state;
     const type = dataSource.type;
 
@@ -94,7 +78,6 @@ class DataManager {
       stateData = this.assignFeatureIds(stateData, key);
     }
 
-    // console.log('stateData', stateData);
     const nextPage = this.store.state.sources[key].data.page + 1;
 
     // put data in state
@@ -121,13 +104,6 @@ class DataManager {
 
     const geocodeObj = this.store.state.geocode.data;
 
-    // we always need a good geocode before we can get data, so return
-    // if we don't have one yet.
-    // if (!geocodeObj) {
-    //   // console.log('fetch data but no geocode yet, returning');
-    //   return;
-    // }
-
     let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
     // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
@@ -144,7 +120,6 @@ class DataManager {
     // console.log('in fetchData, dataSources after filter:', dataSources);
 
     // get "ready" data sources (ones whose deps have been met)
-    // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
     for (let [dataSourceKey, dataSource] of dataSourceKeys) {
       const state = this.store.state;
       const type = dataSource.type;
@@ -205,8 +180,6 @@ class DataManager {
           targetId = targetIdFn(target);
         }
 
-        // targetId && console.log('target:', targetId);
-
         // check if it's ready
         const isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
         if (!isReady) {
@@ -246,7 +219,6 @@ class DataManager {
             // console.log('esri', dataSourceKey)
             // TODO add targets id fn
             this.clients.esri.fetch(target, dataSource, dataSourceKey);
-            break;
 
             break;
           case 'esri-nearby':
@@ -348,17 +320,6 @@ class DataManager {
         this.store.commit('setParcelData');
         this.store.commit('parcel');
       }
-
-      // reset other topic and map state
-      if (this.config.topics.length) {
-        if (this.config.defaultTopic || this.config.defaultTopic === null) {
-          this.store.commit('setActiveTopic', this.config.defaultTopic);
-        } else {
-          // console.log('about to setActiveTopic, config:', this.config.topics[0].key);
-          this.store.commit('setActiveTopic', this.config.topics[0].key);
-        }
-      }
-
 
       if (this.store.state.map) {
         this.store.commit('setBasemap', 'pwd');
@@ -498,7 +459,7 @@ class DataManager {
   }
 
   didGeocode(feature) {
-    // console.log('DataManager.didGeocode:', feature);
+    console.log('DataManager.didGeocode:', feature);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {

@@ -18,33 +18,14 @@ class Router {
     }
   }
 
-  activeTopicConfig() {
-    const key = this.store.state.activeTopic;
-    let config;
-
-    // if no active topic, return null
-    if (key) {
-      config = this.config.topics.filter((topic) => {
-        return topic.key === key;
-      })[0];
-    }
-
-    return config || {};
-  }
-
-  makeHash(address, topic) {
-    // console.log('make hash', address, topic);
+  makeHash(address) {
+    // console.log('make hash', address);
 
     // must have an address
     if (!address || address.length === 0) {
       return null;
     }
-
     let hash = `#/${encodeURIComponent(address)}`;
-    if (topic) {
-      hash += `/${topic}`;
-    }
-
     return hash;
   }
 
@@ -60,7 +41,6 @@ class Router {
   }
 
   hashChanged() {
-    // console.log('hashChanged is running, this.store.state.activeTopic:', this.store.state.activeTopic);
     const location = window.location;
     const hash = location.hash;
 
@@ -84,7 +64,6 @@ class Router {
     }
 
     const nextAddress = decodeURIComponent(addressComp);
-    let nextTopic;
 
     const modalKeys = this.config.modals || [];
     // console.log('pathComps:', pathComps, 'modalKeys:', modalKeys);
@@ -94,21 +73,9 @@ class Router {
       return;
     }
 
-    if (pathComps.length > 1) {
-      nextTopic = decodeURIComponent(pathComps[1]);
-    }
-
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
     }
-
-    this.routeToAddress(nextAddress);
-    if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
-      if (this.config.topics.length) {
-        this.routeToTopic(nextTopic);
-      }
-    }
-  }
 
   routeToAddress(nextAddress, searchCategory) {
     // console.log('Router.routeToAddress', nextAddress);
@@ -151,40 +118,6 @@ class Router {
     this.store.commit('setDidToggleModal', selectedModal);
   }
 
-  // this gets called when you click a topic header.
-  routeToTopic(nextTopic, target) {
-    // console.log('router.js routeToTopic is running');
-    // check against active topic
-    const prevTopic = this.store.state.activeTopic;
-
-    if (!prevTopic || prevTopic !== nextTopic) {
-      this.store.commit('setActiveTopic', nextTopic);
-
-      if (this.store.state.map) {
-        const prevBasemap = this.store.state.map.basemap || null;
-        const nextTopicConfig = this.config.topics.filter(topic => {
-          return topic.key === nextTopic;
-        })[0] || {};
-        const nextBasemap = nextTopicConfig.parcels;
-        const nextImagery = nextTopicConfig.imagery;
-        if (prevBasemap !== nextBasemap) {
-          this.store.commit('setBasemap', nextTopicConfig.parcels);
-        }
-        if (nextImagery) {
-          this.store.commit('setShouldShowImagery', true);
-          this.store.commit('setImagery', nextImagery);
-        }
-      }
-    }
-
-    if (!this.silent) {
-      const address = this.getAddressFromState();
-      const nextHash = this.makeHash(address, nextTopic);
-      const lastHistoryState = this.history.state;
-      this.history.replaceState(lastHistoryState, null, nextHash);
-    }
-  }
-
   didGeocode() {
     const geocodeData = this.store.state.geocode.data;
 
@@ -198,7 +131,6 @@ class Router {
       } else if (geocodeData.properties.street_address) {
         address = geocodeData.properties.street_address;
       }
-      const topic = this.store.state.activeTopic;
 
       // REVIEW this is only pushing state when routing is turned on. but maybe we
       // want this to happen all the time, right?
@@ -207,7 +139,7 @@ class Router {
         const nextHistoryState = {
           geocode: geocodeData
         };
-        const nextHash = this.makeHash(address, topic);
+        const nextHash = this.makeHash(address);
         // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
         this.history.pushState(nextHistoryState, null, nextHash);
       }
