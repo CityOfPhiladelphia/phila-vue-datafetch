@@ -35,16 +35,43 @@ class Controller {
     this.router.hashChanged();
   }
 
+  test() {
+    console.log('controller test is firing');
+  }
+
   getMoreRecords(dataSource, highestPageRetrieved) {
     this.dataManager.fetchMoreData(dataSource, highestPageRetrieved);
   }
 
-  handleSearchFormSubmit(value) {
+  filterInputSubmit(value, process, searchCategory) {
+    console.log('controller filterInputSubmit is running, value:', value, 'process:', process);
+    if (process === 'mapboard') {
+      this.handleSearchFormSubmit(value);
+    } else {
+      this.handleConfigurableInputSubmit(value, searchCategory);
+    }
+  }
+
+  handleConfigurableInputSubmit(value, searchCategory) {
+    console.log('controller handleConfigurableInputSubmit is running, value:', value, 'searchCategory:', searchCategory);
+    if (searchCategory === 'address') {
+      this.handleSearchFormSubmit(value, searchCategory);
+    } else if (searchCategory === 'owner') {
+      console.log('searchCategory is owner');
+      this.handleSearchFormSubmit(value, searchCategory);
+    }
+  }
+
+  handleSearchFormSubmit(value, searchCategory) {
     const input = value
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
-    this.store.commit('setGeocodeInput', input);
+    if (!searchCategory || searchCategory === 'address') {
+      this.store.commit('setGeocodeInput', input);
+    } else if (searchCategory === 'owner') {
+      this.store.commit('setOwnerSearchInput', input);
+    }
     this.store.commit('setShouldShowAddressCandidateList', false);
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -84,7 +111,13 @@ class Controller {
     }
 
     // tell router
-    this.router.routeToAddress(input);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
+    if (!searchCategory || searchCategory === 'address') {
+      this.router.routeToAddress(input, searchCategory);
+    } else if (searchCategory === 'owner') {
+      console.log('searchCategory is owner');
+      this.router.routeToOwner(input, searchCategory);
+    }
   }
 
   handleMapClick(e) {

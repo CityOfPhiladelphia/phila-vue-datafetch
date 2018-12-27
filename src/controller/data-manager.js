@@ -13,6 +13,7 @@ import distance from '@turf/distance';
 import area from '@turf/area';
 import {
   GeocodeClient,
+  OwnerSearchClient,
   HttpClient,
   EsriClient
 } from './clients';
@@ -31,6 +32,7 @@ class DataManager {
     // response back to this?
     const clientOpts = { config, store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
+    this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
   }
@@ -265,14 +267,20 @@ class DataManager {
   }
 
   didFetchData(key, status, data, targetId) {
-    // console.log('DID FETCH DATA:', key, targetId || '', data);
 
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
+    // console.log('data-manager DID FETCH DATA:', key, targetId || '', data);
+    let rows;
+    if (stateData) {
+      rows = stateData.rows;
+    }
 
     // if this is an array, assign feature ids
     if (Array.isArray(stateData)) {
       stateData = this.assignFeatureIds(stateData, key, targetId);
+    } else if (stateData) {
+      stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
 
     // does this data source have targets?
@@ -329,6 +337,7 @@ class DataManager {
     // this gets called when the current geocoded address is wiped out, such as
     // when you click on the "Atlas" title and it navigates to an empty hash
     resetGeocode() {
+      console.log('resetGeocode is running');
       // reset geocode
       this.store.commit('setGeocodeStatus', null);
       this.store.commit('setGeocodeData', null);
@@ -432,6 +441,9 @@ class DataManager {
   }
 
   assignFeatureIds(features, dataSourceKey, topicId) {
+    if (!features) {
+      return;
+    }
     const featuresWithIds = [];
 
     // REVIEW this was not working with Array.map for some reason
@@ -476,21 +488,49 @@ class DataManager {
   }
 
   /* GEOCODING */
-  geocode(address) {
-    // console.log('data-manager geocode is running, address:', address);
-    const didGeocode = this.didGeocode.bind(this);
-    return this.clients.geocode.fetch(address).then(didGeocode);
+  geocode(input, category) {
+    // console.log('data-manager geocode is running, input:', input, 'category:', category);
+    if (category === 'address') {
+      const didGeocode = this.didGeocode.bind(this);
+      return this.clients.geocode.fetch(input).then(didGeocode);
+    } else if (category === 'owner') {
+      // console.log('category is owner');
+      const didOwnerSearch = this.didOwnerSearch.bind(this);
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+    } else if (category == null) {
+      // console.log('no category');
+      const didTryGeocode = this.didTryGeocode.bind(this);
+      const test = this.clients.geocode.fetch(input).then(didTryGeocode);
+    }
+  }
+
+  didOwnerSearch() {
+    console.log('callback from owner search is running');
+  }
+
+  didTryGeocode(feature) {
+    console.log('didTryGeocode is running, feature:', feature);
+    if (this.store.state.geocode.status === 'error') {
+      const input = this.store.state.geocode.input;
+      const didOwnerSearch = this.didOwnerSearch.bind(this);
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+    } else if (this.store.state.geocode.status === 'success') {
+      this.didGeocode(feature);
+      this.store.commit('setOwnerSearchStatus', null);
+      this.store.commit('setOwnerSearchData', null);
+      this.store.commit('setOwnerSearchInput', null);
+    }
   }
 
   didGeocode(feature) {
-    // console.log('DataManager.didGeocode:', feature);
+    console.log('DataManager.didGeocode:', feature);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {
         this.store.commit('setMapZoom', 19);
         this.store.commit('setMapCenter', feature.geometry.coordinates);
       }
-      return;
+      return
     }
 
     const activeParcelLayer = this.store.state.activeParcelLayer;
