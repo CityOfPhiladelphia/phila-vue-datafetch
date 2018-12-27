@@ -76,6 +76,7 @@ class Router {
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
     }
+  }
 
   routeToAddress(nextAddress, searchCategory) {
     // console.log('Router.routeToAddress', nextAddress);
