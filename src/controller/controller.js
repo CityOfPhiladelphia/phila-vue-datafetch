@@ -119,6 +119,9 @@ class Controller {
     // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
   }
+  geocodeDrawnShape() {
+    console.log("Testing DrawnShape Geocoder")
+  }
 
   goToDefaultAddress(address) {
     this.router.routeToAddress(address);
