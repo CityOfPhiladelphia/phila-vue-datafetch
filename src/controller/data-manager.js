@@ -99,48 +99,57 @@ class DataManager {
 
   defineTargets(dataSourceKey, targetsDef) {
     const state = this.store.state;
-    let targets;
-    let targetIdFn;
-    let targetsFn;
     // targets may cause a looped axios call, or may just call one once and get multiple results
-    if (targetsDef) {
-      // console.log('in if targetsDef:', targetsDef);
-      targetsFn = targetsDef.get;
-      targetIdFn = targetsDef.getTargetId;
+    let targetsFn = targetsDef.get;
+    let targetIdFn = targetsDef.getTargetId;
 
-      if (typeof targetsFn !== 'function') {
-        throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
-      }
-      targets = targetsFn(state);
+    if (typeof targetsFn !== 'function') {
+      throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
+    }
+    let targets = targetsFn(state);
 
-      // check if target objs exist in state.
-      const targetIds = targets.map(targetIdFn);
-      // console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
-      const stateTargets = state.sources[dataSourceKey].targets;
-      const stateTargetIds = Object.keys(stateTargets);
-      // the inclusion check wasn't working because ids were strings in
-      // one set and ints in another, so do this.
-      const stateTargetIdsStr = stateTargetIds.map(String);
-      const shouldCreateTargets = !targetIds.every(targetId => {
+    // check if target objs exist in state.
+    const targetIds = targets.map(targetIdFn);
+    // console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
+    const stateTargets = state.sources[dataSourceKey].targets;
+    const stateTargetIds = Object.keys(stateTargets);
+    // the inclusion check wasn't working because ids were strings in
+    // one set and ints in another, so do this.
+    const stateTargetIdsStr = stateTargetIds.map(String);
+    let shouldCreateTargets;
+    if (targetsDef.runOnce) {
+      shouldCreateTargets = false;
+    } else {
+      shouldCreateTargets = !targetIds.every(targetId => {
         const targetIdStr = String(targetId);
         return stateTargetIdsStr.includes(targetIdStr);
       });
-
-      // if not, create them.
-      if (shouldCreateTargets) {
-        // console.log('should create targets', targetIds, stateTargetIds);
-        this.store.commit('createEmptySourceTargets', {
-          key: dataSourceKey,
-          targetIds
-        });
-      }
-
-      if (!Array.isArray(targets)) {
-        throw new Error('Data source targets getter should return an array');
-      }
-    } else if (this.store.state.lastSearchMethod !== 'owner search') {
-      targets = [geocodeObj];
     }
+    console.log('shouldCreateTargets:', shouldCreateTargets);
+
+    // if not, create them.
+    if (shouldCreateTargets) {
+      // console.log('should create targets', targetIds, stateTargetIds);
+      this.store.commit('createEmptySourceTargets', {
+        key: dataSourceKey,
+        targetIds
+      });
+    }
+
+    if (!Array.isArray(targets)) {
+      throw new Error('Data source targets getter should return an array');
+    }
+
+    // this over-rides if the targets are set to "runOnce = true"
+    if (targetsDef.runOnce) {
+      let idsOfOwnersOrProps = "";
+      for (let target of targets) {
+        idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
+      }
+      idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
+      targets = [idsOfOwnersOrProps];
+    }
+
     return targets;
   }
 
@@ -149,6 +158,7 @@ class DataManager {
     // console.log('-----------');
 
     const geocodeObj = this.store.state.geocode.data;
+    const ownerSearchObj = this.store.state.ownerSearch.data;
 
     let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
@@ -181,17 +191,17 @@ class DataManager {
       let targetsFn;
 
       // targets may cause a looped axios call, or may just call one once and get multiple results
-      targets = this.defineTargets(dataSourceKey, targetsDef);
-
-      // this over-rides if the targets are set to "runOnce = true"
-      if (targetsDef.runOnce) {
-        let idsOfOwnersOrProps = "";
-        for (let target of targets) {
-          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
-        }
-        idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
-        targets = [idsOfOwnersOrProps];
+      if (targetsDef) {
+        targetsFn = targetsDef.get;
+        targetIdFn = targetsDef.getTargetId;
+        targets = this.defineTargets(dataSourceKey, targetsDef);
+      } else if (this.store.state.lastSearchMethod !== 'owner search') {
+        targets = [geocodeObj];
+      } else {
+        targets = [ownerSearchObj][0];
       }
+
+      // console.log('targets:', targets);
 
       for (let target of targets) {
         // get id of target
@@ -218,9 +228,11 @@ class DataManager {
         this.store.commit('setSourceStatus', setSourceStatusOpts);
 
         // if it is set up to run a single axios call on a set of targets
-        if (targetsDef.runOnce) {
-          targetIdFn = function(feature) {
-            return feature.parcel_number;
+        if (targetsDef) {
+          if (targetsDef.runOnce) {
+            targetIdFn = function(feature) {
+              return feature.parcel_number;
+            }
           }
         }
 
@@ -281,6 +293,7 @@ class DataManager {
     }
     // console.log('stateData:', stateData);
 
+    // this might cause a problem for other dataSources
     if (targetIdFn) {
       this.turnToTargets(key, stateData, targetIdFn);
     }
@@ -314,16 +327,18 @@ class DataManager {
     this.fetchData();
   }
 
+  // TODO - this is probably completely wasteful
   turnToTargets(key, stateData, targetIdFn) {
     // console.log('turnToTargets is running, key:', key, 'stateData:', stateData, 'targetsIdFn:', targetIdFn);
+    let newLargeObj = { 'key': key }
+    let newSmallObj = {}
     for (let theData of stateData) {
-      let newObj = {
-        'key': key,
-        'targetId': theData.parcel_number,
+      newSmallObj[theData.parcel_number] = {
         'data': theData
       }
-      this.store.commit('setSourceData', newObj);
     }
+    newLargeObj['data'] = newSmallObj;
+    this.store.commit('setSourceDataObject', newLargeObj);
   }
 
   resetData() {

@@ -4999,48 +4999,59 @@
 
   DataManager.prototype.defineTargets = function defineTargets (dataSourceKey, targetsDef) {
     var state = this.store.state;
-    var targets;
-    var targetIdFn;
-    var targetsFn;
     // targets may cause a looped axios call, or may just call one once and get multiple results
-    if (targetsDef) {
-      // console.log('in if targetsDef:', targetsDef);
-      targetsFn = targetsDef.get;
-      targetIdFn = targetsDef.getTargetId;
+    var targetsFn = targetsDef.get;
+    var targetIdFn = targetsDef.getTargetId;
 
-      if (typeof targetsFn !== 'function') {
-        throw new Error(("Invalid targets getter for data source '" + dataSourceKey + "'"));
-      }
-      targets = targetsFn(state);
+    if (typeof targetsFn !== 'function') {
+      throw new Error(("Invalid targets getter for data source '" + dataSourceKey + "'"));
+    }
+    var targets = targetsFn(state);
 
-      // check if target objs exist in state.
-      var targetIds = targets.map(targetIdFn);
-      // console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
-      var stateTargets = state.sources[dataSourceKey].targets;
-      var stateTargetIds = Object.keys(stateTargets);
-      // the inclusion check wasn't working because ids were strings in
-      // one set and ints in another, so do this.
-      var stateTargetIdsStr = stateTargetIds.map(String);
-      var shouldCreateTargets = !targetIds.every(function (targetId) {
+    // check if target objs exist in state.
+    var targetIds = targets.map(targetIdFn);
+    // console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
+    var stateTargets = state.sources[dataSourceKey].targets;
+    var stateTargetIds = Object.keys(stateTargets);
+    // the inclusion check wasn't working because ids were strings in
+    // one set and ints in another, so do this.
+    var stateTargetIdsStr = stateTargetIds.map(String);
+    var shouldCreateTargets;
+    if (targetsDef.runOnce) {
+      shouldCreateTargets = false;
+    } else {
+      shouldCreateTargets = !targetIds.every(function (targetId) {
         var targetIdStr = String(targetId);
         return stateTargetIdsStr.includes(targetIdStr);
       });
-
-      // if not, create them.
-      if (shouldCreateTargets) {
-        // console.log('should create targets', targetIds, stateTargetIds);
-        this.store.commit('createEmptySourceTargets', {
-          key: dataSourceKey,
-          targetIds: targetIds
-        });
-      }
-
-      if (!Array.isArray(targets)) {
-        throw new Error('Data source targets getter should return an array');
-      }
-    } else if (this.store.state.lastSearchMethod !== 'owner search') {
-      targets = [geocodeObj];
     }
+    console.log('shouldCreateTargets:', shouldCreateTargets);
+
+    // if not, create them.
+    if (shouldCreateTargets) {
+      // console.log('should create targets', targetIds, stateTargetIds);
+      this.store.commit('createEmptySourceTargets', {
+        key: dataSourceKey,
+        targetIds: targetIds
+      });
+    }
+
+    if (!Array.isArray(targets)) {
+      throw new Error('Data source targets getter should return an array');
+    }
+
+    // this over-rides if the targets are set to "runOnce = true"
+    if (targetsDef.runOnce) {
+      var idsOfOwnersOrProps = "";
+      for (var i = 0, list = targets; i < list.length; i += 1) {
+        var target = list[i];
+
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
+      }
+      idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
+      targets = [idsOfOwnersOrProps];
+    }
+
     return targets;
   };
 
@@ -5049,6 +5060,7 @@
     // console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
+    var ownerSearchObj = this.store.state.ownerSearch.data;
 
     var dataSources = this.config.dataSources || {};
     var dataSourceKeys = Object.entries(dataSources);
@@ -5068,8 +5080,8 @@
     // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
-    for (var i$2 = 0, list$2 = dataSourceKeys; i$2 < list$2.length; i$2 += 1) {
-      var ref = list$2[i$2];
+    for (var i$1 = 0, list$1 = dataSourceKeys; i$1 < list$1.length; i$1 += 1) {
+      var ref = list$1[i$1];
         var dataSourceKey = ref[0];
         var dataSource = ref[1];
 
@@ -5082,29 +5094,28 @@
       // default to the geocode result.
       var targets = (void 0);
       var targetIdFn = (void 0);
+      var targetsFn = (void 0);
 
       // targets may cause a looped axios call, or may just call one once and get multiple results
-      targets = this.defineTargets(dataSourceKey, targetsDef);
-
-      // this over-rides if the targets are set to "runOnce = true"
-      if (targetsDef.runOnce) {
-        var idsOfOwnersOrProps = "";
-        for (var i = 0, list = targets; i < list.length; i += 1) {
-          var target = list[i];
-
-            idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
-        }
-        idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
-        targets = [idsOfOwnersOrProps];
+      if (targetsDef) {
+        targetsFn = targetsDef.get;
+        targetIdFn = targetsDef.getTargetId;
+        targets = this.defineTargets(dataSourceKey, targetsDef);
+      } else if (this.store.state.lastSearchMethod !== 'owner search') {
+        targets = [geocodeObj];
+      } else {
+        targets = [ownerSearchObj][0];
       }
 
-      for (var i$1 = 0, list$1 = targets; i$1 < list$1.length; i$1 += 1) {
+      // console.log('targets:', targets);
+
+      for (var i = 0, list = targets; i < list.length; i += 1) {
         // get id of target
-        var target$1 = list$1[i$1];
+        var target = list[i];
 
           var targetId = (void 0);
         if (targetIdFn && !targetsDef.runOnce) {
-          targetId = targetIdFn(target$1);
+          targetId = targetIdFn(target);
         }
 
         // check if it's ready
@@ -5125,17 +5136,19 @@
         this.store.commit('setSourceStatus', setSourceStatusOpts);
 
         // if it is set up to run a single axios call on a set of targets
-        if (targetsDef.runOnce) {
-          targetIdFn = function(feature$$1) {
-            return feature$$1.parcel_number;
-          };
+        if (targetsDef) {
+          if (targetsDef.runOnce) {
+            targetIdFn = function(feature$$1) {
+              return feature$$1.parcel_number;
+            };
+          }
         }
 
         // TODO do this for all targets
         switch(type) {
           case 'http-get':
             // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
-            this.clients.http.fetch(target$1,
+            this.clients.http.fetch(target,
                                     dataSource,
                                     dataSourceKey,
                                     targetIdFn);
@@ -5143,7 +5156,7 @@
 
           case 'http-get-nearby':
           // console.log('http-get-nearby', dataSourceKey, targetIdFn)
-            this.clients.http.fetchNearby(target$1,
+            this.clients.http.fetchNearby(target,
                                           dataSource,
                                           dataSourceKey,
                                           targetIdFn);
@@ -5152,13 +5165,13 @@
           case 'esri':
             // console.log('esri', dataSourceKey)
             // TODO add targets id fn
-            this.clients.esri.fetch(target$1, dataSource, dataSourceKey);
+            this.clients.esri.fetch(target, dataSource, dataSourceKey);
 
             break;
           case 'esri-nearby':
             // console.log('esri-nearby', dataSourceKey)
             // TODO add targets id fn
-            this.clients.esri.fetchNearby(target$1, dataSource, dataSourceKey);
+            this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
             break;
 
           default:
@@ -5188,6 +5201,7 @@
     }
     // console.log('stateData:', stateData);
 
+    // this might cause a problem for other dataSources
     if (targetIdFn) {
       this.turnToTargets(key, stateData, targetIdFn);
     }
@@ -5221,18 +5235,20 @@
     this.fetchData();
   };
 
+  // TODO - this is probably completely wasteful
   DataManager.prototype.turnToTargets = function turnToTargets (key, stateData, targetIdFn) {
     // console.log('turnToTargets is running, key:', key, 'stateData:', stateData, 'targetsIdFn:', targetIdFn);
+    var newLargeObj = { 'key': key };
+    var newSmallObj = {};
     for (var i = 0, list = stateData; i < list.length; i += 1) {
       var theData = list[i];
 
-        var newObj = {
-        'key': key,
-        'targetId': theData.parcel_number,
+        newSmallObj[theData.parcel_number] = {
         'data': theData
       };
-      this.store.commit('setSourceData', newObj);
     }
+    newLargeObj['data'] = newSmallObj;
+    this.store.commit('setSourceDataObject', newLargeObj);
   };
 
   DataManager.prototype.resetData = function resetData () {
@@ -5829,6 +5845,11 @@
           } else {
             state.sources[key].data = data;
           }
+        },
+        setSourceDataObject: function setSourceDataObject(state, payload) {
+          var key = payload.key;
+          var data = payload.data;
+          state.sources[key].targets = data;
         },
         setSourceDataMore: function setSourceDataMore(state, payload) {
           var key = payload.key;
