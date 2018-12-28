@@ -4352,7 +4352,7 @@
       var this$1 = this;
 
       var params = this.evaluateParams(feature, dataSource);
-      console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+      // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
       var url = dataSource.url;
       var options = dataSource.options;
       var urlAddition = params.urlAddition;
@@ -4381,7 +4381,7 @@
         var targetId;
         if (targetIdFn) {
           targetId = targetIdFn(feature);
-          console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
+          // console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
         }
 
         this$1.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
@@ -4997,19 +4997,62 @@
     this.store.commit('setSecondarySourceStatus', setSecondarySourceStatusOpts);
   };
 
+  DataManager.prototype.defineTargets = function defineTargets (dataSourceKey, targetsDef) {
+    var state = this.store.state;
+    var targets;
+    var targetIdFn;
+    var targetsFn;
+    // targets may cause a looped axios call, or may just call one once and get multiple results
+    if (targetsDef) {
+      // console.log('in if targetsDef:', targetsDef);
+      targetsFn = targetsDef.get;
+      targetIdFn = targetsDef.getTargetId;
+
+      if (typeof targetsFn !== 'function') {
+        throw new Error(("Invalid targets getter for data source '" + dataSourceKey + "'"));
+      }
+      targets = targetsFn(state);
+
+      // check if target objs exist in state.
+      var targetIds = targets.map(targetIdFn);
+      // console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
+      var stateTargets = state.sources[dataSourceKey].targets;
+      var stateTargetIds = Object.keys(stateTargets);
+      // the inclusion check wasn't working because ids were strings in
+      // one set and ints in another, so do this.
+      var stateTargetIdsStr = stateTargetIds.map(String);
+      var shouldCreateTargets = !targetIds.every(function (targetId) {
+        var targetIdStr = String(targetId);
+        return stateTargetIdsStr.includes(targetIdStr);
+      });
+
+      // if not, create them.
+      if (shouldCreateTargets) {
+        // console.log('should create targets', targetIds, stateTargetIds);
+        this.store.commit('createEmptySourceTargets', {
+          key: dataSourceKey,
+          targetIds: targetIds
+        });
+      }
+
+      if (!Array.isArray(targets)) {
+        throw new Error('Data source targets getter should return an array');
+      }
+    } else if (this.store.state.lastSearchMethod !== 'owner search') {
+      targets = [geocodeObj];
+    }
+    return targets;
+  };
 
   DataManager.prototype.fetchData = function fetchData () {
-    console.log('\nFETCH DATA');
+    // console.log('\nFETCH DATA');
     // console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
 
     var dataSources = this.config.dataSources || {};
     var dataSourceKeys = Object.entries(dataSources);
-    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
-
-    var idsOfOwners = "";
-    var idsOfProperties = "";
+    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     if (this.store.state.lastSearchMethod !== 'owner search') {
       if (!geocodeObj) {
@@ -5021,20 +5064,12 @@
           }
         });
       }
-    } else {
-      for (var i = 0, list = this.store.state.ownerSearch.data; i < list.length; i += 1) {
-        var owner = list[i];
-
-          idsOfOwners = idsOfOwners + "'" + owner.properties.opa_account_num + "',";
-      }
-      idsOfOwners = idsOfOwners.substring(0, idsOfOwners.length - 1);
-      idsOfOwners = [idsOfOwners];
     }
-    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
-    for (var i$3 = 0, list$3 = dataSourceKeys; i$3 < list$3.length; i$3 += 1) {
-      var ref = list$3[i$3];
+    for (var i$2 = 0, list$2 = dataSourceKeys; i$2 < list$2.length; i$2 += 1) {
+      var ref = list$2[i$2];
         var dataSourceKey = ref[0];
         var dataSource = ref[1];
 
@@ -5042,85 +5077,32 @@
       var type = dataSource.type;
       var targetsDef = dataSource.targets;
 
-      // console.log('key:', dataSourceKey, type);
-
       // if the data sources specifies a features getter, use that to source
       // features for evaluating params/forming requests. otherwise,
       // default to the geocode result.
       var targets = (void 0);
       var targetIdFn = (void 0);
-      var targetsFn = (void 0);
 
-      // if (targetsDef && !targetsDef.runOnce) {
-      // if (!targetsDef.runOnce) {
-      if (targetsDef) {
-        console.log('in if targetsDef:', targetsDef);
-        // if (!targetsDef.runOnce) {
-          targetsFn = targetsDef.get;
-          targetIdFn = targetsDef.getTargetId;
+      // targets may cause a looped axios call, or may just call one once and get multiple results
+      targets = this.defineTargets(dataSourceKey, targetsDef);
 
-          if (typeof targetsFn !== 'function') {
-            throw new Error(("Invalid targets getter for data source '" + dataSourceKey + "'"));
-          }
-          targets = targetsFn(state);
-
-          // check if target objs exist in state.
-          var targetIds = targets.map(targetIdFn);
-          console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
-          var stateTargets = state.sources[dataSourceKey].targets;
-          var stateTargetIds = Object.keys(stateTargets);
-          // the inclusion check wasn't working because ids were strings in
-          // one set and ints in another, so do this.
-          var stateTargetIdsStr = stateTargetIds.map(String);
-          var shouldCreateTargets = !targetIds.every(function (targetId) {
-            var targetIdStr = String(targetId);
-            return stateTargetIdsStr.includes(targetIdStr);
-          });
-
-          // if not, create them.
-          if (shouldCreateTargets) {
-            // console.log('should create targets', targetIds, stateTargetIds);
-            this.store.commit('createEmptySourceTargets', {
-              key: dataSourceKey,
-              targetIds: targetIds
-            });
-          }
-
-          if (!Array.isArray(targets)) {
-            throw new Error('Data source targets getter should return an array');
-          }
-        // }
-      } else if (this.store.state.lastSearchMethod !== 'owner search') {
-        targets = [geocodeObj];
-      }
-
-      console.log('IN MIDDLE, targets:', targets);
-      // } else {
-      // console.log('start of data-manager.js, else is running');
-      // targets = idsOfOwners;
-      // }
+      // this over-rides if the targets are set to "runOnce = true"
       if (targetsDef.runOnce) {
-        if (this.store.state.lastSearchMethod == 'owner search') {
-          targets = idsOfOwners;
-        } else {
-          for (var i$1 = 0, list$1 = targets; i$1 < list$1.length; i$1 += 1) {
-            var target = list$1[i$1];
+        var idsOfOwnersOrProps = "";
+        for (var i = 0, list = targets; i < list.length; i += 1) {
+          var target = list[i];
 
-              idsOfProperties = idsOfProperties + "'" + target.properties.opa_account_num + "',";
-          }
-          idsOfProperties = idsOfProperties.substring(0, idsOfProperties.length - 1);
-          targets = [idsOfProperties];
+            idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
         }
+        idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
+        targets = [idsOfOwnersOrProps];
       }
 
-      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets);
-
-      for (var i$2 = 0, list$2 = targets; i$2 < list$2.length; i$2 += 1) {
-        var target$1 = list$2[i$2];
-
-          console.log('target:', target$1);
+      for (var i$1 = 0, list$1 = targets; i$1 < list$1.length; i$1 += 1) {
         // get id of target
-        var targetId = (void 0);
+        var target$1 = list$1[i$1];
+
+          var targetId = (void 0);
         if (targetIdFn && !targetsDef.runOnce) {
           targetId = targetIdFn(target$1);
         }
@@ -5142,10 +5124,10 @@
         }
         this.store.commit('setSourceStatus', setSourceStatusOpts);
 
+        // if it is set up to run a single axios call on a set of targets
         if (targetsDef.runOnce) {
-          console.log('targetsDef.runOnce:', targetsDef.runOnce);
-          targetIdFn = function(test) {
-            return test.parcel_number;
+          targetIdFn = function(feature$$1) {
+            return feature$$1.parcel_number;
           };
         }
 
@@ -5192,7 +5174,7 @@
   DataManager.prototype.didFetchData = function didFetchData (key, status, data, targetId, targetIdFn) {
     var dataOrNull = status === 'error' ? null : data;
     var stateData = dataOrNull;
-    console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
+    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
     var rows;
     if (stateData) {
       rows = stateData.rows;
@@ -5204,7 +5186,7 @@
     } else if (stateData) {
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
-    console.log('stateData:', stateData);
+    // console.log('stateData:', stateData);
 
     if (targetIdFn) {
       this.turnToTargets(key, stateData, targetIdFn);
@@ -5231,6 +5213,7 @@
     if (!targetIdFn) {
       this.store.commit('setSourceData', setSourceDataOpts);
     }
+    // console.log('in didFetchData, setSourceStatusOpts:', setSourceStatusOpts);
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
@@ -5239,9 +5222,7 @@
   };
 
   DataManager.prototype.turnToTargets = function turnToTargets (key, stateData, targetIdFn) {
-    console.log('turnToTargets is running, key:', key, 'stateData:', stateData, 'targetsIdFn:', targetIdFn);
-    // this.store.commit('createEmptySourceTargets')
-    // let newObj = {}
+    // console.log('turnToTargets is running, key:', key, 'stateData:', stateData, 'targetsIdFn:', targetIdFn);
     for (var i = 0, list = stateData; i < list.length; i += 1) {
       var theData = list[i];
 
@@ -5252,64 +5233,70 @@
       };
       this.store.commit('setSourceData', newObj);
     }
-
   };
 
   DataManager.prototype.resetData = function resetData () {
-      var dataSources = this.config.dataSources || {};
+    // console.log('resetData is running');
+    var dataSources = this.config.dataSources || {};
 
-      for (var i = 0, list = Object.keys(dataSources); i < list.length; i += 1) {
-        var dataSourceKey = list[i];
+    for (var i = 0, list = Object.keys(dataSources); i < list.length; i += 1) {
+      var dataSourceKey = list[i];
 
-          var dataSource = dataSources[dataSourceKey];
-        var targetsDef = dataSource.targets;
+        var dataSource = dataSources[dataSourceKey];
+      var targetsDef = dataSource.targets;
 
-        // null out existing data in state
-        if (targetsDef) {
-          this.store.commit('clearSourceTargets', {
-            key: dataSourceKey
-          });
-        } else {
-          this.store.commit('setSourceData', {
-            key: dataSourceKey,
-            data: null
-          });
+      // null out existing data in state
+      if (targetsDef) {
+        this.store.commit('clearSourceTargets', {
+          key: dataSourceKey
+        });
+        if (targetsDef.runOnce) {
           this.store.commit('setSourceStatus', {
             key: dataSourceKey,
             status: null
           });
         }
-      }
-    };
-
-    // this gets called when the current geocoded address is wiped out, such as
-    // when you click on the "Atlas" title and it navigates to an empty hash
-    DataManager.prototype.resetGeocode = function resetGeocode () {
-      console.log('resetGeocode is running');
-      // reset geocode
-      this.store.commit('setGeocodeStatus', null);
-      this.store.commit('setGeocodeData', null);
-      this.store.commit('setGeocodeRelated', null);
-      this.store.commit('setGeocodeInput', null);
-
-      // reset parcels
-      if (this.config.parcels) {
-        this.store.commit('setParcelData', {
-          parcelLayer: 'pwd',
-          multipleAllowed: false,
+      } else {
+        this.store.commit('setSourceData', {
+          key: dataSourceKey,
           data: null
         });
+        this.store.commit('setSourceStatus', {
+          key: dataSourceKey,
+          status: null
+        });
       }
+    }
+  };
 
-      if (this.store.state.map) {
-        this.store.commit('setBasemap', 'pwd');
-      }
+  // this gets called when the current geocoded address is wiped out, such as
+  // when you click on the "Atlas" title and it navigates to an empty hash
+  DataManager.prototype.resetGeocode = function resetGeocode () {
+    // console.log('resetGeocode is running');
+    // reset geocode
+    this.store.commit('setGeocodeStatus', null);
+    this.store.commit('setGeocodeData', null);
+    this.store.commit('setGeocodeRelated', null);
+    this.store.commit('setGeocodeInput', null);
 
-      // reset data sources
-      if (this.store.state.sources) {
-        this.resetData();
-      }
-    };
+    // reset parcels
+    if (this.config.parcels) {
+      this.store.commit('setParcelData', {
+        parcelLayer: 'pwd',
+        multipleAllowed: false,
+        data: null
+      });
+    }
+
+    if (this.store.state.map) {
+      this.store.commit('setBasemap', 'pwd');
+    }
+
+    // reset data sources
+    if (this.store.state.sources) {
+      this.resetData();
+    }
+  };
 
   DataManager.prototype.checkDataSourcesFetched = function checkDataSourcesFetched (paths) {
       if ( paths === void 0 ) paths = [];
@@ -5427,7 +5414,6 @@
   };
 
   DataManager.prototype.didOwnerSearch = function didOwnerSearch () {
-    console.log('callback from owner search is running');
     this.fetchData();
   };
 
@@ -5440,6 +5426,7 @@
       var didOwnerSearch = this.didOwnerSearch.bind(this);
       return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
     } else if (this.store.state.geocode.status === 'success') {
+      this.resetData();
       this.didGeocode(feature$$1);
       this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setOwnerSearchStatus', null);
@@ -5449,7 +5436,7 @@
   };
 
   DataManager.prototype.didGeocode = function didGeocode (feature$$1) {
-    console.log('DataManager.didGeocode:', feature$$1);
+    // console.log('DataManager.didGeocode:', feature);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {
@@ -5757,13 +5744,13 @@
 
   var pvdStore = {
     createSources: function createSources(config) {
-      console.log('createSources is running, config:', config);
+      // console.log('createSources is running, config:', config);
       var sourceKeys = Object.keys(config.dataSources || {});
       var sources = sourceKeys.reduce(function (o, key) {
         var val;
         // if the source has targets, just set it to be an empty object
         if (config.dataSources[key].targets) {
-          console.log('in config.dataSources[key].targets:', config.dataSources[key].targets);
+          // console.log('in config.dataSources[key].targets:', config.dataSources[key].targets);
           val = {
             targets: {}
           };
@@ -5800,6 +5787,7 @@
           state.clickCoords = payload;
         },
         setSourceStatus: function setSourceStatus(state, payload) {
+          // console.log('setSourceStatus is running, payload:', payload);
           var key = payload.key;
           var status = payload.status;
 
