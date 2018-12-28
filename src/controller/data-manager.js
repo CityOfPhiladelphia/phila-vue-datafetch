@@ -109,6 +109,7 @@ class DataManager {
     console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     let idsOfOwners = "";
+    let idsOfProperties = "";
 
     if (this.store.state.lastSearchMethod !== 'owner search') {
       if (!geocodeObj) {
@@ -147,6 +148,7 @@ class DataManager {
       // if (targetsDef && !targetsDef.runOnce) {
       //   if (!targetsDef.runOnce) {
       if (targetsDef) {
+        console.log('in if targetsDef:', targetsDef);
         // if (!targetsDef.runOnce) {
           targetsFn = targetsDef.get;
           targetIdFn = targetsDef.getTargetId;
@@ -158,6 +160,7 @@ class DataManager {
 
           // check if target objs exist in state.
           const targetIds = targets.map(targetIdFn);
+          console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
           const stateTargets = state.sources[dataSourceKey].targets;
           const stateTargetIds = Object.keys(stateTargets);
           // the inclusion check wasn't working because ids were strings in
@@ -184,12 +187,22 @@ class DataManager {
       } else if (this.store.state.lastSearchMethod !== 'owner search') {
         targets = [geocodeObj];
       }
+
+      console.log('IN MIDDLE, targets:', targets);
       // } else {
       //   console.log('start of data-manager.js, else is running');
       //   targets = idsOfOwners;
       // }
       if (targetsDef.runOnce) {
-        targets = idsOfOwners;
+        if (this.store.state.lastSearchMethod == 'owner search') {
+          targets = idsOfOwners;
+        } else {
+          for (let target of targets) {
+            idsOfProperties = idsOfProperties + "'" + target.properties.opa_account_num + "',";
+          }
+          idsOfProperties = idsOfProperties.substring(0, idsOfProperties.length - 1);
+          targets = [idsOfProperties];
+        }
       }
 
       console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets);

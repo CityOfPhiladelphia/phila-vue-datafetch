@@ -5009,6 +5009,7 @@
     console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     var idsOfOwners = "";
+    var idsOfProperties = "";
 
     if (this.store.state.lastSearchMethod !== 'owner search') {
       if (!geocodeObj) {
@@ -5032,8 +5033,8 @@
     console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
-    for (var i$2 = 0, list$2 = dataSourceKeys; i$2 < list$2.length; i$2 += 1) {
-      var ref = list$2[i$2];
+    for (var i$3 = 0, list$3 = dataSourceKeys; i$3 < list$3.length; i$3 += 1) {
+      var ref = list$3[i$3];
         var dataSourceKey = ref[0];
         var dataSource = ref[1];
 
@@ -5053,6 +5054,7 @@
       // if (targetsDef && !targetsDef.runOnce) {
       // if (!targetsDef.runOnce) {
       if (targetsDef) {
+        console.log('in if targetsDef:', targetsDef);
         // if (!targetsDef.runOnce) {
           targetsFn = targetsDef.get;
           targetIdFn = targetsDef.getTargetId;
@@ -5064,6 +5066,7 @@
 
           // check if target objs exist in state.
           var targetIds = targets.map(targetIdFn);
+          console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
           var stateTargets = state.sources[dataSourceKey].targets;
           var stateTargetIds = Object.keys(stateTargets);
           // the inclusion check wasn't working because ids were strings in
@@ -5090,24 +5093,36 @@
       } else if (this.store.state.lastSearchMethod !== 'owner search') {
         targets = [geocodeObj];
       }
+
+      console.log('IN MIDDLE, targets:', targets);
       // } else {
       // console.log('start of data-manager.js, else is running');
       // targets = idsOfOwners;
       // }
       if (targetsDef.runOnce) {
-        targets = idsOfOwners;
+        if (this.store.state.lastSearchMethod == 'owner search') {
+          targets = idsOfOwners;
+        } else {
+          for (var i$1 = 0, list$1 = targets; i$1 < list$1.length; i$1 += 1) {
+            var target = list$1[i$1];
+
+              idsOfProperties = idsOfProperties + "'" + target.properties.opa_account_num + "',";
+          }
+          idsOfProperties = idsOfProperties.substring(0, idsOfProperties.length - 1);
+          targets = [idsOfProperties];
+        }
       }
 
       console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets);
 
-      for (var i$1 = 0, list$1 = targets; i$1 < list$1.length; i$1 += 1) {
-        var target = list$1[i$1];
+      for (var i$2 = 0, list$2 = targets; i$2 < list$2.length; i$2 += 1) {
+        var target$1 = list$2[i$2];
 
-          console.log('target:', target);
+          console.log('target:', target$1);
         // get id of target
         var targetId = (void 0);
         if (targetIdFn && !targetsDef.runOnce) {
-          targetId = targetIdFn(target);
+          targetId = targetIdFn(target$1);
         }
 
         // check if it's ready
@@ -5138,7 +5153,7 @@
         switch(type) {
           case 'http-get':
             // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
-            this.clients.http.fetch(target,
+            this.clients.http.fetch(target$1,
                                     dataSource,
                                     dataSourceKey,
                                     targetIdFn);
@@ -5146,7 +5161,7 @@
 
           case 'http-get-nearby':
           // console.log('http-get-nearby', dataSourceKey, targetIdFn)
-            this.clients.http.fetchNearby(target,
+            this.clients.http.fetchNearby(target$1,
                                           dataSource,
                                           dataSourceKey,
                                           targetIdFn);
@@ -5155,13 +5170,13 @@
           case 'esri':
             // console.log('esri', dataSourceKey)
             // TODO add targets id fn
-            this.clients.esri.fetch(target, dataSource, dataSourceKey);
+            this.clients.esri.fetch(target$1, dataSource, dataSourceKey);
 
             break;
           case 'esri-nearby':
             // console.log('esri-nearby', dataSourceKey)
             // TODO add targets id fn
-            this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
+            this.clients.esri.fetchNearby(target$1, dataSource, dataSourceKey);
             break;
 
           default:
