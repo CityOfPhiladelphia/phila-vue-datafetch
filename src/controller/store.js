@@ -108,6 +108,11 @@ const pvdStore = {
           state.sources[key].data = data;
         }
       },
+      setSourceDataObject(state, payload) {
+        const key = payload.key;
+        const data = payload.data;
+        state.sources[key].targets = data;
+      },
       setSourceDataMore(state, payload) {
         const key = payload.key;
         const data = payload.data;
