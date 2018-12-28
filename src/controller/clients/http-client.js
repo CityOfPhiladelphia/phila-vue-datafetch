@@ -27,7 +27,7 @@ class HttpClient extends BaseClient {
 
   fetch(feature, dataSource, dataSourceKey, targetIdFn) {
     let params = this.evaluateParams(feature, dataSource);
-    // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
     let url = dataSource.url;
     const options = dataSource.options;
     const urlAddition = params.urlAddition;
@@ -56,9 +56,10 @@ class HttpClient extends BaseClient {
       let targetId;
       if (targetIdFn) {
         targetId = targetIdFn(feature);
+        console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
       }
 
-      this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId);
+      this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
     }, response => {
       console.log('fetch json error', response);
       this.dataManager.didFetchData(dataSourceKey, 'error');

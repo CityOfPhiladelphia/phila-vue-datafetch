@@ -99,25 +99,35 @@ class DataManager {
 
 
   fetchData() {
-    // console.log('\nFETCH DATA');
+    console.log('\nFETCH DATA');
     // console.log('-----------');
 
     const geocodeObj = this.store.state.geocode.data;
 
     let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
-    if (!geocodeObj) {
-      dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
-        if (dataSourceKey[1].dependent) {
-          if (dataSourceKey[1].dependent === 'parcel') {
-            return true;
+    let idsOfOwners = "";
+
+    if (this.store.state.lastSearchMethod !== 'owner search') {
+      if (!geocodeObj) {
+        dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
+          if (dataSourceKey[1].dependent) {
+            if (dataSourceKey[1].dependent === 'parcel') {
+              return true;
+            }
           }
-        }
-      })
+        })
+      }
+    } else {
+      for (let owner of this.store.state.ownerSearch.data) {
+        idsOfOwners = idsOfOwners + "'" + owner.properties.opa_account_num + "',";
+      }
+      idsOfOwners = idsOfOwners.substring(0, idsOfOwners.length - 1);
+      idsOfOwners = [idsOfOwners]
     }
-    // console.log('in fetchData, dataSources after filter:', dataSources);
+    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     for (let [dataSourceKey, dataSource] of dataSourceKeys) {
@@ -134,49 +144,61 @@ class DataManager {
       let targetIdFn;
       let targetsFn;
 
+      // if (targetsDef && !targetsDef.runOnce) {
+      //   if (!targetsDef.runOnce) {
       if (targetsDef) {
-        targetsFn = targetsDef.get;
-        targetIdFn = targetsDef.getTargetId;
+        // if (!targetsDef.runOnce) {
+          targetsFn = targetsDef.get;
+          targetIdFn = targetsDef.getTargetId;
 
-        if (typeof targetsFn !== 'function') {
-          throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
-        }
-        targets = targetsFn(state);
+          if (typeof targetsFn !== 'function') {
+            throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
+          }
+          targets = targetsFn(state);
 
-        // check if target objs exist in state.
-        const targetIds = targets.map(targetIdFn);
-        const stateTargets = state.sources[dataSourceKey].targets;
-        const stateTargetIds = Object.keys(stateTargets);
-        // the inclusion check wasn't working because ids were strings in
-        // one set and ints in another, so do this.
-        const stateTargetIdsStr = stateTargetIds.map(String);
-        const shouldCreateTargets = !targetIds.every(targetId => {
-          const targetIdStr = String(targetId);
-          return stateTargetIdsStr.includes(targetIdStr);
-        });
-
-        // if not, create them.
-        if (shouldCreateTargets) {
-          // console.log('should create targets', targetIds, stateTargetIds);
-          this.store.commit('createEmptySourceTargets', {
-            key: dataSourceKey,
-            targetIds
+          // check if target objs exist in state.
+          const targetIds = targets.map(targetIdFn);
+          const stateTargets = state.sources[dataSourceKey].targets;
+          const stateTargetIds = Object.keys(stateTargets);
+          // the inclusion check wasn't working because ids were strings in
+          // one set and ints in another, so do this.
+          const stateTargetIdsStr = stateTargetIds.map(String);
+          const shouldCreateTargets = !targetIds.every(targetId => {
+            const targetIdStr = String(targetId);
+            return stateTargetIdsStr.includes(targetIdStr);
           });
-        }
 
-        if (!Array.isArray(targets)) {
-          throw new Error('Data source targets getter should return an array');
-        }
-      } else {
+          // if not, create them.
+          if (shouldCreateTargets) {
+            // console.log('should create targets', targetIds, stateTargetIds);
+            this.store.commit('createEmptySourceTargets', {
+              key: dataSourceKey,
+              targetIds
+            });
+          }
+
+          if (!Array.isArray(targets)) {
+            throw new Error('Data source targets getter should return an array');
+          }
+        // }
+      } else if (this.store.state.lastSearchMethod !== 'owner search') {
         targets = [geocodeObj];
       }
+      // } else {
+      //   console.log('start of data-manager.js, else is running');
+      //   targets = idsOfOwners;
+      // }
+      if (targetsDef.runOnce) {
+        targets = idsOfOwners;
+      }
 
-      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets);
+      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets);
 
       for (let target of targets) {
+        console.log('target:', target);
         // get id of target
         let targetId;
-        if (targetIdFn) {
+        if (targetIdFn && !targetsDef.runOnce) {
           targetId = targetIdFn(target);
         }
 
@@ -196,6 +218,13 @@ class DataManager {
           setSourceStatusOpts.targetId = targetId;
         }
         this.store.commit('setSourceStatus', setSourceStatusOpts);
+
+        if (targetsDef.runOnce) {
+          console.log('targetsDef.runOnce:', targetsDef.runOnce);
+          targetIdFn = function(test) {
+            return test.parcel_number;
+          }
+        }
 
         // TODO do this for all targets
         switch(type) {
@@ -237,11 +266,10 @@ class DataManager {
     // console.log('end of outer loop');
   }
 
-  didFetchData(key, status, data, targetId) {
-
+  didFetchData(key, status, data, targetId, targetIdFn) {
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
-    // console.log('data-manager DID FETCH DATA:', key, targetId || '', data);
+    console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
     let rows;
     if (stateData) {
       rows = stateData.rows;
@@ -252,6 +280,11 @@ class DataManager {
       stateData = this.assignFeatureIds(stateData, key, targetId);
     } else if (stateData) {
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
+    }
+    console.log('stateData:', stateData);
+
+    if (targetIdFn) {
+      this.turnToTargets(key, stateData, targetIdFn);
     }
 
     // does this data source have targets?
@@ -272,12 +305,29 @@ class DataManager {
     }
 
     // commit
-    this.store.commit('setSourceData', setSourceDataOpts);
+    if (!targetIdFn) {
+      this.store.commit('setSourceData', setSourceDataOpts);
+    }
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
     // console.log('171111 data-manager.js line 319 - didFetchData - is calling fetchData on targetId', targetId, 'key', key);
     this.fetchData();
+  }
+
+  turnToTargets(key, stateData, targetIdFn) {
+    console.log('turnToTargets is running, key:', key, 'stateData:', stateData, 'targetsIdFn:', targetIdFn);
+    // this.store.commit('createEmptySourceTargets')
+    // let newObj = {}
+    for (let theData of stateData) {
+      let newObj = {
+        'key': key,
+        'targetId': theData.parcel_number,
+        'data': theData
+      }
+      this.store.commit('setSourceData', newObj);
+    }
+
   }
 
   resetData() {
@@ -317,8 +367,11 @@ class DataManager {
 
       // reset parcels
       if (this.config.parcels) {
-        this.store.commit('setParcelData');
-        this.store.commit('parcel');
+        this.store.commit('setParcelData', {
+          parcelLayer: 'pwd',
+          multipleAllowed: false,
+          data: null
+        });
       }
 
       if (this.store.state.map) {
@@ -442,16 +495,20 @@ class DataManager {
 
   didOwnerSearch() {
     console.log('callback from owner search is running');
+    this.fetchData();
   }
 
   didTryGeocode(feature) {
     // console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
+      this.store.commit('setLastSearchMethod', 'owner search');
       const input = this.store.state.geocode.input;
+      this.resetGeocode();
       const didOwnerSearch = this.didOwnerSearch.bind(this);
       return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
     } else if (this.store.state.geocode.status === 'success') {
       this.didGeocode(feature);
+      this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);

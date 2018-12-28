@@ -2,12 +2,12 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('axios'), require('moment'), require('proj4'), require('leaflet'), require('esri-leaflet'), require('vue')) :
   typeof define === 'function' && define.amd ? define(['exports', 'axios', 'moment', 'proj4', 'leaflet', 'esri-leaflet', 'vue'], factory) :
   (factory((global.philaVueDatafetch = {}),global.axios,global.moment,global.proj4,global.L,global.L.esri,global.Vue));
-}(this, (function (exports,axios,moment,proj4,L,esriLeaflet,Vue) { 'use strict';
+}(this, (function (exports,axios,moment,proj4,L,esriLeaflet,vue) { 'use strict';
 
   axios = axios && axios.hasOwnProperty('default') ? axios['default'] : axios;
   moment = moment && moment.hasOwnProperty('default') ? moment['default'] : moment;
   proj4 = proj4 && proj4.hasOwnProperty('default') ? proj4['default'] : proj4;
-  Vue = Vue && Vue.hasOwnProperty('default') ? Vue['default'] : Vue;
+  vue = vue && vue.hasOwnProperty('default') ? vue['default'] : vue;
 
   /*! https://mths.be/punycode v1.4.1 by @mathias */
 
@@ -3141,33 +3141,14 @@
     }
   };
 
-  Router.prototype.activeTopicConfig = function activeTopicConfig () {
-    var key = this.store.state.activeTopic;
-    var config;
-
-    // if no active topic, return null
-    if (key) {
-      config = this.config.topics.filter(function (topic) {
-        return topic.key === key;
-      })[0];
-    }
-
-    return config || {};
-  };
-
-  Router.prototype.makeHash = function makeHash (address, topic) {
-    // console.log('make hash', address, topic);
+  Router.prototype.makeHash = function makeHash (address) {
+    // console.log('make hash', address);
 
     // must have an address
     if (!address || address.length === 0) {
       return null;
     }
-
     var hash = "#/" + (encodeURIComponent(address));
-    if (topic) {
-      hash += "/" + topic;
-    }
-
     return hash;
   };
 
@@ -3183,7 +3164,6 @@
   };
 
   Router.prototype.hashChanged = function hashChanged () {
-    // console.log('hashChanged is running, this.store.state.activeTopic:', this.store.state.activeTopic);
     var location = window.location;
     var hash = location.hash;
 
@@ -3206,9 +3186,6 @@
       return;
     }
 
-    var nextAddress = decodeURIComponent(addressComp);
-    var nextTopic;
-
     var modalKeys = this.config.modals || [];
     // console.log('pathComps:', pathComps, 'modalKeys:', modalKeys);
     if (modalKeys.includes(pathComps[0])) {
@@ -3217,19 +3194,8 @@
       return;
     }
 
-    if (pathComps.length > 1) {
-      nextTopic = decodeURIComponent(pathComps[1]);
-    }
-
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
-    }
-
-    this.routeToAddress(nextAddress);
-    if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
-      if (this.config.topics.length) {
-        this.routeToTopic(nextTopic);
-      }
     }
   };
 
@@ -3274,40 +3240,6 @@
     this.store.commit('setDidToggleModal', selectedModal);
   };
 
-  // this gets called when you click a topic header.
-  Router.prototype.routeToTopic = function routeToTopic (nextTopic, target) {
-    // console.log('router.js routeToTopic is running');
-    // check against active topic
-    var prevTopic = this.store.state.activeTopic;
-
-    if (!prevTopic || prevTopic !== nextTopic) {
-      this.store.commit('setActiveTopic', nextTopic);
-
-      if (this.store.state.map) {
-        var prevBasemap = this.store.state.map.basemap || null;
-        var nextTopicConfig = this.config.topics.filter(function (topic) {
-          return topic.key === nextTopic;
-        })[0] || {};
-        var nextBasemap = nextTopicConfig.parcels;
-        var nextImagery = nextTopicConfig.imagery;
-        if (prevBasemap !== nextBasemap) {
-          this.store.commit('setBasemap', nextTopicConfig.parcels);
-        }
-        if (nextImagery) {
-          this.store.commit('setShouldShowImagery', true);
-          this.store.commit('setImagery', nextImagery);
-        }
-      }
-    }
-
-    if (!this.silent) {
-      var address = this.getAddressFromState();
-      var nextHash = this.makeHash(address, nextTopic);
-      var lastHistoryState = this.history.state;
-      this.history.replaceState(lastHistoryState, null, nextHash);
-    }
-  };
-
   Router.prototype.didGeocode = function didGeocode () {
     var geocodeData = this.store.state.geocode.data;
 
@@ -3321,7 +3253,6 @@
       } else if (geocodeData.properties.street_address) {
         address = geocodeData.properties.street_address;
       }
-      var topic = this.store.state.activeTopic;
 
       // REVIEW this is only pushing state when routing is turned on. but maybe we
       // want this to happen all the time, right?
@@ -3330,7 +3261,7 @@
         var nextHistoryState = {
           geocode: geocodeData
         };
-        var nextHash = this.makeHash(address, topic);
+        var nextHash = this.makeHash(address);
         // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
         this.history.pushState(nextHistoryState, null, nextHash);
       }
@@ -4421,7 +4352,7 @@
       var this$1 = this;
 
       var params = this.evaluateParams(feature, dataSource);
-      // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+      console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
       var url = dataSource.url;
       var options = dataSource.options;
       var urlAddition = params.urlAddition;
@@ -4450,9 +4381,10 @@
         var targetId;
         if (targetIdFn) {
           targetId = targetIdFn(feature);
+          console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
         }
 
-        this$1.dataManager.didFetchData(dataSourceKey, 'success', data, targetId);
+        this$1.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
       }, function (response) {
         console.log('fetch json error', response);
         this$1.dataManager.didFetchData(dataSourceKey, 'error');
@@ -5007,28 +4939,12 @@
 
   /* STATE HELPERS */
 
-  // REVIEW maybe the getXXXParcelsById methods should just take an argument
-
-  DataManager.prototype.activeTopicConfig = function activeTopicConfig () {
-    var key = this.store.state.activeTopic;
-    var config;
-
-    // if no active topic, return null
-    if (key) {
-      config = this.config.topics.filter(function (topic) {
-        return topic.key === key;
-      })[0];
-    }
-
-    return config || {};
-  };
 
   /* DATA FETCHING METHODS */
 
   DataManager.prototype.fetchMoreData = function fetchMoreData (dataSourceKey, highestPageRetrieved) {
     var feature$$1 = this.store.state.geocode.data;
     var dataSource = this.config.dataSources[dataSourceKey];
-
     var state = this.store.state;
     var type = dataSource.type;
 
@@ -5062,7 +4978,6 @@
       stateData = this.assignFeatureIds(stateData, key);
     }
 
-    // console.log('stateData', stateData);
     var nextPage = this.store.state.sources[key].data.page + 1;
 
     // put data in state
@@ -5084,37 +4999,41 @@
 
 
   DataManager.prototype.fetchData = function fetchData () {
-    // console.log('\nFETCH DATA');
+    console.log('\nFETCH DATA');
     // console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
 
-    // we always need a good geocode before we can get data, so return
-    // if we don't have one yet.
-    // if (!geocodeObj) {
-    // // console.log('fetch data but no geocode yet, returning');
-    // return;
-    // }
-
     var dataSources = this.config.dataSources || {};
     var dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
-    if (!geocodeObj) {
-      dataSourceKeys = dataSourceKeys.filter(function (dataSourceKey) {
-        if (dataSourceKey[1].dependent) {
-          if (dataSourceKey[1].dependent === 'parcel') {
-            return true;
+    var idsOfOwners = "";
+
+    if (this.store.state.lastSearchMethod !== 'owner search') {
+      if (!geocodeObj) {
+        dataSourceKeys = dataSourceKeys.filter(function (dataSourceKey) {
+          if (dataSourceKey[1].dependent) {
+            if (dataSourceKey[1].dependent === 'parcel') {
+              return true;
+            }
           }
-        }
-      });
+        });
+      }
+    } else {
+      for (var i = 0, list = this.store.state.ownerSearch.data; i < list.length; i += 1) {
+        var owner = list[i];
+
+          idsOfOwners = idsOfOwners + "'" + owner.properties.opa_account_num + "',";
+      }
+      idsOfOwners = idsOfOwners.substring(0, idsOfOwners.length - 1);
+      idsOfOwners = [idsOfOwners];
     }
-    // console.log('in fetchData, dataSources after filter:', dataSources);
+    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
-    // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
-    for (var i$1 = 0, list$1 = dataSourceKeys; i$1 < list$1.length; i$1 += 1) {
-      var ref = list$1[i$1];
+    for (var i$2 = 0, list$2 = dataSourceKeys; i$2 < list$2.length; i$2 += 1) {
+      var ref = list$2[i$2];
         var dataSourceKey = ref[0];
         var dataSource = ref[1];
 
@@ -5131,55 +5050,65 @@
       var targetIdFn = (void 0);
       var targetsFn = (void 0);
 
+      // if (targetsDef && !targetsDef.runOnce) {
+      // if (!targetsDef.runOnce) {
       if (targetsDef) {
-        targetsFn = targetsDef.get;
-        targetIdFn = targetsDef.getTargetId;
+        // if (!targetsDef.runOnce) {
+          targetsFn = targetsDef.get;
+          targetIdFn = targetsDef.getTargetId;
 
-        if (typeof targetsFn !== 'function') {
-          throw new Error(("Invalid targets getter for data source '" + dataSourceKey + "'"));
-        }
-        targets = targetsFn(state);
+          if (typeof targetsFn !== 'function') {
+            throw new Error(("Invalid targets getter for data source '" + dataSourceKey + "'"));
+          }
+          targets = targetsFn(state);
 
-        // check if target objs exist in state.
-        var targetIds = targets.map(targetIdFn);
-        var stateTargets = state.sources[dataSourceKey].targets;
-        var stateTargetIds = Object.keys(stateTargets);
-        // the inclusion check wasn't working because ids were strings in
-        // one set and ints in another, so do this.
-        var stateTargetIdsStr = stateTargetIds.map(String);
-        var shouldCreateTargets = !targetIds.every(function (targetId) {
-          var targetIdStr = String(targetId);
-          return stateTargetIdsStr.includes(targetIdStr);
-        });
-
-        // if not, create them.
-        if (shouldCreateTargets) {
-          // console.log('should create targets', targetIds, stateTargetIds);
-          this.store.commit('createEmptySourceTargets', {
-            key: dataSourceKey,
-            targetIds: targetIds
+          // check if target objs exist in state.
+          var targetIds = targets.map(targetIdFn);
+          var stateTargets = state.sources[dataSourceKey].targets;
+          var stateTargetIds = Object.keys(stateTargets);
+          // the inclusion check wasn't working because ids were strings in
+          // one set and ints in another, so do this.
+          var stateTargetIdsStr = stateTargetIds.map(String);
+          var shouldCreateTargets = !targetIds.every(function (targetId) {
+            var targetIdStr = String(targetId);
+            return stateTargetIdsStr.includes(targetIdStr);
           });
-        }
 
-        if (!Array.isArray(targets)) {
-          throw new Error('Data source targets getter should return an array');
-        }
-      } else {
+          // if not, create them.
+          if (shouldCreateTargets) {
+            // console.log('should create targets', targetIds, stateTargetIds);
+            this.store.commit('createEmptySourceTargets', {
+              key: dataSourceKey,
+              targetIds: targetIds
+            });
+          }
+
+          if (!Array.isArray(targets)) {
+            throw new Error('Data source targets getter should return an array');
+          }
+        // }
+      } else if (this.store.state.lastSearchMethod !== 'owner search') {
         targets = [geocodeObj];
       }
+      // } else {
+      // console.log('start of data-manager.js, else is running');
+      // targets = idsOfOwners;
+      // }
+      if (targetsDef.runOnce) {
+        targets = idsOfOwners;
+      }
 
-      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets);
+      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets);
 
-      for (var i = 0, list = targets; i < list.length; i += 1) {
+      for (var i$1 = 0, list$1 = targets; i$1 < list$1.length; i$1 += 1) {
+        var target = list$1[i$1];
+
+          console.log('target:', target);
         // get id of target
-        var target = list[i];
-
-          var targetId = (void 0);
-        if (targetIdFn) {
+        var targetId = (void 0);
+        if (targetIdFn && !targetsDef.runOnce) {
           targetId = targetIdFn(target);
         }
-
-        // targetId && console.log('target:', targetId);
 
         // check if it's ready
         var isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
@@ -5197,6 +5126,13 @@
           setSourceStatusOpts.targetId = targetId;
         }
         this.store.commit('setSourceStatus', setSourceStatusOpts);
+
+        if (targetsDef.runOnce) {
+          console.log('targetsDef.runOnce:', targetsDef.runOnce);
+          targetIdFn = function(test) {
+            return test.parcel_number;
+          };
+        }
 
         // TODO do this for all targets
         switch(type) {
@@ -5220,7 +5156,6 @@
             // console.log('esri', dataSourceKey)
             // TODO add targets id fn
             this.clients.esri.fetch(target, dataSource, dataSourceKey);
-            break;
 
             break;
           case 'esri-nearby':
@@ -5239,11 +5174,10 @@
     // console.log('end of outer loop');
   };
 
-  DataManager.prototype.didFetchData = function didFetchData (key, status, data, targetId) {
-
+  DataManager.prototype.didFetchData = function didFetchData (key, status, data, targetId, targetIdFn) {
     var dataOrNull = status === 'error' ? null : data;
     var stateData = dataOrNull;
-    // console.log('data-manager DID FETCH DATA:', key, targetId || '', data);
+    console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
     var rows;
     if (stateData) {
       rows = stateData.rows;
@@ -5254,6 +5188,11 @@
       stateData = this.assignFeatureIds(stateData, key, targetId);
     } else if (stateData) {
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
+    }
+    console.log('stateData:', stateData);
+
+    if (targetIdFn) {
+      this.turnToTargets(key, stateData, targetIdFn);
     }
 
     // does this data source have targets?
@@ -5274,12 +5213,31 @@
     }
 
     // commit
-    this.store.commit('setSourceData', setSourceDataOpts);
+    if (!targetIdFn) {
+      this.store.commit('setSourceData', setSourceDataOpts);
+    }
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
     // console.log('171111 data-manager.js line 319 - didFetchData - is calling fetchData on targetId', targetId, 'key', key);
     this.fetchData();
+  };
+
+  DataManager.prototype.turnToTargets = function turnToTargets (key, stateData, targetIdFn) {
+    console.log('turnToTargets is running, key:', key, 'stateData:', stateData, 'targetsIdFn:', targetIdFn);
+    // this.store.commit('createEmptySourceTargets')
+    // let newObj = {}
+    for (var i = 0, list = stateData; i < list.length; i += 1) {
+      var theData = list[i];
+
+        var newObj = {
+        'key': key,
+        'targetId': theData.parcel_number,
+        'data': theData
+      };
+      this.store.commit('setSourceData', newObj);
+    }
+
   };
 
   DataManager.prototype.resetData = function resetData () {
@@ -5321,20 +5279,12 @@
 
       // reset parcels
       if (this.config.parcels) {
-        this.store.commit('setParcelData');
-        this.store.commit('parcel');
+        this.store.commit('setParcelData', {
+          parcelLayer: 'pwd',
+          multipleAllowed: false,
+          data: null
+        });
       }
-
-      // reset other topic and map state
-      if (this.config.topics.length) {
-        if (this.config.defaultTopic || this.config.defaultTopic === null) {
-          this.store.commit('setActiveTopic', this.config.defaultTopic);
-        } else {
-          // console.log('about to setActiveTopic, config:', this.config.topics[0].key);
-          this.store.commit('setActiveTopic', this.config.topics[0].key);
-        }
-      }
-
 
       if (this.store.state.map) {
         this.store.commit('setBasemap', 'pwd');
@@ -5463,16 +5413,20 @@
 
   DataManager.prototype.didOwnerSearch = function didOwnerSearch () {
     console.log('callback from owner search is running');
+    this.fetchData();
   };
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
     // console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
+      this.store.commit('setLastSearchMethod', 'owner search');
       var input = this.store.state.geocode.input;
+      this.resetGeocode();
       var didOwnerSearch = this.didOwnerSearch.bind(this);
       return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
     } else if (this.store.state.geocode.status === 'success') {
       this.didGeocode(feature$$1);
+      this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
@@ -5480,9 +5434,7 @@
   };
 
   DataManager.prototype.didGeocode = function didGeocode (feature$$1) {
-      var assign, assign$1;
-
-    // console.log('DataManager.didGeocode:', feature);
+    console.log('DataManager.didGeocode:', feature$$1);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {
@@ -5492,84 +5444,6 @@
       return
     }
 
-    var parcels = this.store.state.parcels;
-    var lastSearchMethod = this.store.state.lastSearchMethod;
-    var configForParcels = this.config.parcels;
-    var parcelLayers = Object.keys(this.config.parcels || {});
-
-    // if it is a dor parcel query, and the geocode fails, coordinates can still be used
-    // to get dor parcels which are not in ais
-    // set coords to the ais coords OR the click if there is no ais result
-    var coords, lat, lng, latlng;
-    // if geocode fails
-    if (!feature$$1) {
-      console.log('didGeocode - no geom');
-      if (lastSearchMethod === 'reverseGeocode') {
-        var clickCoords = this.store.state.clickCoords;
-        coords = [clickCoords.lng, clickCoords.lat];
-        (assign = coords, lng = assign[0], lat = assign[1]);
-        latlng = L.latLng(lat, lng);
-      }
-    // if geocode succeeds
-    } else {
-      // console.log('didGeocode - GEOM', feature);
-      coords = feature$$1.geometry.coordinates;
-      (assign$1 = coords, lng = assign$1[0], lat = assign$1[1]);
-      latlng = L.latLng(lat, lng);
-    }
-
-    // all of this happens whether geocode failed or succeeded
-    // search box or onload - get parcels by id
-    // (unless it fails and you are allowed to get them by LatLng on failure)
-    if (lastSearchMethod === 'geocode') {
-      if (feature$$1) {
-
-        var configForParcelLayer = this.config.parcels[parcelLayers];
-        var parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder;
-        var parcelId = feature$$1.properties[parcelIdInGeocoder];
-        if (parcelId && parcelId.length > 0) {
-          this.getParcelsById(parcelId, parcelLayers);
-        } else {
-          if (configForParcelLayer.getByLatLngIfIdFails) {
-            // console.log(parcelLayer, 'Id failed - had to get by LatLng')
-            console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayers);
-            this.getParcelsByLatLng(latlng, parcelLayers);
-          }
-        }
-      }
-    }
-
-    // console.log('in didGeocode, activeTopicConfig:', this.activeTopicConfig());
-    var activeTopicConfig = this.activeTopicConfig();
-    // console.log('activeTopicConfig.zoomToShape:', activeTopicConfig.zoomToShape);
-    // const geocodeData = this.store.state.geocode.data || null;
-    // const geocodeProperties = geocodeData.properties || null;
-    // const newShape = geocodeProperties.opa_account_num || null;
-
-    // only recenter the map on geocode
-    if (lastSearchMethod === 'geocode' && this.store.state.geocode.status !== 'error') {
-      if (!activeTopicConfig.zoomToShape) {
-        // console.log('NO ZOOM TO SHAPE - NOW IT SHOULD NOT BE ZOOMING TO THE SHAPE ON GEOCODE');
-        if (this.store.state.map) {
-          this.store.commit('setMapCenter', coords);
-          this.store.commit('setMapZoom', 19);
-        }
-      } else {
-        // console.log('ZOOM TO SHAPE - NOW IT SHOULD BE ZOOMING TO THE SHAPE ON GEOCODE');
-        // this.store.commit('setMapBoundsBasedOnShape', newShape);
-      }
-
-    } else if (activeTopicConfig.zoomToShape && lastSearchMethod === 'reverseGeocode' && this.store.state.geocode.status !== 'error') {
-      // console.log('ZOOM TO SHAPE - NOW IT SHOULD BE ZOOMING TO THE SHAPE ON REVERSE GEOCODE');
-      // this.store.commit('setMapBoundsBasedOnShape', newShape);
-    }
-
-    // reset data only when not a rev geocode second attempt
-    if (lastSearchMethod !== 'reverseGeocode-secondAttempt') {
-      this.resetData();
-    }
-
-    // as long as it is not an intersection, fetch new data
     if (feature$$1) {
       if (feature$$1.street_address) {
         return;
@@ -5838,57 +5712,8 @@
     this.store.commit('setGeocodeInput', null);
 
     var parcels = this.store.state.parcels;
-    console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+    // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
-  };
-
-  // util for making sure topic headers are visible after clicking on one
-  // adapted from: https://stackoverflow.com/questions/123999/how-to-tell-if-a-dom-element-is-visible-in-the-current-viewport/7557433#7557433
-  // REVIEW this is returning true even when the topic header isn't visible,
-  // probably because of a timing issue. it's good enough without this check for
-  // now. commenting out.
-  // isElementInViewport(el) {
-  // const rect = el.getBoundingClientRect();
-  //
-  // // check visibility of each side of bounding rect
-  // const topVisible = rect.top >= 0;
-  // const leftVisible = rect.left >= 0;
-  // const bottomVisible = rect.bottom <= (
-  //   window.innerHeight || document.documentElement.clientHeight
-  // );
-  // const rightVisible = rect.right <= (
-  //   window.innerWidth || document.documentElement.clientWidth
-  // );
-  //
-  // return (topVisible && leftVisible && bottomVisible && rightVisible);
-  // }
-
-  Controller.prototype.handleTopicHeaderClick = function handleTopicHeaderClick (topic) {
-    // console.log('Controller.handleTopicHeaderClick', topic);
-
-    this.router.routeToTopic(topic);//.then(function(targetExists) {
-
-    /*
-    scroll to top of topic header
-    */
-
-    // get element
-    var els = document.querySelectorAll(("[data-topic-key='" + topic + "']"));
-    var el = els.length === 1 && els[0];
-
-    // handle null el - this shouldn't happen, but just in case
-    if (!el) { return; }
-
-    Vue.nextTick(function () {
-      // REVIEW this check is returning true even when the header el isn't
-      // really visible, probbaly because of a timing issue. it works well
-      // enough without it. commenting out for now.
-      // const visible = this.isElementInViewport(el);
-
-      // if (!visible) {
-        el.scrollIntoView();
-      // }
-    });
   };
 
   Controller.prototype.goToDefaultAddress = function goToDefaultAddress (address) {
@@ -5896,10 +5721,7 @@
   };
 
   var initialState = {
-    // this gets set to the parcel layer for the default (aka first) topic in
-    // DataManager.resetGeocode, which is called by Router.hashChanged on app
-    // load.
-    activeTopic: '',
+
     clickCoords: null,
     // should addresscandidate be here if neither pvm or pvc were included?
     shouldShowAddressCandidateList: false,
@@ -5920,12 +5742,13 @@
 
   var pvdStore = {
     createSources: function createSources(config) {
-      // console.log('createSources is running, config:', config);
+      console.log('createSources is running, config:', config);
       var sourceKeys = Object.keys(config.dataSources || {});
       var sources = sourceKeys.reduce(function (o, key) {
         var val;
         // if the source has targets, just set it to be an empty object
         if (config.dataSources[key].targets) {
+          console.log('in config.dataSources[key].targets:', config.dataSources[key].targets);
           val = {
             targets: {}
           };
@@ -5958,9 +5781,6 @@
     store: {
       state: initialState,
       mutations: {
-        setActiveTopic: function setActiveTopic(state, payload) {
-          state.activeTopic = payload;
-        },
         setClickCoords: function setClickCoords(state, payload) {
           state.clickCoords = payload;
         },
@@ -6050,7 +5870,7 @@
           state.map.zoom = payload;
         },
         setParcelData: function setParcelData(state, payload) {
-          console.log('payload :', payload);
+          // console.log('payload :', payload);
           var ref = payload || {};
           var data = ref.data;
           // console.log('store setParcelData parcelLayer:', parcelLayer, 'data:', data, 'status:', status, 'activeParcel:', activeParcel);
@@ -6096,10 +5916,10 @@
     }
   };
 
-  function controllerMixin(Vue$$1, opts) {
+  function controllerMixin(Vue, opts) {
     var controller = new Controller(opts);
 
-    Vue$$1.mixin({
+    Vue.mixin({
       created: function created() {
         this.$controller = controller;
       }

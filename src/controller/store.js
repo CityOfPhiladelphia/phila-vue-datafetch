@@ -22,12 +22,13 @@ const initialState = {
 
 const pvdStore = {
   createSources(config) {
-    // console.log('createSources is running, config:', config);
+    console.log('createSources is running, config:', config);
     const sourceKeys = Object.keys(config.dataSources || {});
     const sources = sourceKeys.reduce((o, key) => {
       let val;
       // if the source has targets, just set it to be an empty object
       if (config.dataSources[key].targets) {
+        console.log('in config.dataSources[key].targets:', config.dataSources[key].targets);
         val = {
           targets: {}
         };
