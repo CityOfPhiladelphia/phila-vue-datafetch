@@ -14,6 +14,7 @@ import area from '@turf/area';
 import {
   GeocodeClient,
   OwnerSearchClient,
+  ShapeSearchClient,
   HttpClient,
   EsriClient
 } from './clients';
@@ -33,6 +34,7 @@ class DataManager {
     const clientOpts = { config, store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
+    this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
   }
@@ -125,7 +127,7 @@ class DataManager {
         return stateTargetIdsStr.includes(targetIdStr);
       });
     }
-    console.log('shouldCreateTargets:', shouldCreateTargets);
+    // console.log('shouldCreateTargets:', shouldCreateTargets);
 
     // if not, create them.
     if (shouldCreateTargets) {
@@ -154,27 +156,28 @@ class DataManager {
   }
 
   fetchData() {
-    // console.log('\nFETCH DATA');
-    // console.log('-----------');
+    console.log('\nFETCH DATA');
+    console.log('-----------');
 
     const geocodeObj = this.store.state.geocode.data;
     const ownerSearchObj = this.store.state.ownerSearch.data;
+    console.log( "ownerSearchObj: ", ownerSearchObj, )
 
     let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
-    if (this.store.state.lastSearchMethod !== 'owner search') {
-      if (!geocodeObj) {
-        dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
-          if (dataSourceKey[1].dependent) {
-            if (dataSourceKey[1].dependent === 'parcel') {
-              return true;
-            }
-          }
-        })
-      }
-    }
+    // if (this.store.state.lastSearchMethod !== 'owner search') {
+    //   if (!geocodeObj) {
+    //     dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
+    //       if (dataSourceKey[1].dependent) {
+    //         if (dataSourceKey[1].dependent === 'parcel') {
+    //           return true;
+    //         }
+    //       }
+    //     })
+    //   }
+    // }
     // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
@@ -191,6 +194,7 @@ class DataManager {
       let targetsFn;
 
       // targets may cause a looped axios call, or may just call one once and get multiple results
+      console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
@@ -199,6 +203,7 @@ class DataManager {
         targets = [geocodeObj];
       } else {
         targets = [ownerSearchObj][0];
+        console.log("targets: ", targets)
       }
 
       // console.log('targets:', targets);
@@ -265,6 +270,15 @@ class DataManager {
             // TODO add targets id fn
             this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
             break;
+
+          // case 'esri-spatial':
+          //
+          //   const url = this.config.map.featureLayers.pwdParcels.url;
+          //   // console.log('esri-nearby', dataSourceKey)
+          //   // TODO add targets id fn
+          //   this.clients.esri.fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {});
+          //   fetchBySpatialQuery(dataSourceKey, url, relationship, geom, parameters, options)
+          //   break;
 
           default:
             throw `Unknown data source type: ${type}`;
@@ -495,41 +509,53 @@ class DataManager {
   }
 
   /* GEOCODING */
-  geocode(input, category) {
-    // console.log('data-manager geocode is running, input:', input, 'category:', category);
-    if (category === 'address') {
-      const didGeocode = this.didGeocode.bind(this);
-      return this.clients.geocode.fetch(input).then(didGeocode);
-    } else if (category === 'owner') {
-      // console.log('category is owner');
-      const didOwnerSearch = this.didOwnerSearch.bind(this);
-      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
-    } else if (category == null) {
-      // console.log('no category');
-      const didTryGeocode = this.didTryGeocode.bind(this);
-      const test = this.clients.geocode.fetch(input).then(didTryGeocode);
-    }
+  geocode(input) {
+    console.log('data-manager geocode is running, input:', input);
+    console.log('no category');
+    const didTryGeocode = this.didTryGeocode.bind(this);
+    const test = this.clients.geocode.fetch(input).then(didTryGeocode);
   }
 
   didOwnerSearch() {
     this.fetchData();
   }
 
+  didShapeSearch() {
+    console.log("didShapeSearch - Will set this up to fetch data");
+    // this.fetchData();
+  }
+
   didTryGeocode(feature) {
-    // console.log('didTryGeocode is running, feature:', feature);
+    console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
-      this.store.commit('setLastSearchMethod', 'owner search');
-      const input = this.store.state.geocode.input;
-      this.resetGeocode();
-      const didOwnerSearch = this.didOwnerSearch.bind(this);
-      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+      console.log('didTryGeocode is running, error');
+      if(this.store.state.drawShape !== null ) {
+        this.store.commit('setLastSearchMethod', 'shape search');
+        const input = [];
+        const didShapeSearch = this.didShapeSearch.bind(this);
+        return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
+      } else {
+        this.store.commit('setLastSearchMethod', 'owner search');
+        const input = this.store.state.geocode.input;
+        this.resetGeocode();
+        const didOwnerSearch = this.didOwnerSearch.bind(this);
+        return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+      }
     } else if (this.store.state.geocode.status === 'success') {
+      console.log('didTryGeocode is running, success');
       this.resetData();
       this.didGeocode(feature);
       this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
+    } else if (this.store.state.geocode.status === null) {
+      console.log('didTryGeocode is running, feature:', feature);
+      this.store.commit('setLastSearchMethod', 'owner search');
+      const input = this.store.state.geocode.input;
+      this.resetGeocode();
+      // const didOwnerSearch = this.didOwnerSearch.bind(this);
+      return this.clients.shapeSearch.fetch(input);
     }
   }
 
@@ -575,7 +601,9 @@ class DataManager {
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const parcelQuery = Query({ url });
+    console.log(parcelQuery);
     parcelQuery.contains(latLng);
+    console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
     const test = 5;
     parcelQuery.run((function(error, featureCollection, response) {
         this.didGetParcels(error, featureCollection, response, parcelLayer, fetch);
@@ -583,8 +611,25 @@ class DataManager {
     )
   }
 
+  getParcelsByShape(latlng, parcelLayer) {
+
+    console.log("Testing DrawnShape Geocoder", latlng._latlngs)
+
+    const latLng = L.polygon(latlng._latlngs, latlng.options);
+    const url = this.config.map.featureLayers.pwdParcels.url;
+
+    const parcelQuery = Query({ url });
+    parcelQuery.intersects(latLng);
+
+    parcelQuery.run((function(error, featureCollection, response) {
+        this.didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch);
+      }).bind(this)
+    );
+
+  }
+
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -657,9 +702,11 @@ class DataManager {
       const latlng = L.latLng(lat, lng);
       const props = feature.properties || {};
       const id = props[geocodeField];
+      console.log("id", id);
+      console.log('Line 701 data-manager.js didGetParcels - if shouldGeocode is running through router');
       if (id) this.controller.router.routeToAddress(id);
     } else {
-      // console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
+      console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
       if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt') {
@@ -667,6 +714,34 @@ class DataManager {
         this.fetchData();
       }
     }
+  }
+
+  didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {
+
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+
+    const configForParcelLayer = this.config.parcels.pwd;
+    const geocodeField = configForParcelLayer.geocodeField;
+    const otherParcelLayers = Object.keys(this.config.parcels || {});
+    otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
+    const lastSearchMethod = this.store.state.lastSearchMethod;
+
+    console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+
+    if (error) {
+      if (configForParcelLayer.clearStateOnError) {
+      }
+      return;}
+      if (!featureCollection) {return;}
+
+      const features = featureCollection.features;
+
+      if (features.length === 0) { return;}
+      // at this point there is definitely a feature or features - put it in state
+      this.setParcelsInState(parcelLayer, features);
+      this.geocode(features);
+
+      // this.fetchData();
   }
 
   getDistances(coords) {

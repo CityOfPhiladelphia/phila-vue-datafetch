@@ -3200,14 +3200,14 @@
   };
 
   Router.prototype.routeToAddress = function routeToAddress (nextAddress, searchCategory) {
-    // console.log('Router.routeToAddress', nextAddress);
+    console.log('Router.routeToAddress', nextAddress);
     if (nextAddress) {
       // check against current address
       var prevAddress = this.getAddressFromState();
 
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
-        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
+        console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
         this.dataManager.geocode(nextAddress, searchCategory);
         // this.dataManager.geocode(nextAddress, 'address')
                         // .then(this.didGeocode.bind(this));
@@ -4211,6 +4211,7 @@
       var store = this.store;
       var data = response.data;
       var url = response.config.url;
+      console.log('geocode search success', response.config.url);
 
       // TODO handle multiple results
 
@@ -4337,6 +4338,50 @@
     };
 
     return OwnerSearchClient;
+  }(BaseClient));
+
+  // the high-level purpose of this is: take a person, search AIS for them, and put
+  // the result in state.
+  var ShapeSearchClient = /*@__PURE__*/(function (BaseClient$$1) {
+    function ShapeSearchClient () {
+      BaseClient$$1.apply(this, arguments);
+    }
+
+    if ( BaseClient$$1 ) ShapeSearchClient.__proto__ = BaseClient$$1;
+    ShapeSearchClient.prototype = Object.create( BaseClient$$1 && BaseClient$$1.prototype );
+    ShapeSearchClient.prototype.constructor = ShapeSearchClient;
+
+    ShapeSearchClient.prototype.fetch = function fetch (input) {
+      console.log('owner search client fetch', input);
+
+      var store = this.store;
+
+      var shapeSearchConfig = this.config.shapeSearch;
+      // console.log('owner search-client, ownerSearchConfig:', ownerSearchConfig);
+      var url = shapeSearchConfig.url();
+      var params = shapeSearchConfig.options.params;
+      console.log('shape search-client: url, params', url, params);
+      var success = this.success.bind(this);
+      var error = this.error.bind(this);
+
+      // return a promise that can accept further chaining
+      console.log('shape search-client: axios', axios.get(url, { params: params }));
+      return axios.get(url, { params: params })
+        .then(success)
+        .catch(error);
+    };
+
+    ShapeSearchClient.prototype.success = function success (success$1) {
+      console.log('owner search success', success$1);
+        return
+      };
+
+    ShapeSearchClient.prototype.error = function error (error$1) {
+      console.log('owner search error', error$1);
+      return
+    };
+
+    return ShapeSearchClient;
   }(BaseClient));
 
   var HttpClient = /*@__PURE__*/(function (BaseClient$$1) {
@@ -4933,6 +4978,7 @@
     var clientOpts = { config: config, store: store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
+    this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
   };
@@ -5025,7 +5071,7 @@
         return stateTargetIdsStr.includes(targetIdStr);
       });
     }
-    console.log('shouldCreateTargets:', shouldCreateTargets);
+    // console.log('shouldCreateTargets:', shouldCreateTargets);
 
     // if not, create them.
     if (shouldCreateTargets) {
@@ -5056,27 +5102,28 @@
   };
 
   DataManager.prototype.fetchData = function fetchData () {
-    // console.log('\nFETCH DATA');
-    // console.log('-----------');
+    console.log('\nFETCH DATA');
+    console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
+    console.log( "ownerSearchObj: ", ownerSearchObj );
 
     var dataSources = this.config.dataSources || {};
     var dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
-    if (this.store.state.lastSearchMethod !== 'owner search') {
-      if (!geocodeObj) {
-        dataSourceKeys = dataSourceKeys.filter(function (dataSourceKey) {
-          if (dataSourceKey[1].dependent) {
-            if (dataSourceKey[1].dependent === 'parcel') {
-              return true;
-            }
-          }
-        });
-      }
-    }
+    // if (this.store.state.lastSearchMethod !== 'owner search') {
+    // if (!geocodeObj) {
+    //   dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
+    //     if (dataSourceKey[1].dependent) {
+    //       if (dataSourceKey[1].dependent === 'parcel') {
+    //         return true;
+    //       }
+    //     }
+    //   })
+    // }
+    // }
     // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
@@ -5097,6 +5144,7 @@
       var targetsFn = (void 0);
 
       // targets may cause a looped axios call, or may just call one once and get multiple results
+      console.log("targetsDef: ", targetsDef);
       if (targetsDef) {
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
@@ -5105,6 +5153,7 @@
         targets = [geocodeObj];
       } else {
         targets = [ownerSearchObj][0];
+        console.log("targets: ", targets);
       }
 
       // console.log('targets:', targets);
@@ -5173,6 +5222,15 @@
             // TODO add targets id fn
             this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
             break;
+
+          // case 'esri-spatial':
+          //
+          // const url = this.config.map.featureLayers.pwdParcels.url;
+          // // console.log('esri-nearby', dataSourceKey)
+          // // TODO add targets id fn
+          // this.clients.esri.fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {});
+          // fetchBySpatialQuery(dataSourceKey, url, relationship, geom, parameters, options)
+          // break;
 
           default:
             throw ("Unknown data source type: " + type);
@@ -5413,41 +5471,53 @@
   };
 
   /* GEOCODING */
-  DataManager.prototype.geocode = function geocode (input, category) {
-    // console.log('data-manager geocode is running, input:', input, 'category:', category);
-    if (category === 'address') {
-      var didGeocode = this.didGeocode.bind(this);
-      return this.clients.geocode.fetch(input).then(didGeocode);
-    } else if (category === 'owner') {
-      // console.log('category is owner');
-      var didOwnerSearch = this.didOwnerSearch.bind(this);
-      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
-    } else if (category == null) {
-      // console.log('no category');
-      var didTryGeocode = this.didTryGeocode.bind(this);
-      var test = this.clients.geocode.fetch(input).then(didTryGeocode);
-    }
+  DataManager.prototype.geocode = function geocode (input) {
+    console.log('data-manager geocode is running, input:', input);
+    console.log('no category');
+    var didTryGeocode = this.didTryGeocode.bind(this);
+    var test = this.clients.geocode.fetch(input).then(didTryGeocode);
   };
 
   DataManager.prototype.didOwnerSearch = function didOwnerSearch () {
     this.fetchData();
   };
 
+  DataManager.prototype.didShapeSearch = function didShapeSearch () {
+    console.log("didShapeSearch - Will set this up to fetch data");
+    // this.fetchData();
+  };
+
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
-    // console.log('didTryGeocode is running, feature:', feature);
+    console.log('didTryGeocode is running, feature:', feature$$1);
     if (this.store.state.geocode.status === 'error') {
-      this.store.commit('setLastSearchMethod', 'owner search');
-      var input = this.store.state.geocode.input;
-      this.resetGeocode();
-      var didOwnerSearch = this.didOwnerSearch.bind(this);
-      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+      console.log('didTryGeocode is running, error');
+      if(this.store.state.drawShape !== null ) {
+        this.store.commit('setLastSearchMethod', 'shape search');
+        var input = [];
+        var didShapeSearch = this.didShapeSearch.bind(this);
+        return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
+      } else {
+        this.store.commit('setLastSearchMethod', 'owner search');
+        var input$1 = this.store.state.geocode.input;
+        this.resetGeocode();
+        var didOwnerSearch = this.didOwnerSearch.bind(this);
+        return this.clients.ownerSearch.fetch(input$1).then(didOwnerSearch);
+      }
     } else if (this.store.state.geocode.status === 'success') {
+      console.log('didTryGeocode is running, success');
       this.resetData();
       this.didGeocode(feature$$1);
       this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
+    } else if (this.store.state.geocode.status === null) {
+      console.log('didTryGeocode is running, feature:', feature$$1);
+      this.store.commit('setLastSearchMethod', 'owner search');
+      var input$2 = this.store.state.geocode.input;
+      this.resetGeocode();
+      // const didOwnerSearch = this.didOwnerSearch.bind(this);
+      return this.clients.shapeSearch.fetch(input$2);
     }
   };
 
@@ -5493,15 +5563,34 @@
     var latLng = L.latLng(latlng.lat, latlng.lng);
     var url = this.config.map.featureLayers.pwdParcels.url;
     var parcelQuery = esriLeaflet.query({ url: url });
+    console.log(parcelQuery);
     parcelQuery.contains(latLng);
+    console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
     parcelQuery.run((function(error, featureCollection$$1, response) {
         this.didGetParcels(error, featureCollection$$1, response, parcelLayer, fetch);
       }).bind(this)
     );
   };
 
+  DataManager.prototype.getParcelsByShape = function getParcelsByShape (latlng, parcelLayer) {
+
+    console.log("Testing DrawnShape Geocoder", latlng._latlngs);
+
+    var latLng = L.polygon(latlng._latlngs, latlng.options);
+    var url = this.config.map.featureLayers.pwdParcels.url;
+
+    var parcelQuery = esriLeaflet.query({ url: url });
+    parcelQuery.intersects(latLng);
+
+    parcelQuery.run((function(error, featureCollection$$1, response) {
+        this.didGetParcelsByShape(error, featureCollection$$1, response, parcelLayer, fetch);
+      }).bind(this)
+    );
+
+  };
+
   DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     var configForParcelLayer = this.config.parcels.pwd;
     var geocodeField = configForParcelLayer.geocodeField;
     var otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -5578,9 +5667,11 @@
       var latlng = L.latLng(lat, lng);
       var props = feature$$1.properties || {};
       var id = props[geocodeField];
+      console.log("id", id);
+      console.log('Line 701 data-manager.js didGetParcels - if shouldGeocode is running through router');
       if (id) { this.controller.router.routeToAddress(id); }
     } else {
-      // console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
+      console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
       if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt') {
@@ -5588,6 +5679,34 @@
         this.fetchData();
       }
     }
+  };
+
+  DataManager.prototype.didGetParcelsByShape = function didGetParcelsByShape (error, featureCollection$$1, response, parcelLayer, fetch) {
+
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+
+    var configForParcelLayer = this.config.parcels.pwd;
+    var geocodeField = configForParcelLayer.geocodeField;
+    var otherParcelLayers = Object.keys(this.config.parcels || {});
+    otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
+    var lastSearchMethod = this.store.state.lastSearchMethod;
+
+    console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+
+    if (error) {
+      if (configForParcelLayer.clearStateOnError) {
+      }
+      return;}
+      if (!featureCollection$$1) {return;}
+
+      var features = featureCollection$$1.features;
+
+      if (features.length === 0) { return;}
+      // at this point there is definitely a feature or features - put it in state
+      this.setParcelsInState(parcelLayer, features);
+      this.geocode(features);
+
+      // this.fetchData();
   };
 
   DataManager.prototype.getDistances = function getDistances (coords) {
@@ -5666,26 +5785,13 @@
     }
   };
 
-  Controller.prototype.handleConfigurableInputSubmit = function handleConfigurableInputSubmit (value, searchCategory) {
-    console.log('controller handleConfigurableInputSubmit is running, value:', value, 'searchCategory:', searchCategory);
-    if (searchCategory === 'address') {
-      this.handleSearchFormSubmit(value, searchCategory);
-    } else if (searchCategory === 'owner') {
-      console.log('searchCategory is owner');
-      this.handleSearchFormSubmit(value, searchCategory);
-    }
-  };
-
   Controller.prototype.handleSearchFormSubmit = function handleSearchFormSubmit (value, searchCategory) {
     var input = value;
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
-    if (!searchCategory || searchCategory === 'address') {
-      this.store.commit('setGeocodeInput', input);
-    } else if (searchCategory === 'owner') {
-      this.store.commit('setOwnerSearchInput', input);
-    }
+    this.store.commit('setGeocodeInput', input);
+
     this.store.commit('setShouldShowAddressCandidateList', false);
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -5705,12 +5811,7 @@
 
     // tell router
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
-    if (!searchCategory || searchCategory === 'address') {
-      this.router.routeToAddress(input, searchCategory);
-    } else if (searchCategory === 'owner') {
-      console.log('searchCategory is owner');
-      this.router.routeToOwner(input, searchCategory);
-    }
+    this.router.routeToAddress(input, searchCategory);
   };
 
   Controller.prototype.handleMapClick = function handleMapClick (e) {
@@ -5732,6 +5833,11 @@
     var parcels = this.store.state.parcels;
     // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
+  };
+  Controller.prototype.geocodeDrawnShape = function geocodeDrawnShape (state) {
+    var shape = this.store.state.drawShape;
+    var parcels = [];
+    this.dataManager.getParcelsByShape(shape, parcels);
   };
 
   Controller.prototype.goToDefaultAddress = function goToDefaultAddress (address) {

@@ -52,26 +52,13 @@ class Controller {
     }
   }
 
-  handleConfigurableInputSubmit(value, searchCategory) {
-    console.log('controller handleConfigurableInputSubmit is running, value:', value, 'searchCategory:', searchCategory);
-    if (searchCategory === 'address') {
-      this.handleSearchFormSubmit(value, searchCategory);
-    } else if (searchCategory === 'owner') {
-      console.log('searchCategory is owner');
-      this.handleSearchFormSubmit(value, searchCategory);
-    }
-  }
-
   handleSearchFormSubmit(value, searchCategory) {
     const input = value
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
-    if (!searchCategory || searchCategory === 'address') {
-      this.store.commit('setGeocodeInput', input);
-    } else if (searchCategory === 'owner') {
-      this.store.commit('setOwnerSearchInput', input);
-    }
+    this.store.commit('setGeocodeInput', input);
+
     this.store.commit('setShouldShowAddressCandidateList', false);
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -91,12 +78,7 @@ class Controller {
 
     // tell router
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
-    if (!searchCategory || searchCategory === 'address') {
-      this.router.routeToAddress(input, searchCategory);
-    } else if (searchCategory === 'owner') {
-      console.log('searchCategory is owner');
-      this.router.routeToOwner(input, searchCategory);
-    }
+    this.router.routeToAddress(input, searchCategory);
   }
 
   handleMapClick(e) {
@@ -119,8 +101,10 @@ class Controller {
     // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
   }
-  geocodeDrawnShape() {
-    console.log("Testing DrawnShape Geocoder")
+  geocodeDrawnShape(state) {
+    const shape = this.store.state.drawShape;
+    const parcels = [];
+    this.dataManager.getParcelsByShape(shape, parcels);
   }
 
   goToDefaultAddress(address) {

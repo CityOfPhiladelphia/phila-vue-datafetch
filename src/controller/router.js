@@ -79,14 +79,14 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    // console.log('Router.routeToAddress', nextAddress);
+    console.log('Router.routeToAddress', nextAddress);
     if (nextAddress) {
       // check against current address
       const prevAddress = this.getAddressFromState();
 
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
-        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
+        console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
         this.dataManager.geocode(nextAddress, searchCategory);
         // this.dataManager.geocode(nextAddress, 'address')
                         // .then(this.didGeocode.bind(this));
