@@ -13,7 +13,7 @@ class OwnerSearchClient extends BaseClient {
     // console.log('owner search-client, ownerSearchConfig:', ownerSearchConfig);
     const url = ownerSearchConfig.url(input);
     const params = ownerSearchConfig.params;
-
+    console.log('owner search client url', url);
     // update state
     this.store.commit('setOwnerSearchStatus', 'waiting');
     // console.log('OWNER SEARCH CLIENT setting last search method to owner search');

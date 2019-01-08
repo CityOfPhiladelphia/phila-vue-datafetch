@@ -535,7 +535,8 @@ class DataManager {
       //probably need some way to clear that too though for owner, click and address searches.
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
-        const input = [];
+        const input = this.store.state.parcels.pwd;
+        console.log('didTryGeocode is running, input: ', input);
         const didShapeSearch = this.didShapeSearch.bind(this);
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
       } else {

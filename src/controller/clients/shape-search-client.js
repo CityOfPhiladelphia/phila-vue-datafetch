@@ -4,7 +4,7 @@ import BaseClient from './base-client';
 
 class ShapeSearchClient extends BaseClient {
 
-  evaluateParams(dataSource) {
+  evaluateParams(feature, dataSource) {
     console.log('http-client evaluateParams is running');
     const params = {};
     if (!dataSource.options.params) { return params };
@@ -15,26 +15,28 @@ class ShapeSearchClient extends BaseClient {
       let val;
 
       if (typeof valOrGetter === 'function') {
-        val = valOrGetter(state);
+        console.log(feature);
+        val = valOrGetter(feature);
       } else {
         val = valOrGetter;
       }
 
       params[key] = val;
     }
-
     return params;
   }
 
   fetch(input) {
-    console.log('owner search client fetch', input);
+    console.log('shape search client fetch', input);
+    const data =  input.map(a => a.properties.BRT_ID)
+    console.log('shape search client fetch', data);
 
     const store = this.store;
 
     const shapeSearchConfig = this.config.shapeSearch;
     const url = shapeSearchConfig.url;
     console.log('shapeSearchConfig.url: ', url);
-    let params = this.evaluateParams(shapeSearchConfig);
+    let params = this.evaluateParams(data, shapeSearchConfig);
     console.log('shapeSearchConfig.params: ', params);
     const success = this.success.bind(this);
     const error = this.error.bind(this);
@@ -64,10 +66,10 @@ class ShapeSearchClient extends BaseClient {
     // data = this.assignFeatureIds(data, 'drawShape');
     // console.log('assignFeatureIds', data);
 
-    store.commit('setOwnerSearchData', data);
+    // store.commit('setOwnerSearchData', data);
     // store.commit('setOwnerSearchData', data.features);
     // store.commit('setOwnerSearchRelated', relatedFeatures);
-    store.commit('setOwnerSearchStatus', 'success');
+    // store.commit('setOwnerSearchStatus', 'success');
 
     return data;
   }
