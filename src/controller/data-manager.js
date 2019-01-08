@@ -489,6 +489,7 @@ class DataManager {
   }
 
   evaluateParams(feature, dataSource) {
+    console.log("evalutateParams data-manager feature:  ", feature)
     const params = {};
     const paramEntries = Object.entries(dataSource.options.params);
     const state = this.store.state;
@@ -528,7 +529,10 @@ class DataManager {
   didTryGeocode(feature) {
     console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
-      console.log('didTryGeocode is running, error');
+      console.log('didTryGeocode is running, error: need to reset drawShape ');
+      //TODO set up drawShape so that after running it removes the shape, resetting the field
+      // and instead shows the polygons of the parcels selected on the map
+      //probably need some way to clear that too though for owner, click and address searches.
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
         const input = [];

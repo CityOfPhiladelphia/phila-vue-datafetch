@@ -1,33 +1,76 @@
 import axios from 'axios';
 import BaseClient from './base-client';
 
-// the high-level purpose of this is: take a person, search AIS for them, and put
-// the result in state.
+
 class ShapeSearchClient extends BaseClient {
+
+  evaluateParams(dataSource) {
+    console.log('http-client evaluateParams is running');
+    const params = {};
+    if (!dataSource.options.params) { return params };
+    const paramEntries = Object.entries(dataSource.options.params);
+    const state = this.store.state;
+
+    for (let [key, valOrGetter] of paramEntries) {
+      let val;
+
+      if (typeof valOrGetter === 'function') {
+        val = valOrGetter(state);
+      } else {
+        val = valOrGetter;
+      }
+
+      params[key] = val;
+    }
+
+    return params;
+  }
+
   fetch(input) {
     console.log('owner search client fetch', input);
 
     const store = this.store;
 
     const shapeSearchConfig = this.config.shapeSearch;
-    // console.log('owner search-client, ownerSearchConfig:', ownerSearchConfig);
-    const url = shapeSearchConfig.url();
-    const params = shapeSearchConfig.options.params;
-    console.log('shape search-client: url, params', url, params);
+    const url = shapeSearchConfig.url;
+    console.log('shapeSearchConfig.url: ', url);
+    let params = this.evaluateParams(shapeSearchConfig);
+    console.log('shapeSearchConfig.params: ', params);
     const success = this.success.bind(this);
     const error = this.error.bind(this);
 
     // return a promise that can accept further chaining
     console.log('shape search-client: axios', axios.get(url, { params }));
     return axios.get(url, { params })
-      .then(success)
-      .catch(error);
+                                    .then(success)
+                                    .catch(error);
   }
 
-  success(success) {
-    console.log('owner search success', success);
-      return
-    }
+  success(response) {
+    console.log('owner search success', response.config.url);
+
+    const store = this.store;
+    let data = response.data;
+    const url = response.config.url;
+    console.log(url)
+
+    // TODO handle multiple results
+
+    // if (!data.features || data.features.length < 1) {
+    //   console.log('owner search got no features', data);
+    //   return;
+    // }
+
+    // data = this.assignFeatureIds(data, 'drawShape');
+    // console.log('assignFeatureIds', data);
+
+    store.commit('setOwnerSearchData', data);
+    // store.commit('setOwnerSearchData', data.features);
+    // store.commit('setOwnerSearchRelated', relatedFeatures);
+    store.commit('setOwnerSearchStatus', 'success');
+
+    return data;
+  }
 
   error(error) {
     console.log('owner search error', error);

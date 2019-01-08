@@ -29,7 +29,7 @@ class OwnerSearchClient extends BaseClient {
   }
 
   success(response) {
-    console.log('owner search success', response.config.url);
+    console.log('owner search success', response.data);
 
     const store = this.store;
     const data = response.data;

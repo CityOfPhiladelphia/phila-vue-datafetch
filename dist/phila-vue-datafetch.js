@@ -4089,7 +4089,8 @@
   };
 
   BaseClient.prototype.evaluateParams = function evaluateParams (feature, dataSource) {
-    // console.log('base-client evaluateParams is running')
+    console.log('base-client evaluateParams is running');
+    console.log('evaluateParams feature: ', feature);
     var params = {};
     if (!dataSource.options.params) { return params }  var paramEntries = Object.entries(dataSource.options.params);
     var state = this.store.state;
@@ -4288,7 +4289,7 @@
     };
 
     OwnerSearchClient.prototype.success = function success (response) {
-      console.log('owner search success', response.config.url);
+      console.log('owner search success', response.data);
 
       var store = this.store;
       var data = response.data;
@@ -4340,8 +4341,6 @@
     return OwnerSearchClient;
   }(BaseClient));
 
-  // the high-level purpose of this is: take a person, search AIS for them, and put
-  // the result in state.
   var ShapeSearchClient = /*@__PURE__*/(function (BaseClient$$1) {
     function ShapeSearchClient () {
       BaseClient$$1.apply(this, arguments);
@@ -4351,30 +4350,76 @@
     ShapeSearchClient.prototype = Object.create( BaseClient$$1 && BaseClient$$1.prototype );
     ShapeSearchClient.prototype.constructor = ShapeSearchClient;
 
+    ShapeSearchClient.prototype.evaluateParams = function evaluateParams (dataSource) {
+      console.log('http-client evaluateParams is running');
+      var params = {};
+      if (!dataSource.options.params) { return params }    var paramEntries = Object.entries(dataSource.options.params);
+      var state = this.store.state;
+
+      for (var i = 0, list = paramEntries; i < list.length; i += 1) {
+        var ref = list[i];
+        var key = ref[0];
+        var valOrGetter = ref[1];
+
+        var val = (void 0);
+
+        if (typeof valOrGetter === 'function') {
+          val = valOrGetter(state);
+        } else {
+          val = valOrGetter;
+        }
+
+        params[key] = val;
+      }
+
+      return params;
+    };
+
     ShapeSearchClient.prototype.fetch = function fetch (input) {
       console.log('owner search client fetch', input);
 
       var store = this.store;
 
       var shapeSearchConfig = this.config.shapeSearch;
-      // console.log('owner search-client, ownerSearchConfig:', ownerSearchConfig);
-      var url = shapeSearchConfig.url();
-      var params = shapeSearchConfig.options.params;
-      console.log('shape search-client: url, params', url, params);
+      var url = shapeSearchConfig.url;
+      console.log('shapeSearchConfig.url: ', url);
+      var params = this.evaluateParams(shapeSearchConfig);
+      console.log('shapeSearchConfig.params: ', params);
       var success = this.success.bind(this);
       var error = this.error.bind(this);
 
       // return a promise that can accept further chaining
       console.log('shape search-client: axios', axios.get(url, { params: params }));
       return axios.get(url, { params: params })
-        .then(success)
-        .catch(error);
+                                      .then(success)
+                                      .catch(error);
     };
 
-    ShapeSearchClient.prototype.success = function success (success$1) {
-      console.log('owner search success', success$1);
-        return
-      };
+    ShapeSearchClient.prototype.success = function success (response) {
+      console.log('owner search success', response.config.url);
+
+      var store = this.store;
+      var data = response.data;
+      var url = response.config.url;
+      console.log(url);
+
+      // TODO handle multiple results
+
+      // if (!data.features || data.features.length < 1) {
+      //   console.log('owner search got no features', data);
+      //   return;
+      // }
+
+      // data = this.assignFeatureIds(data, 'drawShape');
+      // console.log('assignFeatureIds', data);
+
+      store.commit('setOwnerSearchData', data);
+      // store.commit('setOwnerSearchData', data.features);
+      // store.commit('setOwnerSearchRelated', relatedFeatures);
+      store.commit('setOwnerSearchStatus', 'success');
+
+      return data;
+    };
 
     ShapeSearchClient.prototype.error = function error (error$1) {
       console.log('owner search error', error$1);
@@ -4397,7 +4442,7 @@
       var this$1 = this;
 
       var params = this.evaluateParams(feature, dataSource);
-      // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+      console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
       var url = dataSource.url;
       var options = dataSource.options;
       var urlAddition = params.urlAddition;
@@ -5447,6 +5492,7 @@
   };
 
   DataManager.prototype.evaluateParams = function evaluateParams (feature$$1, dataSource) {
+    console.log("evalutateParams data-manager feature:  ", feature$$1);
     var params = {};
     var paramEntries = Object.entries(dataSource.options.params);
     var state = this.store.state;
@@ -5490,7 +5536,10 @@
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
     console.log('didTryGeocode is running, feature:', feature$$1);
     if (this.store.state.geocode.status === 'error') {
-      console.log('didTryGeocode is running, error');
+      console.log('didTryGeocode is running, error: need to reset drawShape ');
+      //TODO set up drawShape so that after running it removes the shape, resetting the field
+      // and instead shows the polygons of the parcels selected on the map
+      //probably need some way to clear that too though for owner, click and address searches.
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
         var input = [];
