@@ -4415,10 +4415,10 @@
       // data = this.assignFeatureIds(data, 'drawShape');
       // console.log('assignFeatureIds', data);
 
-      // store.commit('setOwnerSearchData', data);
+      store.commit('setOwnerSearchData', data);
       // store.commit('setOwnerSearchData', data.features);
       // store.commit('setOwnerSearchRelated', relatedFeatures);
-      // store.commit('setOwnerSearchStatus', 'success');
+      store.commit('setOwnerSearchStatus', 'success');
 
       return data;
     };
