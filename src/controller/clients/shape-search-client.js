@@ -66,10 +66,10 @@ class ShapeSearchClient extends BaseClient {
     // data = this.assignFeatureIds(data, 'drawShape');
     // console.log('assignFeatureIds', data);
 
-    store.commit('setOwnerSearchData', data);
+    store.commit('setShapeSearchData', data);
     // store.commit('setOwnerSearchData', data.features);
     // store.commit('setOwnerSearchRelated', relatedFeatures);
-    store.commit('setOwnerSearchStatus', 'success');
+    store.commit('setShapeSearchStatus', 'success');
 
     return data;
   }

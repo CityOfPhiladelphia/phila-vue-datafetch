@@ -17,6 +17,11 @@ const initialState = {
     data: null,
     input: null,
   },
+  shapeSearch: {
+    status: null,
+    data: null,
+    input: null,
+  },
   lastSearchMethod: 'geocode',
 };
 
@@ -180,6 +185,12 @@ const pvdStore = {
       },
       setOwnerSearchData(state, payload) {
         state.ownerSearch.data = payload;
+      },
+      setShapeSearchStatus(state, payload) {
+        state.shapeSearch.status = payload;
+      },
+      setShapeSearchData(state, payload) {
+        state.shapeSearch.data = payload;
       },
       setOwnerSearchInput(state, payload) {
         state.ownerSearch.input = payload;
