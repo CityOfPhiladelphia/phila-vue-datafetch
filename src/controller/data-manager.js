@@ -103,12 +103,13 @@ class DataManager {
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
-    let targetIdFn = targetsDef.getTargetId;
+    // let targetIdFn = targetsDef.getTargetId;
 
     if (typeof targetsFn !== 'function') {
       throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
     }
     let targets = targetsFn(state);
+    let targetIdFn = targetsDef.getTargetId;
 
     // check if target objs exist in state.
     const targetIds = targets.map(targetIdFn);
@@ -161,6 +162,8 @@ class DataManager {
 
     const geocodeObj = this.store.state.geocode.data;
     const ownerSearchObj = this.store.state.ownerSearch.data;
+    console.log( "TODO: add shapeSearch")
+    // const shapeSearchObj = this.store.state.shapeSearch.data.rows;
     console.log( "ownerSearchObj: ", ownerSearchObj, )
 
     let dataSources = this.config.dataSources || {};
@@ -212,7 +215,7 @@ class DataManager {
         // get id of target
         let targetId;
         if (targetIdFn && !targetsDef.runOnce) {
-          targetId = targetIdFn(target);
+          targetId = targetIdFn(target, state);
         }
 
         // check if it's ready
@@ -511,8 +514,7 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input) {
-    console.log('data-manager geocode is running, input:', input);
-    console.log('no category');
+    // console.log('data-manager geocode is running, input:', input);
     const didTryGeocode = this.didTryGeocode.bind(this);
     const test = this.clients.geocode.fetch(input).then(didTryGeocode);
   }
@@ -522,21 +524,21 @@ class DataManager {
   }
 
   didShapeSearch() {
-    console.log("didShapeSearch - Will set this up to fetch data");
+    console.log("TODO - didShapeSearch - Will set this up to fetch data");
     // this.fetchData();
   }
 
   didTryGeocode(feature) {
-    console.log('didTryGeocode is running, feature:', feature);
+    // console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
-      console.log('didTryGeocode is running, error: need to reset drawShape ');
+      // console.log('didTryGeocode is running, error: need to reset drawShape ');
       //TODO set up drawShape so that after running it removes the shape, resetting the field
       // and instead shows the polygons of the parcels selected on the map
       //probably need some way to clear that too though for owner, click and address searches.
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
         const input = this.store.state.parcels.pwd;
-        console.log('didTryGeocode is running, input: ', input);
+        // console.log('didTryGeocode is running, input: ', input);
         const didShapeSearch = this.didShapeSearch.bind(this);
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
       } else {
@@ -547,7 +549,7 @@ class DataManager {
         return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
       }
     } else if (this.store.state.geocode.status === 'success') {
-      console.log('didTryGeocode is running, success');
+      // console.log('didTryGeocode is running, success');
       this.resetData();
       this.didGeocode(feature);
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -555,7 +557,7 @@ class DataManager {
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
     } else if (this.store.state.geocode.status === null) {
-      console.log('didTryGeocode is running, feature:', feature);
+      // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
       const input = this.store.state.geocode.input;
       this.resetGeocode();
@@ -618,7 +620,7 @@ class DataManager {
 
   getParcelsByShape(latlng, parcelLayer) {
 
-    console.log("Testing DrawnShape Geocoder", latlng._latlngs)
+    // console.log("Testing DrawnShape Geocoder", latlng._latlngs)
 
     const latLng = L.polygon(latlng._latlngs, latlng.options);
     const url = this.config.map.featureLayers.pwdParcels.url;
@@ -723,7 +725,7 @@ class DataManager {
 
   didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {
 
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
 
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -731,7 +733,7 @@ class DataManager {
     otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
     const lastSearchMethod = this.store.state.lastSearchMethod;
 
-    console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+    // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
 
     if (error) {
       if (configForParcelLayer.clearStateOnError) {

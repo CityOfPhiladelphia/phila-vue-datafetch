@@ -5,7 +5,7 @@ import BaseClient from './base-client';
 class ShapeSearchClient extends BaseClient {
 
   evaluateParams(feature, dataSource) {
-    console.log('http-client evaluateParams is running');
+    // console.log('http-client evaluateParams is running');
     const params = {};
     if (!dataSource.options.params) { return params };
     const paramEntries = Object.entries(dataSource.options.params);
@@ -15,7 +15,7 @@ class ShapeSearchClient extends BaseClient {
       let val;
 
       if (typeof valOrGetter === 'function') {
-        console.log(feature);
+        // console.log(feature);
         val = valOrGetter(feature);
       } else {
         val = valOrGetter;
@@ -27,34 +27,34 @@ class ShapeSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    console.log('shape search client fetch', input);
+    // console.log('shape search client fetch', input);
     const data =  input.map(a => a.properties.BRT_ID)
-    console.log('shape search client fetch', data);
+    // console.log('shape search client fetch', data);
 
     const store = this.store;
 
     const shapeSearchConfig = this.config.shapeSearch;
     const url = shapeSearchConfig.url;
-    console.log('shapeSearchConfig.url: ', url);
+    // console.log('shapeSearchConfig.url: ', url);
     let params = this.evaluateParams(data, shapeSearchConfig);
-    console.log('shapeSearchConfig.params: ', params);
+    // console.log('shapeSearchConfig.params: ', params);
     const success = this.success.bind(this);
     const error = this.error.bind(this);
 
     // return a promise that can accept further chaining
-    console.log('shape search-client: axios', axios.get(url, { params }));
+    // console.log('shape search-client: axios', axios.get(url, { params }));
     return axios.get(url, { params })
                                     .then(success)
                                     .catch(error);
   }
 
   success(response) {
-    console.log('owner search success', response.config.url);
+    // console.log('owner search success', response.config.url);
 
     const store = this.store;
     let data = response.data;
     const url = response.config.url;
-    console.log(url)
+    // console.log(url)
 
     // TODO handle multiple results
 
@@ -75,7 +75,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   error(error) {
-    console.log('owner search error', error);
+    // console.log('owner search error', error);
     return
   }
   // success(response) {

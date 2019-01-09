@@ -4265,7 +4265,7 @@
     OwnerSearchClient.prototype.constructor = OwnerSearchClient;
 
     OwnerSearchClient.prototype.fetch = function fetch (input) {
-      console.log('owner search client fetch', input);
+      // console.log('owner search client fetch', input);
 
       var store = this.store;
 
@@ -4273,7 +4273,7 @@
       // console.log('owner search-client, ownerSearchConfig:', ownerSearchConfig);
       var url = ownerSearchConfig.url(input);
       var params = ownerSearchConfig.params;
-      console.log('owner search client url', url);
+      // console.log('owner search client url', url);
       // update state
       this.store.commit('setOwnerSearchStatus', 'waiting');
       // console.log('OWNER SEARCH CLIENT setting last search method to owner search');
@@ -4289,7 +4289,7 @@
     };
 
     OwnerSearchClient.prototype.success = function success (response) {
-      console.log('owner search success', response.data);
+      // console.log('owner search success', response.data);
 
       var store = this.store;
       var data = response.data;
@@ -4329,7 +4329,7 @@
     };
 
     OwnerSearchClient.prototype.error = function error (error$1) {
-      console.log('owner search error', error$1);
+      // console.log('owner search error', error);
 
       var store = this.store;
 
@@ -4351,7 +4351,7 @@
     ShapeSearchClient.prototype.constructor = ShapeSearchClient;
 
     ShapeSearchClient.prototype.evaluateParams = function evaluateParams (feature, dataSource) {
-      console.log('http-client evaluateParams is running');
+      // console.log('http-client evaluateParams is running');
       var params = {};
       if (!dataSource.options.params) { return params }    var paramEntries = Object.entries(dataSource.options.params);
       var state = this.store.state;
@@ -4364,7 +4364,7 @@
         var val = (void 0);
 
         if (typeof valOrGetter === 'function') {
-          console.log(feature);
+          // console.log(feature);
           val = valOrGetter(feature);
         } else {
           val = valOrGetter;
@@ -4376,34 +4376,34 @@
     };
 
     ShapeSearchClient.prototype.fetch = function fetch (input) {
-      console.log('shape search client fetch', input);
+      // console.log('shape search client fetch', input);
       var data =  input.map(function (a) { return a.properties.BRT_ID; });
-      console.log('shape search client fetch', data);
+      // console.log('shape search client fetch', data);
 
       var store = this.store;
 
       var shapeSearchConfig = this.config.shapeSearch;
       var url = shapeSearchConfig.url;
-      console.log('shapeSearchConfig.url: ', url);
+      // console.log('shapeSearchConfig.url: ', url);
       var params = this.evaluateParams(data, shapeSearchConfig);
-      console.log('shapeSearchConfig.params: ', params);
+      // console.log('shapeSearchConfig.params: ', params);
       var success = this.success.bind(this);
       var error = this.error.bind(this);
 
       // return a promise that can accept further chaining
-      console.log('shape search-client: axios', axios.get(url, { params: params }));
+      // console.log('shape search-client: axios', axios.get(url, { params }));
       return axios.get(url, { params: params })
                                       .then(success)
                                       .catch(error);
     };
 
     ShapeSearchClient.prototype.success = function success (response) {
-      console.log('owner search success', response.config.url);
+      // console.log('owner search success', response.config.url);
 
       var store = this.store;
       var data = response.data;
       var url = response.config.url;
-      console.log(url);
+      // console.log(url)
 
       // TODO handle multiple results
 
@@ -4415,16 +4415,16 @@
       // data = this.assignFeatureIds(data, 'drawShape');
       // console.log('assignFeatureIds', data);
 
-      store.commit('setOwnerSearchData', data);
+      store.commit('setShapeSearchData', data);
       // store.commit('setOwnerSearchData', data.features);
       // store.commit('setOwnerSearchRelated', relatedFeatures);
-      store.commit('setOwnerSearchStatus', 'success');
+      store.commit('setShapeSearchStatus', 'success');
 
       return data;
     };
 
     ShapeSearchClient.prototype.error = function error (error$1) {
-      console.log('owner search error', error$1);
+      // console.log('owner search error', error);
       return
     };
 
@@ -4444,7 +4444,7 @@
       var this$1 = this;
 
       var params = this.evaluateParams(feature, dataSource);
-      console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+      // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
       var url = dataSource.url;
       var options = dataSource.options;
       var urlAddition = params.urlAddition;
@@ -5094,12 +5094,13 @@
     var state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     var targetsFn = targetsDef.get;
-    var targetIdFn = targetsDef.getTargetId;
+    // let targetIdFn = targetsDef.getTargetId;
 
     if (typeof targetsFn !== 'function') {
       throw new Error(("Invalid targets getter for data source '" + dataSourceKey + "'"));
     }
     var targets = targetsFn(state);
+    var targetIdFn = targetsDef.getTargetId;
 
     // check if target objs exist in state.
     var targetIds = targets.map(targetIdFn);
@@ -5154,6 +5155,8 @@
 
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
+    console.log( "TODO: add shapeSearch");
+    // const shapeSearchObj = this.store.state.shapeSearch.data.rows;
     console.log( "ownerSearchObj: ", ownerSearchObj );
 
     var dataSources = this.config.dataSources || {};
@@ -5211,7 +5214,7 @@
 
           var targetId = (void 0);
         if (targetIdFn && !targetsDef.runOnce) {
-          targetId = targetIdFn(target);
+          targetId = targetIdFn(target, state);
         }
 
         // check if it's ready
@@ -5520,8 +5523,7 @@
 
   /* GEOCODING */
   DataManager.prototype.geocode = function geocode (input) {
-    console.log('data-manager geocode is running, input:', input);
-    console.log('no category');
+    // console.log('data-manager geocode is running, input:', input);
     var didTryGeocode = this.didTryGeocode.bind(this);
     var test = this.clients.geocode.fetch(input).then(didTryGeocode);
   };
@@ -5531,21 +5533,21 @@
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
-    console.log("didShapeSearch - Will set this up to fetch data");
+    console.log("TODO - didShapeSearch - Will set this up to fetch data");
     // this.fetchData();
   };
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
-    console.log('didTryGeocode is running, feature:', feature$$1);
+    // console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
-      console.log('didTryGeocode is running, error: need to reset drawShape ');
+      // console.log('didTryGeocode is running, error: need to reset drawShape ');
       //TODO set up drawShape so that after running it removes the shape, resetting the field
       // and instead shows the polygons of the parcels selected on the map
       //probably need some way to clear that too though for owner, click and address searches.
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
         var input = this.store.state.parcels.pwd;
-        console.log('didTryGeocode is running, input: ', input);
+        // console.log('didTryGeocode is running, input: ', input);
         var didShapeSearch = this.didShapeSearch.bind(this);
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
       } else {
@@ -5556,7 +5558,7 @@
         return this.clients.ownerSearch.fetch(input$1).then(didOwnerSearch);
       }
     } else if (this.store.state.geocode.status === 'success') {
-      console.log('didTryGeocode is running, success');
+      // console.log('didTryGeocode is running, success');
       this.resetData();
       this.didGeocode(feature$$1);
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -5564,7 +5566,7 @@
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
     } else if (this.store.state.geocode.status === null) {
-      console.log('didTryGeocode is running, feature:', feature$$1);
+      // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
       var input$2 = this.store.state.geocode.input;
       this.resetGeocode();
@@ -5626,7 +5628,7 @@
 
   DataManager.prototype.getParcelsByShape = function getParcelsByShape (latlng, parcelLayer) {
 
-    console.log("Testing DrawnShape Geocoder", latlng._latlngs);
+    // console.log("Testing DrawnShape Geocoder", latlng._latlngs)
 
     var latLng = L.polygon(latlng._latlngs, latlng.options);
     var url = this.config.map.featureLayers.pwdParcels.url;
@@ -5735,7 +5737,7 @@
 
   DataManager.prototype.didGetParcelsByShape = function didGetParcelsByShape (error, featureCollection$$1, response, parcelLayer, fetch) {
 
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
 
     var configForParcelLayer = this.config.parcels.pwd;
     var geocodeField = configForParcelLayer.geocodeField;
@@ -5743,7 +5745,7 @@
     otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
     var lastSearchMethod = this.store.state.lastSearchMethod;
 
-    console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+    // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
 
     if (error) {
       if (configForParcelLayer.clearStateOnError) {
@@ -5913,6 +5915,11 @@
       data: null,
       input: null,
     },
+    shapeSearch: {
+      status: null,
+      data: null,
+      input: null,
+    },
     lastSearchMethod: 'geocode',
   };
 
@@ -6078,6 +6085,12 @@
         },
         setOwnerSearchData: function setOwnerSearchData(state, payload) {
           state.ownerSearch.data = payload;
+        },
+        setShapeSearchStatus: function setShapeSearchStatus(state, payload) {
+          state.shapeSearch.status = payload;
+        },
+        setShapeSearchData: function setShapeSearchData(state, payload) {
+          state.shapeSearch.data = payload;
         },
         setOwnerSearchInput: function setOwnerSearchInput(state, payload) {
           state.ownerSearch.input = payload;
