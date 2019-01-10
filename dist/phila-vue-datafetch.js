@@ -1,11 +1,10 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('axios'), require('moment'), require('proj4'), require('leaflet'), require('esri-leaflet'), require('vue')) :
-  typeof define === 'function' && define.amd ? define(['exports', 'axios', 'moment', 'proj4', 'leaflet', 'esri-leaflet', 'vue'], factory) :
-  (factory((global.philaVueDatafetch = {}),global.axios,global.moment,global.proj4,global.L,global.L.esri,global.Vue));
-}(this, (function (exports,axios,moment,proj4,L,esriLeaflet,Vue) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('axios'), require('date-fns'), require('proj4'), require('leaflet'), require('esri-leaflet'), require('vue')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'axios', 'date-fns', 'proj4', 'leaflet', 'esri-leaflet', 'vue'], factory) :
+  (factory((global.philaVueDatafetch = {}),global.axios,global.dateFns,global.proj4,global.L,global.L.esri,global.Vue));
+}(this, (function (exports,axios,dateFns,proj4,L,esriLeaflet,Vue) { 'use strict';
 
   axios = axios && axios.hasOwnProperty('default') ? axios['default'] : axios;
-  moment = moment && moment.hasOwnProperty('default') ? moment['default'] : moment;
   proj4 = proj4 && proj4.hasOwnProperty('default') ? proj4['default'] : proj4;
   Vue = Vue && Vue.hasOwnProperty('default') ? Vue['default'] : Vue;
 
@@ -4514,6 +4513,7 @@
       // returns a sql statement
       var dateMinNum = options.dateMinNum || null;
       var dateMinType = options.dateMinType || null;
+      console.log('dateMinType:', dateMinType);
       var dateField = options.dateField || null;
       var successFn = options.success;
       var distances = options.distances || 250;
@@ -4534,8 +4534,30 @@
 
       params['q'] = "select" + select + " from " + table + " where " + distQuery + " < " + distances;
 
+      var subFn;
       if (dateMinNum) {
-        params['q'] = params['q'] + " and " + dateField + " > '" + moment().subtract(dateMinNum, dateMinType).format('YYYY-MM-DD') + "'";
+        // let subFn, addFn;
+        switch (dateMinType) {
+          case 'hour':
+            subFn = dateFns.subHours;
+            break;
+          case 'day':
+            subFn = dateFns.subDays;
+            break;
+          case 'week':
+            subFn = dateFns.subWeeks;
+            break;
+          case 'month':
+            subFn = dateFns.subMonths;
+            break;
+          case 'year':
+            subFn = dateFns.subYears;
+            break;
+        }
+
+        // let test = format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD');
+        // params['q'] = params['q'] + " and " + dateField + " > '" + moment().subtract(dateMinNum, dateMinType).format('YYYY-MM-DD') + "'"
+        params['q'] = params['q'] + " and " + dateField + " > '" + dateFns.format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD') + "'";
       }
 
       // if the data is not dependent on other data
