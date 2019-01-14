@@ -29,14 +29,14 @@ export default {
     // map imports to global names for using vue-leaflet-esri in the browser
     globals: {
       leaflet: 'L',
-      'esri-leaflet': 'L.esri',
-      moment: 'moment',
-      'leaflet-measure': 'L.Control.Measure',
-      'leaflet-vector-icon': 'leafletVectorIcon',
       axios: 'axios',
       vue: 'Vue',
       vuex: 'Vuex',
       proj4: 'proj4',
+      'esri-leaflet': 'L.esri',
+      'leaflet-measure': 'L.Control.Measure',
+      'leaflet-vector-icon': 'leafletVectorIcon',
+      'date-fns': 'dateFns',
       'blueimp-md5': 'md5',
       '@turf/helpers': 'turf',
       '@turf/distance': 'turf.distance',
