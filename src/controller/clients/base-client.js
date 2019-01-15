@@ -6,8 +6,8 @@ class BaseClient {
   }
 
   evaluateParams(feature, dataSource) {
-    console.log('base-client evaluateParams is running')
-    console.log('evaluateParams feature: ', feature)
+    // console.log('base-client evaluateParams is running')
+    // console.log('evaluateParams feature: ', feature)
     const params = {};
     if (!dataSource.options.params) { return params };
     const paramEntries = Object.entries(dataSource.options.params);
@@ -85,7 +85,7 @@ class BaseClient {
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    console.log('171111 base-client js is calling fetchData()')
+    // console.log('171111 base-client js is calling fetchData()')
     this.fetchData();
   }
 }

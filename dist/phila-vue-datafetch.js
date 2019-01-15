@@ -4089,8 +4089,8 @@
   };
 
   BaseClient.prototype.evaluateParams = function evaluateParams (feature, dataSource) {
-    console.log('base-client evaluateParams is running');
-    console.log('evaluateParams feature: ', feature);
+    // console.log('base-client evaluateParams is running')
+    // console.log('evaluateParams feature: ', feature)
     var params = {};
     if (!dataSource.options.params) { return params }  var paramEntries = Object.entries(dataSource.options.params);
     var state = this.store.state;
@@ -4171,7 +4171,7 @@
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    console.log('171111 base-client js is calling fetchData()');
+    // console.log('171111 base-client js is calling fetchData()')
     this.fetchData();
   };
 
@@ -4187,7 +4187,7 @@
     GeocodeClient.prototype.constructor = GeocodeClient;
 
     GeocodeClient.prototype.fetch = function fetch (input) {
-      console.log('geocode client fetch', input);
+      // console.log('geocode client fetch', input);
 
       var store = this.store;
       var geocodeConfig;
@@ -5140,7 +5140,11 @@
       for (var i = 0, list = targets; i < list.length; i += 1) {
         var target = list[i];
 
+          if(target.properties){
           idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
+        } else {
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.parcel_number + "',";
+        }
       }
       idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
       targets = [idsOfOwnersOrProps];
@@ -5155,13 +5159,14 @@
 
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
-    console.log( "TODO: add shapeSearch");
-    // const shapeSearchObj = this.store.state.shapeSearch.data.rows;
-    console.log( "ownerSearchObj: ", ownerSearchObj );
+    if(this.store.state.shapeSearch.data) {var shapeSearchObj = this.store.state.shapeSearch.data.rows;}
+    // console.log( "ownerSearchObj: ", ownerSearchObj, )
+    // console.log( "shapeSearchObj: ", shapeSearchObj, )
+
 
     var dataSources = this.config.dataSources || {};
     var dataSourceKeys = Object.entries(dataSources);
-    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // if (this.store.state.lastSearchMethod !== 'owner search') {
     // if (!geocodeObj) {
@@ -5194,7 +5199,7 @@
       var targetsFn = (void 0);
 
       // targets may cause a looped axios call, or may just call one once and get multiple results
-      console.log("targetsDef: ", targetsDef);
+      // console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
@@ -5203,10 +5208,10 @@
         targets = [geocodeObj];
       } else {
         targets = [ownerSearchObj][0];
-        console.log("targets: ", targets);
+        // console.log("targets: ", targets)
       }
 
-      // console.log('targets:', targets);
+      // if(shapeSearchObj) {return}
 
       for (var i = 0, list = targets; i < list.length; i += 1) {
         // get id of target
@@ -5533,8 +5538,7 @@
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
-    console.log("TODO - didShapeSearch - Will set this up to fetch data");
-    // this.fetchData();
+    this.fetchData();
   };
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {

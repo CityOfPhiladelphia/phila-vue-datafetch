@@ -147,7 +147,11 @@ class DataManager {
     if (targetsDef.runOnce) {
       let idsOfOwnersOrProps = "";
       for (let target of targets) {
-        idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
+        if(target.properties){
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
+        } else {
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.parcel_number + "',";
+        }
       }
       idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
       targets = [idsOfOwnersOrProps];
@@ -162,13 +166,14 @@ class DataManager {
 
     const geocodeObj = this.store.state.geocode.data;
     const ownerSearchObj = this.store.state.ownerSearch.data;
-    console.log( "TODO: add shapeSearch")
-    // const shapeSearchObj = this.store.state.shapeSearch.data.rows;
-    console.log( "ownerSearchObj: ", ownerSearchObj, )
+    if(this.store.state.shapeSearch.data) {const shapeSearchObj = this.store.state.shapeSearch.data.rows;}
+    // console.log( "ownerSearchObj: ", ownerSearchObj, )
+    // console.log( "shapeSearchObj: ", shapeSearchObj, )
+
 
     let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
-    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // if (this.store.state.lastSearchMethod !== 'owner search') {
     //   if (!geocodeObj) {
@@ -197,7 +202,7 @@ class DataManager {
       let targetsFn;
 
       // targets may cause a looped axios call, or may just call one once and get multiple results
-      console.log("targetsDef: ", targetsDef)
+      // console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
@@ -206,10 +211,10 @@ class DataManager {
         targets = [geocodeObj];
       } else {
         targets = [ownerSearchObj][0];
-        console.log("targets: ", targets)
+        // console.log("targets: ", targets)
       }
 
-      // console.log('targets:', targets);
+      // if(shapeSearchObj) {return}
 
       for (let target of targets) {
         // get id of target
@@ -524,8 +529,7 @@ class DataManager {
   }
 
   didShapeSearch() {
-    console.log("TODO - didShapeSearch - Will set this up to fetch data");
-    // this.fetchData();
+    this.fetchData();
   }
 
   didTryGeocode(feature) {
