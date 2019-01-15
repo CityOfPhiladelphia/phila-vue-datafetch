@@ -31,7 +31,7 @@ class GeocodeClient extends BaseClient {
     const store = this.store;
     const data = response.data;
     const url = response.config.url;
-    console.log('geocode search success', response.config.url);
+    // console.log('geocode search success', response.config.url);
 
     // TODO handle multiple results
 

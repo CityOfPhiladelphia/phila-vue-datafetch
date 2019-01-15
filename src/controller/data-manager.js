@@ -161,8 +161,8 @@ class DataManager {
   }
 
   fetchData() {
-    console.log('\nFETCH DATA');
-    console.log('-----------');
+    // console.log('\nFETCH DATA');
+    // console.log('-----------');
 
     const geocodeObj = this.store.state.geocode.data;
     const ownerSearchObj = this.store.state.ownerSearch.data;
@@ -560,9 +560,17 @@ class DataManager {
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
+      this.store.commit('setShapeSearchStatus', null);
+      this.store.commit('setEditableLayers', null);
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setDrawShape', null);
     } else if (this.store.state.geocode.status === null) {
       // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
+      this.store.commit('setShapeSearchStatus', null);
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setEditableLayers', null);
+      this.store.commit('setDrawShape', null);
       const input = this.store.state.geocode.input;
       this.resetGeocode();
       // const didOwnerSearch = this.didOwnerSearch.bind(this);
@@ -612,9 +620,9 @@ class DataManager {
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const parcelQuery = Query({ url });
-    console.log(parcelQuery);
+    // console.log(parcelQuery);
     parcelQuery.contains(latLng);
-    console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
+    // console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
     const test = 5;
     parcelQuery.run((function(error, featureCollection, response) {
         this.didGetParcels(error, featureCollection, response, parcelLayer, fetch);
@@ -640,7 +648,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -713,11 +721,11 @@ class DataManager {
       const latlng = L.latLng(lat, lng);
       const props = feature.properties || {};
       const id = props[geocodeField];
-      console.log("id", id);
-      console.log('Line 701 data-manager.js didGetParcels - if shouldGeocode is running through router');
+      // console.log("id", id);
+      // console.log('Line 701 data-manager.js didGetParcels - if shouldGeocode is running through router');
       if (id) this.controller.router.routeToAddress(id);
     } else {
-      console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
+      // console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
       if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt') {

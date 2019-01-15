@@ -4212,7 +4212,7 @@
       var store = this.store;
       var data = response.data;
       var url = response.config.url;
-      console.log('geocode search success', response.config.url);
+      // console.log('geocode search success', response.config.url);
 
       // TODO handle multiple results
 
@@ -4304,8 +4304,14 @@
         return;
       }
 
+      console.log('assignFeatureIds', data.features);
+
       var features = data.features;
       features = this.assignFeatureIds(features, 'owner');
+
+      console.log('assignFeatureIds FINISHED', data);
+
+
 
       // TODO do some checking here
       // const feature = data.features[0];
@@ -4412,15 +4418,17 @@
       //   return;
       // }
 
-      // data = this.assignFeatureIds(data, 'drawShape');
-      // console.log('assignFeatureIds', data);
+      console.log('assignFeatureIds', data.rows);
+
+      var features = data.rows;
+      features = this.assignFeatureIds(features, 'shape');
+
+      console.log('assignFeatureIds FINISHED', data);
 
       store.commit('setShapeSearchData', data);
-      // store.commit('setOwnerSearchData', data.features);
-      // store.commit('setOwnerSearchRelated', relatedFeatures);
       store.commit('setShapeSearchStatus', 'success');
 
-      return data;
+      return features;
     };
 
     ShapeSearchClient.prototype.error = function error (error$1) {
@@ -5154,8 +5162,8 @@
   };
 
   DataManager.prototype.fetchData = function fetchData () {
-    console.log('\nFETCH DATA');
-    console.log('-----------');
+    // console.log('\nFETCH DATA');
+    // console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
@@ -5569,9 +5577,17 @@
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
+      this.store.commit('setShapeSearchStatus', null);
+      this.store.commit('setEditableLayers', null);
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setDrawShape', null);
     } else if (this.store.state.geocode.status === null) {
       // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
+      this.store.commit('setShapeSearchStatus', null);
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setEditableLayers', null);
+      this.store.commit('setDrawShape', null);
       var input$2 = this.store.state.geocode.input;
       this.resetGeocode();
       // const didOwnerSearch = this.didOwnerSearch.bind(this);
@@ -5621,9 +5637,8 @@
     var latLng = L.latLng(latlng.lat, latlng.lng);
     var url = this.config.map.featureLayers.pwdParcels.url;
     var parcelQuery = esriLeaflet.query({ url: url });
-    console.log(parcelQuery);
+    // console.log(parcelQuery);
     parcelQuery.contains(latLng);
-    console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
     parcelQuery.run((function(error, featureCollection$$1, response) {
         this.didGetParcels(error, featureCollection$$1, response, parcelLayer, fetch);
       }).bind(this)
@@ -5648,7 +5663,7 @@
   };
 
   DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch) {
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     var configForParcelLayer = this.config.parcels.pwd;
     var geocodeField = configForParcelLayer.geocodeField;
     var otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -5725,11 +5740,11 @@
       var latlng = L.latLng(lat, lng);
       var props = feature$$1.properties || {};
       var id = props[geocodeField];
-      console.log("id", id);
-      console.log('Line 701 data-manager.js didGetParcels - if shouldGeocode is running through router');
+      // console.log("id", id);
+      // console.log('Line 701 data-manager.js didGetParcels - if shouldGeocode is running through router');
       if (id) { this.controller.router.routeToAddress(id); }
     } else {
-      console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
+      // console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
       if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt') {
