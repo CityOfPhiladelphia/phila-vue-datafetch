@@ -192,6 +192,9 @@ const pvdStore = {
       setShapeSearchData(state, payload) {
         state.shapeSearch.data = payload;
       },
+      setDrawShape(state, payload) {
+        state.drawShape.data = payload;
+      },
       setOwnerSearchInput(state, payload) {
         state.ownerSearch.input = payload;
       },

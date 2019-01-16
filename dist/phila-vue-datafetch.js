@@ -3200,14 +3200,14 @@
   };
 
   Router.prototype.routeToAddress = function routeToAddress (nextAddress, searchCategory) {
-    console.log('Router.routeToAddress', nextAddress);
+    // console.log('Router.routeToAddress', nextAddress);
     if (nextAddress) {
       // check against current address
       var prevAddress = this.getAddressFromState();
 
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
-        console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
+        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
         this.dataManager.geocode(nextAddress, searchCategory);
         // this.dataManager.geocode(nextAddress, 'address')
                         // .then(this.didGeocode.bind(this));
@@ -4304,14 +4304,8 @@
         return;
       }
 
-      console.log('assignFeatureIds', data.features);
-
       var features = data.features;
       features = this.assignFeatureIds(features, 'owner');
-
-      console.log('assignFeatureIds FINISHED', data);
-
-
 
       // TODO do some checking here
       // const feature = data.features[0];
@@ -4382,57 +4376,40 @@
     };
 
     ShapeSearchClient.prototype.fetch = function fetch (input) {
-      // console.log('shape search client fetch', input);
       var data =  input.map(function (a) { return a.properties.BRT_ID; });
-      // console.log('shape search client fetch', data);
 
       var store = this.store;
 
       var shapeSearchConfig = this.config.shapeSearch;
       var url = shapeSearchConfig.url;
-      // console.log('shapeSearchConfig.url: ', url);
+
       var params = this.evaluateParams(data, shapeSearchConfig);
-      // console.log('shapeSearchConfig.params: ', params);
+
       var success = this.success.bind(this);
       var error = this.error.bind(this);
 
-      // return a promise that can accept further chaining
-      // console.log('shape search-client: axios', axios.get(url, { params }));
       return axios.get(url, { params: params })
                                       .then(success)
                                       .catch(error);
     };
 
     ShapeSearchClient.prototype.success = function success (response) {
-      // console.log('owner search success', response.config.url);
 
       var store = this.store;
       var data = response.data;
       var url = response.config.url;
-      // console.log(url)
-
-      // TODO handle multiple results
-
-      // if (!data.features || data.features.length < 1) {
-      //   console.log('owner search got no features', data);
-      //   return;
-      // }
-
-      console.log('assignFeatureIds', data.rows);
 
       var features = data.rows;
       features = this.assignFeatureIds(features, 'shape');
 
-      console.log('assignFeatureIds FINISHED', data);
-
       store.commit('setShapeSearchData', data);
       store.commit('setShapeSearchStatus', 'success');
+      store.commit('setDrawShape', null);
 
       return features;
     };
 
     ShapeSearchClient.prototype.error = function error (error$1) {
-      // console.log('owner search error', error);
       return
     };
 
@@ -5559,11 +5536,13 @@
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
         var input = this.store.state.parcels.pwd;
-        // console.log('didTryGeocode is running, input: ', input);
         var didShapeSearch = this.didShapeSearch.bind(this);
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
       } else {
         this.store.commit('setLastSearchMethod', 'owner search');
+        if(this.store.state.editableLayers !== null ){
+          this.store.state.editableLayers.clearLayers();
+        }
         var input$1 = this.store.state.geocode.input;
         this.resetGeocode();
         var didOwnerSearch = this.didOwnerSearch.bind(this);
@@ -5578,16 +5557,21 @@
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
       this.store.commit('setShapeSearchStatus', null);
-      this.store.commit('setEditableLayers', null);
       this.store.commit('setShapeSearchData', null);
       this.store.commit('setDrawShape', null);
+      if(this.store.state.editableLayers !== null ){
+        this.store.state.editableLayers.clearLayers();
+      }
     } else if (this.store.state.geocode.status === null) {
       // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
+      if(this.store.state.editableLayers !== null ){
+        this.store.state.editableLayers.clearLayers();
+      }
+      this.store.commit('setDrawShape', null);
       this.store.commit('setShapeSearchStatus', null);
       this.store.commit('setShapeSearchData', null);
-      this.store.commit('setEditableLayers', null);
-      this.store.commit('setDrawShape', null);
+
       var input$2 = this.store.state.geocode.input;
       this.resetGeocode();
       // const didOwnerSearch = this.didOwnerSearch.bind(this);
@@ -5860,7 +5844,7 @@
 
   Controller.prototype.handleSearchFormSubmit = function handleSearchFormSubmit (value, searchCategory) {
     var input = value;
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
@@ -6110,6 +6094,9 @@
         },
         setShapeSearchData: function setShapeSearchData(state, payload) {
           state.shapeSearch.data = payload;
+        },
+        setDrawShape: function setDrawShape(state, payload) {
+          state.drawShape.data = payload;
         },
         setOwnerSearchInput: function setOwnerSearchInput(state, payload) {
           state.ownerSearch.input = payload;

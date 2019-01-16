@@ -542,11 +542,13 @@ class DataManager {
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
         const input = this.store.state.parcels.pwd;
-        // console.log('didTryGeocode is running, input: ', input);
         const didShapeSearch = this.didShapeSearch.bind(this);
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
       } else {
         this.store.commit('setLastSearchMethod', 'owner search');
+        if(this.store.state.editableLayers !== null ){
+          this.store.state.editableLayers.clearLayers();
+        }
         const input = this.store.state.geocode.input;
         this.resetGeocode();
         const didOwnerSearch = this.didOwnerSearch.bind(this);
@@ -561,16 +563,21 @@ class DataManager {
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
       this.store.commit('setShapeSearchStatus', null);
-      this.store.commit('setEditableLayers', null);
       this.store.commit('setShapeSearchData', null);
       this.store.commit('setDrawShape', null);
+      if(this.store.state.editableLayers !== null ){
+        this.store.state.editableLayers.clearLayers();
+      }
     } else if (this.store.state.geocode.status === null) {
       // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
+      if(this.store.state.editableLayers !== null ){
+        this.store.state.editableLayers.clearLayers();
+      }
+      this.store.commit('setDrawShape', null);
       this.store.commit('setShapeSearchStatus', null);
       this.store.commit('setShapeSearchData', null);
-      this.store.commit('setEditableLayers', null);
-      this.store.commit('setDrawShape', null);
+
       const input = this.store.state.geocode.input;
       this.resetGeocode();
       // const didOwnerSearch = this.didOwnerSearch.bind(this);

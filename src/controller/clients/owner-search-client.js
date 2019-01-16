@@ -44,14 +44,8 @@ class OwnerSearchClient extends BaseClient {
       return;
     }
 
-    console.log('assignFeatureIds', data.features);
-
     let features = data.features;
     features = this.assignFeatureIds(features, 'owner');
-
-    console.log('assignFeatureIds FINISHED', data);
-
-
 
     // TODO do some checking here
     // const feature = data.features[0];
