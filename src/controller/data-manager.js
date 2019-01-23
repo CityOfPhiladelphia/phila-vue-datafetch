@@ -461,6 +461,7 @@ class DataManager {
         targetObj = targetObj.targets[targetId];
       }
 
+      console.log("targetObj: ", targetObj)
       // if the target obj has a status of null, this data source is ready.
       isReady = !targetObj.status;
     }
@@ -543,6 +544,10 @@ class DataManager {
         this.store.commit('setLastSearchMethod', 'shape search');
         const input = this.store.state.parcels.pwd;
         const didShapeSearch = this.didShapeSearch.bind(this);
+        this.store.commit('setOwnerSearchStatus', null);
+        this.store.commit('setOwnerSearchData', null);
+        this.store.commit('setOwnerSearchInput', null);
+        this.resetGeocode();
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
       } else {
         this.store.commit('setLastSearchMethod', 'owner search');
