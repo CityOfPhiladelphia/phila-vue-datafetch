@@ -406,13 +406,13 @@ class DataManager {
     this.store.commit('setGeocodeInput', null);
 
     // reset parcels
-    if (this.config.parcels) {
-      this.store.commit('setParcelData', {
-        parcelLayer: 'pwd',
-        multipleAllowed: false,
-        data: null
-      });
-    }
+    // if (this.config.parcels) {
+    //   this.store.commit('setParcelData', {
+    //     parcelLayer: 'pwd',
+    //     multipleAllowed: false,
+    //     data: null
+    //   });
+    // }
 
     if (this.store.state.map) {
       this.store.commit('setBasemap', 'pwd');
@@ -460,8 +460,7 @@ class DataManager {
       if (targetId) {
         targetObj = targetObj.targets[targetId];
       }
-
-      console.log("targetObj: ", targetObj)
+      // console.log("targetObj: ", targetObj)
       // if the target obj has a status of null, this data source is ready.
       isReady = !targetObj.status;
     }
