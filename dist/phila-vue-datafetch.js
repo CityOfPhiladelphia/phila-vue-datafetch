@@ -4253,6 +4253,78 @@
     return GeocodeClient;
   }(BaseClient));
 
+  var ActiveSearchClient = /*@__PURE__*/(function (BaseClient$$1) {
+    function ActiveSearchClient () {
+      BaseClient$$1.apply(this, arguments);
+    }
+
+    if ( BaseClient$$1 ) ActiveSearchClient.__proto__ = BaseClient$$1;
+    ActiveSearchClient.prototype = Object.create( BaseClient$$1 && BaseClient$$1.prototype );
+    ActiveSearchClient.prototype.constructor = ActiveSearchClient;
+
+    ActiveSearchClient.prototype.evaluateParams = function evaluateParams (feature, dataSource) {
+      var params = {};
+      if (!dataSource.options.params) { return params }    var paramEntries = Object.entries(dataSource.options.params);
+      var state = this.store.state;
+
+      for (var i = 0, list = paramEntries; i < list.length; i += 1) {
+        var ref = list[i];
+        var key = ref[0];
+        var valOrGetter = ref[1];
+
+        var val = (void 0);
+
+        if (typeof valOrGetter === 'function') {
+          val = valOrGetter(feature);
+        } else {
+          val = valOrGetter;
+        }
+        params[key] = val;
+      }
+      return params;
+    };
+
+    ActiveSearchClient.prototype.fetch = function fetch (input) {
+      var data = [];
+      if(input.properties) {
+        data = input.properties.opa_account_num;
+      } else {
+        data = input.parcel_number;
+      }
+
+      var store = this.store;
+      var activeSearchConfig = this.config.activeSearch;
+      var url = activeSearchConfig.url;
+
+      var params = this.evaluateParams(data, activeSearchConfig);
+
+      var success = this.success.bind(this);
+      var error = this.error.bind(this);
+
+      return axios.get(url, { params: params })
+                                      .then(success)
+                                      .catch(error);
+    };
+
+    ActiveSearchClient.prototype.success = function success (response) {
+
+      var store = this.store;
+      var data = response.data;
+      var url = response.config.url;
+
+      store.commit('setActiveSearchData', data);
+      store.commit('setActiveSearchStatus', 'success');
+
+      return data;
+    };
+
+    ActiveSearchClient.prototype.error = function error (error$1) {
+      return
+    };
+
+    return ActiveSearchClient;
+  }(BaseClient));
+
   // the high-level purpose of this is: take a person, search AIS for them, and put
   // the result in state.
   var OwnerSearchClient = /*@__PURE__*/(function (BaseClient$$1) {
@@ -4369,7 +4441,6 @@
         } else {
           val = valOrGetter;
         }
-
         params[key] = val;
       }
       return params;
@@ -5011,6 +5082,7 @@
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
+    this.clients.activeSearch = new ActiveSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
   };
@@ -5019,6 +5091,33 @@
 
 
   /* DATA FETCHING METHODS */
+
+  DataManager.prototype.fetchRowData = function fetchRowData (){
+    console.log("Fetching row data");
+
+    var state = this.store.state;
+    console.log("state: ", state);
+    var input = [];
+    if (state.lastSearchMethod === 'owner search') {
+        input = state.ownerSearch.data.filter(function (object) {
+                     return object._featureId === state.activeFeature.featureId
+                    });
+      } else if (state.lastSearchMethod === 'shape search') {
+        input = state.shapeSearch.data.rows.filter(function (object) {
+                     return object._featureId === state.activeFeature.featureId
+                     });
+      } else {
+        input.push(state.geocode.data);
+        for (var i = 0, list = state.geocode.related; i < list.length; i += 1) {
+          var relate = list[i];
+
+            input.push(relate);
+        }
+      }
+    console.log("input: ", input);
+
+    this.clients.activeSearch.fetch(input[0]);
+  };
 
   DataManager.prototype.fetchMoreData = function fetchMoreData (dataSourceKey, highestPageRetrieved) {
     var feature$$1 = this.store.state.geocode.data;
@@ -5089,7 +5188,6 @@
 
     // check if target objs exist in state.
     var targetIds = targets.map(targetIdFn);
-    // console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
     var stateTargets = state.sources[dataSourceKey].targets;
     var stateTargetIds = Object.keys(stateTargets);
     // the inclusion check wasn't working because ids were strings in
@@ -5104,7 +5202,6 @@
         return stateTargetIdsStr.includes(targetIdStr);
       });
     }
-    // console.log('shouldCreateTargets:', shouldCreateTargets);
 
     // if not, create them.
     if (shouldCreateTargets) {
@@ -5145,28 +5242,10 @@
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
     if(this.store.state.shapeSearch.data) {var shapeSearchObj = this.store.state.shapeSearch.data.rows;}
-    // console.log( "ownerSearchObj: ", ownerSearchObj, )
-    // console.log( "shapeSearchObj: ", shapeSearchObj, )
-
 
     var dataSources = this.config.dataSources || {};
     var dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
-    // if (this.store.state.lastSearchMethod !== 'owner search') {
-    // if (!geocodeObj) {
-    //   dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
-    //     if (dataSourceKey[1].dependent) {
-    //       if (dataSourceKey[1].dependent === 'parcel') {
-    //         return true;
-    //       }
-    //     }
-    //   })
-    // }
-    // }
-    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
-
-    // get "ready" data sources (ones whose deps have been met)
     for (var i$1 = 0, list$1 = dataSourceKeys; i$1 < list$1.length; i$1 += 1) {
       var ref = list$1[i$1];
         var dataSourceKey = ref[0];
@@ -5193,10 +5272,7 @@
         targets = [geocodeObj];
       } else {
         targets = [ownerSearchObj][0];
-        // console.log("targets: ", targets)
       }
-
-      // if(shapeSearchObj) {return}
 
       for (var i = 0, list = targets; i < list.length; i += 1) {
         // get id of target
@@ -5210,7 +5286,6 @@
         // check if it's ready
         var isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
         if (!isReady) {
-          // console.log('not ready');
           continue;
         }
 
@@ -5236,7 +5311,6 @@
         // TODO do this for all targets
         switch(type) {
           case 'http-get':
-            // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
             this.clients.http.fetch(target,
                                     dataSource,
                                     dataSourceKey,
@@ -5244,7 +5318,6 @@
             break;
 
           case 'http-get-nearby':
-          // console.log('http-get-nearby', dataSourceKey, targetIdFn)
             this.clients.http.fetchNearby(target,
                                           dataSource,
                                           dataSourceKey,
@@ -5252,40 +5325,26 @@
             break;
 
           case 'esri':
-            // console.log('esri', dataSourceKey)
             // TODO add targets id fn
             this.clients.esri.fetch(target, dataSource, dataSourceKey);
 
             break;
           case 'esri-nearby':
-            // console.log('esri-nearby', dataSourceKey)
             // TODO add targets id fn
             this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
             break;
-
-          // case 'esri-spatial':
-          //
-          // const url = this.config.map.featureLayers.pwdParcels.url;
-          // // console.log('esri-nearby', dataSourceKey)
-          // // TODO add targets id fn
-          // this.clients.esri.fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {});
-          // fetchBySpatialQuery(dataSourceKey, url, relationship, geom, parameters, options)
-          // break;
 
           default:
             throw ("Unknown data source type: " + type);
             break;
         }// end of switch
       }// end of for targets loop
-      // console.log('end of targets loop for', dataSourceKey);
     } // end of for dataSource loop
-    // console.log('end of outer loop');
   };
 
   DataManager.prototype.didFetchData = function didFetchData (key, status, data, targetId, targetIdFn) {
     var dataOrNull = status === 'error' ? null : data;
     var stateData = dataOrNull;
-    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
     var rows;
     if (stateData) {
       rows = stateData.rows;
@@ -5297,15 +5356,11 @@
     } else if (stateData) {
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
-    // console.log('stateData:', stateData);
 
     // this might cause a problem for other dataSources
     if (targetIdFn) {
       this.turnToTargets(key, stateData, targetIdFn);
     }
-
-    // does this data source have targets?
-    // const targets = this.config.dataSources[key].targets;
 
     // put data in state
     var setSourceDataOpts = {
@@ -5325,17 +5380,15 @@
     if (!targetIdFn) {
       this.store.commit('setSourceData', setSourceDataOpts);
     }
-    // console.log('in didFetchData, setSourceStatusOpts:', setSourceStatusOpts);
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    // console.log('171111 data-manager.js line 319 - didFetchData - is calling fetchData on targetId', targetId, 'key', key);
+
     this.fetchData();
   };
 
   // TODO - this is probably completely wasteful
   DataManager.prototype.turnToTargets = function turnToTargets (key, stateData, targetIdFn) {
-    // console.log('turnToTargets is running, key:', key, 'stateData:', stateData, 'targetsIdFn:', targetIdFn);
     var newLargeObj = { 'key': key };
     var newSmallObj = {};
     for (var i = 0, list = stateData; i < list.length; i += 1) {
@@ -5394,13 +5447,13 @@
     this.store.commit('setGeocodeInput', null);
 
     // reset parcels
-    if (this.config.parcels) {
-      this.store.commit('setParcelData', {
-        parcelLayer: 'pwd',
-        multipleAllowed: false,
-        data: null
-      });
-    }
+    // if (this.config.parcels) {
+    // this.store.commit('setParcelData', {
+    //   parcelLayer: 'pwd',
+    //   multipleAllowed: false,
+    //   data: null
+    // });
+    // }
 
     if (this.store.state.map) {
       this.store.commit('setBasemap', 'pwd');
@@ -5450,8 +5503,7 @@
       if (targetId) {
         targetObj = targetObj.targets[targetId];
       }
-
-      console.log("targetObj: ", targetObj);
+      // console.log("targetObj: ", targetObj)
       // if the target obj has a status of null, this data source is ready.
       isReady = !targetObj.status;
     }
@@ -5524,7 +5576,7 @@
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
-    this.fetchData();
+    this.fetchData(input);
   };
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
@@ -5825,6 +5877,10 @@
   EVENT HANDLERS
   */
 
+  Controller.prototype.activeFeatureChange = function activeFeatureChange (){
+    this.dataManager.fetchRowData();
+  };
+
   Controller.prototype.appDidLoad = function appDidLoad () {
     // route once on load
     this.router.hashChanged();
@@ -5919,6 +5975,11 @@
       related: null,
     },
     ownerSearch: {
+      status: null,
+      data: null,
+      input: null,
+    },
+    activeSearch: {
       status: null,
       data: null,
       input: null,
@@ -6099,6 +6160,12 @@
         },
         setShapeSearchData: function setShapeSearchData(state, payload) {
           state.shapeSearch.data = payload;
+        },
+        setActiveSearchStatus: function setActiveSearchStatus(state, payload) {
+          state.activeSearch.status = payload;
+        },
+        setActiveSearchData: function setActiveSearchData(state, payload) {
+          state.activeSearch.data = payload;
         },
         setDrawShape: function setDrawShape(state, payload) {
           state.drawShape.data = payload;

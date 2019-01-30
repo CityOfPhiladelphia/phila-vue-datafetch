@@ -17,6 +17,11 @@ const initialState = {
     data: null,
     input: null,
   },
+  activeSearch: {
+    status: null,
+    data: null,
+    input: null,
+  },
   shapeSearch: {
     status: null,
     data: null,
@@ -191,6 +196,12 @@ const pvdStore = {
       },
       setShapeSearchData(state, payload) {
         state.shapeSearch.data = payload;
+      },
+      setActiveSearchStatus(state, payload) {
+        state.activeSearch.status = payload;
+      },
+      setActiveSearchData(state, payload) {
+        state.activeSearch.data = payload;
       },
       setDrawShape(state, payload) {
         state.drawShape.data = payload;
