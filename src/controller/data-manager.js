@@ -15,6 +15,7 @@ import {
   GeocodeClient,
   OwnerSearchClient,
   ShapeSearchClient,
+  ActiveSearchClient,
   HttpClient,
   EsriClient
 } from './clients';
@@ -35,6 +36,7 @@ class DataManager {
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
+    this.clients.activeSearch = new ActiveSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
   }
@@ -43,6 +45,31 @@ class DataManager {
 
 
   /* DATA FETCHING METHODS */
+
+  fetchRowData(){
+    console.log("Fetching row data")
+
+    var state = this.store.state;
+    console.log("state: ", state)
+    let input = [];
+    if (state.lastSearchMethod === 'owner search') {
+        input = state.ownerSearch.data.filter(object => {
+                     return object._featureId === state.activeFeature.featureId
+                    });
+      } else if (state.lastSearchMethod === 'shape search') {
+        input = state.shapeSearch.data.rows.filter(object => {
+                     return object._featureId === state.activeFeature.featureId
+                     });
+      } else {
+        input.push(state.geocode.data);
+        for (let relate of state.geocode.related) {
+          input.push(relate);
+        }
+      }
+    console.log("input: ", input)
+
+    this.clients.activeSearch.fetch(input[0])
+  }
 
   fetchMoreData(dataSourceKey, highestPageRetrieved) {
     const feature = this.store.state.geocode.data;
@@ -113,7 +140,6 @@ class DataManager {
 
     // check if target objs exist in state.
     const targetIds = targets.map(targetIdFn);
-    // console.log('targets:', targets, 'targetIdFn:', targetIdFn, 'targetIds:', targetIds);
     const stateTargets = state.sources[dataSourceKey].targets;
     const stateTargetIds = Object.keys(stateTargets);
     // the inclusion check wasn't working because ids were strings in
@@ -128,7 +154,6 @@ class DataManager {
         return stateTargetIdsStr.includes(targetIdStr);
       });
     }
-    // console.log('shouldCreateTargets:', shouldCreateTargets);
 
     // if not, create them.
     if (shouldCreateTargets) {
@@ -167,28 +192,10 @@ class DataManager {
     const geocodeObj = this.store.state.geocode.data;
     const ownerSearchObj = this.store.state.ownerSearch.data;
     if(this.store.state.shapeSearch.data) {const shapeSearchObj = this.store.state.shapeSearch.data.rows;}
-    // console.log( "ownerSearchObj: ", ownerSearchObj, )
-    // console.log( "shapeSearchObj: ", shapeSearchObj, )
-
 
     let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
-    // if (this.store.state.lastSearchMethod !== 'owner search') {
-    //   if (!geocodeObj) {
-    //     dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
-    //       if (dataSourceKey[1].dependent) {
-    //         if (dataSourceKey[1].dependent === 'parcel') {
-    //           return true;
-    //         }
-    //       }
-    //     })
-    //   }
-    // }
-    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
-
-    // get "ready" data sources (ones whose deps have been met)
     for (let [dataSourceKey, dataSource] of dataSourceKeys) {
       const state = this.store.state;
       const type = dataSource.type;
@@ -211,10 +218,7 @@ class DataManager {
         targets = [geocodeObj];
       } else {
         targets = [ownerSearchObj][0];
-        // console.log("targets: ", targets)
       }
-
-      // if(shapeSearchObj) {return}
 
       for (let target of targets) {
         // get id of target
@@ -226,7 +230,6 @@ class DataManager {
         // check if it's ready
         const isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
         if (!isReady) {
-          // console.log('not ready');
           continue;
         }
 
@@ -252,7 +255,6 @@ class DataManager {
         // TODO do this for all targets
         switch(type) {
           case 'http-get':
-            // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
             this.clients.http.fetch(target,
                                     dataSource,
                                     dataSourceKey,
@@ -260,7 +262,6 @@ class DataManager {
             break;
 
           case 'http-get-nearby':
-          // console.log('http-get-nearby', dataSourceKey, targetIdFn)
             this.clients.http.fetchNearby(target,
                                           dataSource,
                                           dataSourceKey,
@@ -268,40 +269,26 @@ class DataManager {
             break;
 
           case 'esri':
-            // console.log('esri', dataSourceKey)
             // TODO add targets id fn
             this.clients.esri.fetch(target, dataSource, dataSourceKey);
 
             break;
           case 'esri-nearby':
-            // console.log('esri-nearby', dataSourceKey)
             // TODO add targets id fn
             this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
             break;
-
-          // case 'esri-spatial':
-          //
-          //   const url = this.config.map.featureLayers.pwdParcels.url;
-          //   // console.log('esri-nearby', dataSourceKey)
-          //   // TODO add targets id fn
-          //   this.clients.esri.fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {});
-          //   fetchBySpatialQuery(dataSourceKey, url, relationship, geom, parameters, options)
-          //   break;
 
           default:
             throw `Unknown data source type: ${type}`;
             break;
         }  // end of switch
       }  // end of for targets loop
-      // console.log('end of targets loop for', dataSourceKey);
     } // end of for dataSource loop
-    // console.log('end of outer loop');
   }
 
   didFetchData(key, status, data, targetId, targetIdFn) {
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
-    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
     let rows;
     if (stateData) {
       rows = stateData.rows;
@@ -313,15 +300,11 @@ class DataManager {
     } else if (stateData) {
       stateData.rows = this.assignFeatureIds(rows, key, targetId);
     }
-    // console.log('stateData:', stateData);
 
     // this might cause a problem for other dataSources
     if (targetIdFn) {
       this.turnToTargets(key, stateData, targetIdFn);
     }
-
-    // does this data source have targets?
-    // const targets = this.config.dataSources[key].targets;
 
     // put data in state
     const setSourceDataOpts = {
@@ -341,17 +324,15 @@ class DataManager {
     if (!targetIdFn) {
       this.store.commit('setSourceData', setSourceDataOpts);
     }
-    // console.log('in didFetchData, setSourceStatusOpts:', setSourceStatusOpts);
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    // console.log('171111 data-manager.js line 319 - didFetchData - is calling fetchData on targetId', targetId, 'key', key);
+
     this.fetchData();
   }
 
   // TODO - this is probably completely wasteful
   turnToTargets(key, stateData, targetIdFn) {
-    // console.log('turnToTargets is running, key:', key, 'stateData:', stateData, 'targetsIdFn:', targetIdFn);
     let newLargeObj = { 'key': key }
     let newSmallObj = {}
     for (let theData of stateData) {
@@ -529,7 +510,7 @@ class DataManager {
   }
 
   didShapeSearch() {
-    this.fetchData();
+    this.fetchData(input);
   }
 
   didTryGeocode(feature) {

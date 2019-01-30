@@ -30,6 +30,10 @@ class Controller {
   EVENT HANDLERS
   */
 
+  activeFeatureChange(){
+    this.dataManager.fetchRowData();
+  }
+
   appDidLoad() {
     // route once on load
     this.router.hashChanged();

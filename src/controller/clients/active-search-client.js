@@ -2,10 +2,9 @@ import axios from 'axios';
 import BaseClient from './base-client';
 
 
-class ShapeSearchClient extends BaseClient {
+class ActiveSearchClient extends BaseClient {
 
   evaluateParams(feature, dataSource) {
-    // console.log('http-client evaluateParams is running');
     const params = {};
     if (!dataSource.options.params) { return params };
     const paramEntries = Object.entries(dataSource.options.params);
@@ -15,7 +14,6 @@ class ShapeSearchClient extends BaseClient {
       let val;
 
       if (typeof valOrGetter === 'function') {
-        // console.log(feature);
         val = valOrGetter(feature);
       } else {
         val = valOrGetter;
@@ -26,14 +24,18 @@ class ShapeSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    const data =  input.map(a => a.properties.BRT_ID)
+    let data = [];
+    if(input.properties) {
+      data = input.properties.opa_account_num;
+    } else {
+      data = input.parcel_number
+    }
 
     const store = this.store;
+    const activeSearchConfig = this.config.activeSearch;
+    const url = activeSearchConfig.url;
 
-    const shapeSearchConfig = this.config.shapeSearch;
-    const url = shapeSearchConfig.url;
-
-    let params = this.evaluateParams(data, shapeSearchConfig);
+    let params = this.evaluateParams(data, activeSearchConfig);
 
     const success = this.success.bind(this);
     const error = this.error.bind(this);
@@ -49,14 +51,10 @@ class ShapeSearchClient extends BaseClient {
     let data = response.data;
     const url = response.config.url;
 
-    let features = data.rows
-    features = this.assignFeatureIds(features, 'shape');
+    store.commit('setActiveSearchData', data);
+    store.commit('setActiveSearchStatus', 'success');
 
-    store.commit('setShapeSearchData', data);
-    store.commit('setShapeSearchStatus', 'success');
-    store.commit('setDrawShape', null)
-
-    return features;
+    return data;
   }
 
   error(error) {
@@ -64,4 +62,4 @@ class ShapeSearchClient extends BaseClient {
   }
 }
 
-export default ShapeSearchClient;
+export default ActiveSearchClient;
