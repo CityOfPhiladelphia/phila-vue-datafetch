@@ -47,10 +47,9 @@ class DataManager {
   /* DATA FETCHING METHODS */
 
   fetchRowData(){
-    console.log("Fetching row data")
+    // console.log("Fetching row data")
 
     var state = this.store.state;
-    console.log("state: ", state)
     let input = [];
     if (state.lastSearchMethod === 'owner search') {
         input = state.ownerSearch.data.filter(object => {
@@ -66,7 +65,6 @@ class DataManager {
           input.push(relate);
         }
       }
-    console.log("input: ", input)
 
     this.clients.activeSearch.fetch(input[0])
   }
@@ -510,7 +508,7 @@ class DataManager {
   }
 
   didShapeSearch() {
-    this.fetchData(input);
+    this.fetchData();
   }
 
   didTryGeocode(feature) {

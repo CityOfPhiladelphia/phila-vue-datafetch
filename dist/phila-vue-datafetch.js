@@ -5093,10 +5093,9 @@
   /* DATA FETCHING METHODS */
 
   DataManager.prototype.fetchRowData = function fetchRowData (){
-    console.log("Fetching row data");
+    // console.log("Fetching row data")
 
     var state = this.store.state;
-    console.log("state: ", state);
     var input = [];
     if (state.lastSearchMethod === 'owner search') {
         input = state.ownerSearch.data.filter(function (object) {
@@ -5114,7 +5113,6 @@
             input.push(relate);
         }
       }
-    console.log("input: ", input);
 
     this.clients.activeSearch.fetch(input[0]);
   };
@@ -5576,7 +5574,7 @@
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
-    this.fetchData(input);
+    this.fetchData();
   };
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
