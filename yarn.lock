@@ -4226,8 +4226,8 @@ void-elements@^2.0.1:
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-2.0.1.tgz#c066afb582bb1cb4128d60ea92392e94d5e9dbec"
 
 vue-template-compiler@^2.6.2:
-  version "2.6.2"
-  resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.6.2.tgz#6230abf7ca92d565b7471c0cc3f54d5b12aa48e7"
+  version "2.6.3"
+  resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.6.3.tgz#fe76b7755b038889f5e887895745f0d2bce3f778"
   dependencies:
     de-indent "^1.0.2"
     he "^1.1.0"
@@ -4242,7 +4242,7 @@ vue-template-validator@^1.1.5:
   dependencies:
     chalk "^1.1.1"
 
-vue@^2.6.2:
+vue@2.6.2:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.2.tgz#1cc9c9c8f7ba8df45e9b97c284947de78b76301c"
 
