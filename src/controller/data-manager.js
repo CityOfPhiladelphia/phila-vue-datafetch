@@ -569,7 +569,6 @@ class DataManager {
   }
 
   didGeocode(feature) {
-    // console.log('DataManager.didGeocode:', feature);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {
@@ -584,6 +583,9 @@ class DataManager {
         return;
       } else if (feature.properties.street_address) {
         this.fetchData();
+      }
+      if(feature.geometry.coordinates) {
+        this.store.commit('setMapCenter', feature.geometry.coordinates);
       }
     } else {
       this.fetchData();

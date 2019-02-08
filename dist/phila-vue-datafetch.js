@@ -5635,7 +5635,6 @@
   };
 
   DataManager.prototype.didGeocode = function didGeocode (feature$$1) {
-    // console.log('DataManager.didGeocode:', feature);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {
@@ -5650,6 +5649,9 @@
         return;
       } else if (feature$$1.properties.street_address) {
         this.fetchData();
+      }
+      if(feature$$1.geometry.coordinates) {
+        this.store.commit('setMapCenter', feature$$1.geometry.coordinates);
       }
     } else {
       this.fetchData();
