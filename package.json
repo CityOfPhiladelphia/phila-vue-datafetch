@@ -7,7 +7,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"
   },
-  "main": "./dist/phila-vue-datafetch.js",
+  "main": "./src/main.js",
   "dependencies": {
     "@turf/turf": "^5.1.6",
     "axios": "^0.18.0",
