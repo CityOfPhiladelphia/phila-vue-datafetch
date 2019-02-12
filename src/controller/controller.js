@@ -48,7 +48,7 @@ class Controller {
   }
 
   filterInputSubmit(value, process, searchCategory) {
-    console.log('controller filterInputSubmit is running, value:', value, 'process:', process);
+    // console.log('controller filterInputSubmit is running, value:', value, 'process:', process);
     if (process === 'mapboard') {
       this.handleSearchFormSubmit(value);
     } else {
@@ -109,6 +109,16 @@ class Controller {
     const shape = this.store.state.drawShape;
     const parcels = [];
     this.dataManager.getParcelsByShape(shape, parcels);
+  }
+  geocodeOwnerSearch(state) {
+    // console.log("ownerSearch data:", this.store.state.ownerSearch.data);
+    const ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id);
+
+    let feature = this.dataManager.getParcelsById(ids, 'pwd');
+
+    if( feature.response !== undefined) {
+      this.store.commit('setGeocodeData', feature.response);
+    }
   }
 
   goToDefaultAddress(address) {

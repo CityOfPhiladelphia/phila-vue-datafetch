@@ -593,18 +593,22 @@ class DataManager {
   } // end didGeocode
 
   getParcelsById(id, parcelLayer) {
-    // console.log('getParcelsById', parcelLayer);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
     const parcelQuery = Query({ url });
-    parcelQuery.where(geocodeField + " = '" + id + "'");
-    // console.log('parcelQuery:', parcelQuery);
-    parcelQuery.run((function(error, featureCollection, response) {
-        // console.log('171111 getParcelsById parcelQuery ran, response:', response);
-        this.didGetParcels(error, featureCollection, response, parcelLayer);
+    parcelQuery.where(geocodeField + " IN (" + id + ")");
+    let reponse = [];
+    // parcelQuery.run((function(error, featureCollection, response) {
+    //     console.log('171111 getParcelsById parcelQuery ran, response:', response);
+    //     this.didGetParcels(error, featureCollection, response, parcelLayer);
+    //   }).bind(this)
+    // )
+
+    return parcelQuery.run((function(error, featureCollection, response) {
+        this.didGetParcelsById(error, featureCollection, response, parcelLayer, fetch);
       }).bind(this)
-    )
+    );
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
@@ -640,14 +644,14 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
     otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
     const lastSearchMethod = this.store.state.lastSearchMethod;
 
-    // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+    console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
 
     if (error) {
       // update state
@@ -663,6 +667,7 @@ class DataManager {
     }
 
     const features = featureCollection.features;
+    // console.log('featureCollection: ', featureCollection.features, 'features: ', features);
     if (features.length === 0) {
       return;
     }
@@ -671,12 +676,12 @@ class DataManager {
     let coords = feature.geometry.coordinates;
     // use turf to get area and perimeter of all parcels returned
 
-    // console.log('feature:', feature, 'coords.length:', coords.length);
+    console.log('feature:', feature, 'coords.length:', coords.length);
     if (coords.length > 1) {
       let distances = [];
       let areas = [];
       for (let coordsSet of coords) {
-        // console.log('coordsSet:', coordsSet);
+        console.log('coordsSet:', coordsSet);
         const turfPolygon = polygon(coordsSet);
         distances.push(this.getDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
         areas.push(area(turfPolygon) * 10.7639);
@@ -684,16 +689,18 @@ class DataManager {
       feature.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
       feature.properties.TURF_AREA = areas.reduce(function(acc, val) { return acc + val; });
     } else {
-      // console.log('coords:', coords);
+      console.log('coords:', coords);
       const turfPolygon = polygon(coords);
       let distances = this.getDistances(coords);
       feature.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
       feature.properties.TURF_AREA = area(turfPolygon) * 10.7639;
     }
-    // console.log('after calcs, feature:', feature);
+    console.log('after calcs, feature:', feature);
 
     // at this point there is definitely a feature or features - put it in state
+
     this.setParcelsInState(parcelLayer, feature);
+    console.log("setParcelsInState: ", parcelLayer, feature);
 
     // shouldGeocode - true only if:
     // 1. didGetParcels is running because the map was clicked (lastSearchMethod = reverseGeocode)
@@ -701,7 +708,7 @@ class DataManager {
       lastSearchMethod === 'reverseGeocode'
     );
 
-    // console.log('didGetParcels - shouldGeocode is', shouldGeocode);
+    console.log('didGetParcels - shouldGeocode is', shouldGeocode);
     if (shouldGeocode) {
       // since we definitely have a new parcel, and will attempt to geocode it:
       // 1. wipe out state data on other parcels
@@ -753,6 +760,30 @@ class DataManager {
       this.geocode(features);
 
       // this.fetchData();
+  }
+  didGetParcelsById(error, featureCollection, response, parcelLayer, fetch) {
+
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+
+    const configForParcelLayer = this.config.parcels.pwd;
+    const geocodeField = configForParcelLayer.geocodeField;
+    const otherParcelLayers = Object.keys(this.config.parcels || {});
+    otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
+    const lastSearchMethod = this.store.state.lastSearchMethod;
+
+    // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+
+    if (error) {
+      if (configForParcelLayer.clearStateOnError) {
+      }
+      return;}
+      if (!featureCollection) {return;}
+
+      const features = featureCollection.features;
+
+      if (features.length === 0) { return;}
+      // at this point there is definitely a feature or features - put it in state
+      this.setParcelsInState(parcelLayer, features);
   }
 
   getDistances(coords) {
