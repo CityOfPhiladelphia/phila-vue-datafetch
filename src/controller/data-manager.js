@@ -184,8 +184,8 @@ class DataManager {
   }
 
   fetchData() {
-    // console.log('\nFETCH DATA');
-    // console.log('-----------');
+    console.log('\nFETCH DATA');
+    console.log('-----------');
 
     const geocodeObj = this.store.state.geocode.data;
     const ownerSearchObj = this.store.state.ownerSearch.data;
@@ -285,6 +285,7 @@ class DataManager {
   }
 
   didFetchData(key, status, data, targetId, targetIdFn) {
+    console.log("Did fetch data")
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
     let rows;
@@ -377,8 +378,8 @@ class DataManager {
   // this gets called when the current geocoded address is wiped out, such as
   // when you click on the "Atlas" title and it navigates to an empty hash
   resetGeocode() {
-    // console.log('resetGeocode is running');
-    // reset geocode
+    console.log('resetGeocode is running');
+
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
@@ -498,7 +499,7 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input) {
-    // console.log('data-manager geocode is running, input:', input);
+    console.log('data-manager geocode is running, input:', input);
     const didTryGeocode = this.didTryGeocode.bind(this);
     const test = this.clients.geocode.fetch(input).then(didTryGeocode);
   }
@@ -512,12 +513,10 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    // console.log('didTryGeocode is running, feature:', feature);
+    console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
-      // console.log('didTryGeocode is running, error: need to reset drawShape ');
-      //TODO set up drawShape so that after running it removes the shape, resetting the field
-      // and instead shows the polygons of the parcels selected on the map
-      //probably need some way to clear that too though for owner, click and address searches.
+      console.log('didTryGeocode is running, error: need to reset drawShape ');
+
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
         const input = this.store.state.parcels.pwd;
@@ -527,6 +526,34 @@ class DataManager {
         this.store.commit('setOwnerSearchInput', null);
         this.resetGeocode();
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
+      } else if (this.store.state.geocode.status === 'success') {
+        console.log('didTryGeocode is running, success');
+        this.resetData();
+        this.didGeocode(feature);
+        this.store.commit('setLastSearchMethod', 'geocode');
+        this.store.commit('setOwnerSearchStatus', null);
+        this.store.commit('setOwnerSearchData', null);
+        this.store.commit('setOwnerSearchInput', null);
+        this.store.commit('setShapeSearchStatus', null);
+        this.store.commit('setShapeSearchData', null);
+        this.store.commit('setDrawShape', null);
+        if(this.store.state.editableLayers !== null ){
+          this.store.state.editableLayers.clearLayers();
+        }
+      } else if (this.store.state.geocode.status === null) {
+        console.log('didTryGeocode is running, feature:', feature);
+        this.store.commit('setLastSearchMethod', 'owner search');
+        if(this.store.state.editableLayers !== null ){
+          this.store.state.editableLayers.clearLayers();
+        }
+        this.store.commit('setDrawShape', null);
+        this.store.commit('setShapeSearchStatus', null);
+        this.store.commit('setShapeSearchData', null);
+
+        const input = this.store.state.geocode.input;
+        this.resetGeocode();
+        // const didOwnerSearch = this.didOwnerSearch.bind(this);
+        return this.clients.shapeSearch.fetch(input);
       } else {
         this.store.commit('setLastSearchMethod', 'owner search');
         if(this.store.state.editableLayers !== null ){
@@ -537,34 +564,6 @@ class DataManager {
         const didOwnerSearch = this.didOwnerSearch.bind(this);
         return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
       }
-    } else if (this.store.state.geocode.status === 'success') {
-      // console.log('didTryGeocode is running, success');
-      this.resetData();
-      this.didGeocode(feature);
-      this.store.commit('setLastSearchMethod', 'geocode');
-      this.store.commit('setOwnerSearchStatus', null);
-      this.store.commit('setOwnerSearchData', null);
-      this.store.commit('setOwnerSearchInput', null);
-      this.store.commit('setShapeSearchStatus', null);
-      this.store.commit('setShapeSearchData', null);
-      this.store.commit('setDrawShape', null);
-      if(this.store.state.editableLayers !== null ){
-        this.store.state.editableLayers.clearLayers();
-      }
-    } else if (this.store.state.geocode.status === null) {
-      // console.log('didTryGeocode is running, feature:', feature);
-      this.store.commit('setLastSearchMethod', 'owner search');
-      if(this.store.state.editableLayers !== null ){
-        this.store.state.editableLayers.clearLayers();
-      }
-      this.store.commit('setDrawShape', null);
-      this.store.commit('setShapeSearchStatus', null);
-      this.store.commit('setShapeSearchData', null);
-
-      const input = this.store.state.geocode.input;
-      this.resetGeocode();
-      // const didOwnerSearch = this.didOwnerSearch.bind(this);
-      return this.clients.shapeSearch.fetch(input);
     }
   }
 
