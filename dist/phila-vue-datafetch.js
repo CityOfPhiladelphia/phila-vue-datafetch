@@ -5708,14 +5708,14 @@
   };
 
   DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch) {
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     var configForParcelLayer = this.config.parcels.pwd;
     var geocodeField = configForParcelLayer.geocodeField;
     var otherParcelLayers = Object.keys(this.config.parcels || {});
     otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
     var lastSearchMethod = this.store.state.lastSearchMethod;
 
-    console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+    // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
 
     if (error) {
       // update state
@@ -5740,7 +5740,7 @@
     var coords = feature$$1.geometry.coordinates;
     // use turf to get area and perimeter of all parcels returned
 
-    console.log('feature:', feature$$1, 'coords.length:', coords.length);
+    // console.log('feature:', feature, 'coords.length:', coords.length);
     if (coords.length > 1) {
       var distances = [];
       var areas = [];
@@ -5755,18 +5755,18 @@
       feature$$1.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
       feature$$1.properties.TURF_AREA = areas.reduce(function(acc, val) { return acc + val; });
     } else {
-      console.log('coords:', coords);
+      // console.log('coords:', coords);
       var turfPolygon$1 = polygon(coords);
       var distances$1 = this.getDistances(coords);
       feature$$1.properties.TURF_PERIMETER = distances$1.reduce(function(acc, val) { return acc + val; });
       feature$$1.properties.TURF_AREA = area(turfPolygon$1) * 10.7639;
     }
-    console.log('after calcs, feature:', feature$$1);
+    // console.log('after calcs, feature:', feature);
 
     // at this point there is definitely a feature or features - put it in state
 
     this.setParcelsInState(parcelLayer, feature$$1);
-    console.log("setParcelsInState: ", parcelLayer, feature$$1);
+    // console.log("setParcelsInState: ", parcelLayer, feature);
 
     // shouldGeocode - true only if:
     // 1. didGetParcels is running because the map was clicked (lastSearchMethod = reverseGeocode)
@@ -5774,7 +5774,7 @@
       lastSearchMethod === 'reverseGeocode'
     );
 
-    console.log('didGetParcels - shouldGeocode is', shouldGeocode);
+    // console.log('didGetParcels - shouldGeocode is', shouldGeocode);
     if (shouldGeocode) {
       // since we definitely have a new parcel, and will attempt to geocode it:
       // 1. wipe out state data on other parcels
