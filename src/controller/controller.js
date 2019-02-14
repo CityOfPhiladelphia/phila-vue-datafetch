@@ -86,7 +86,7 @@ class Controller {
   }
 
   handleMapClick(e) {
-    console.log('handle map click', e, this);
+    // console.log('handle map click', e, this);
 
     // TODO figure out why form submits via enter key are generating a map
     // click event and remove this
@@ -102,7 +102,7 @@ class Controller {
     this.store.commit('setGeocodeInput', null);
 
     const parcels = this.store.state.parcels;
-    console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+    // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
   }
   geocodeDrawnShape(state) {
@@ -111,7 +111,7 @@ class Controller {
     this.dataManager.getParcelsByShape(shape, parcels);
   }
   geocodeOwnerSearch(state) {
-    console.log("ownerSearch data:", this.store.state.ownerSearch.data);
+    // console.log("ownerSearch data:", this.store.state.ownerSearch.data);
     const ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id);
 
     let feature = this.dataManager.getParcelsById(ids, 'pwd');

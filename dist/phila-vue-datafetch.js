@@ -5235,8 +5235,8 @@
   };
 
   DataManager.prototype.fetchData = function fetchData () {
-    console.log('\nFETCH DATA');
-    console.log('-----------');
+    // console.log('\nFETCH DATA');
+    // console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
@@ -5342,7 +5342,6 @@
   };
 
   DataManager.prototype.didFetchData = function didFetchData (key, status, data, targetId, targetIdFn) {
-    console.log("Did fetch data");
     var dataOrNull = status === 'error' ? null : data;
     var stateData = dataOrNull;
     var rows;
@@ -5439,8 +5438,8 @@
   // this gets called when the current geocoded address is wiped out, such as
   // when you click on the "Atlas" title and it navigates to an empty hash
   DataManager.prototype.resetGeocode = function resetGeocode () {
-    console.log('resetGeocode is running');
-
+    // console.log('resetGeocode is running');
+    // reset geocode
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
@@ -5566,7 +5565,7 @@
 
   /* GEOCODING */
   DataManager.prototype.geocode = function geocode (input) {
-    console.log('data-manager geocode is running, input:', input);
+    // console.log('data-manager geocode is running, input:', input);
     var didTryGeocode = this.didTryGeocode.bind(this);
     var test = this.clients.geocode.fetch(input).then(didTryGeocode);
   };
@@ -5580,10 +5579,12 @@
   };
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
-    console.log('didTryGeocode is running, feature:', feature$$1);
+    // console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
-      console.log('didTryGeocode is running, error: need to reset drawShape ');
-
+      // console.log('didTryGeocode is running, error: need to reset drawShape ');
+      //TODO set up drawShape so that after running it removes the shape, resetting the field
+      // and instead shows the polygons of the parcels selected on the map
+      //probably need some way to clear that too though for owner, click and address searches.
       if(this.store.state.drawShape !== null ) {
         this.store.commit('setLastSearchMethod', 'shape search');
         var input = this.store.state.parcels.pwd;
@@ -5593,44 +5594,44 @@
         this.store.commit('setOwnerSearchInput', null);
         this.resetGeocode();
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
-      } else if (this.store.state.geocode.status === 'success') {
-        console.log('didTryGeocode is running, success');
-        this.resetData();
-        this.didGeocode(feature$$1);
-        this.store.commit('setLastSearchMethod', 'geocode');
-        this.store.commit('setOwnerSearchStatus', null);
-        this.store.commit('setOwnerSearchData', null);
-        this.store.commit('setOwnerSearchInput', null);
-        this.store.commit('setShapeSearchStatus', null);
-        this.store.commit('setShapeSearchData', null);
-        this.store.commit('setDrawShape', null);
-        if(this.store.state.editableLayers !== null ){
-          this.store.state.editableLayers.clearLayers();
-        }
-      } else if (this.store.state.geocode.status === null) {
-        console.log('didTryGeocode is running, feature:', feature$$1);
-        this.store.commit('setLastSearchMethod', 'owner search');
-        if(this.store.state.editableLayers !== null ){
-          this.store.state.editableLayers.clearLayers();
-        }
-        this.store.commit('setDrawShape', null);
-        this.store.commit('setShapeSearchStatus', null);
-        this.store.commit('setShapeSearchData', null);
-
-        var input$1 = this.store.state.geocode.input;
-        this.resetGeocode();
-        // const didOwnerSearch = this.didOwnerSearch.bind(this);
-        return this.clients.shapeSearch.fetch(input$1);
       } else {
         this.store.commit('setLastSearchMethod', 'owner search');
         if(this.store.state.editableLayers !== null ){
           this.store.state.editableLayers.clearLayers();
         }
-        var input$2 = this.store.state.geocode.input;
+        var input$1 = this.store.state.geocode.input;
         this.resetGeocode();
         var didOwnerSearch = this.didOwnerSearch.bind(this);
-        return this.clients.ownerSearch.fetch(input$2).then(didOwnerSearch);
+        return this.clients.ownerSearch.fetch(input$1).then(didOwnerSearch);
       }
+    } else if (this.store.state.geocode.status === 'success') {
+      // console.log('didTryGeocode is running, success');
+      this.resetData();
+      this.didGeocode(feature$$1);
+      this.store.commit('setLastSearchMethod', 'geocode');
+      this.store.commit('setOwnerSearchStatus', null);
+      this.store.commit('setOwnerSearchData', null);
+      this.store.commit('setOwnerSearchInput', null);
+      this.store.commit('setShapeSearchStatus', null);
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setDrawShape', null);
+      if(this.store.state.editableLayers !== null ){
+        this.store.state.editableLayers.clearLayers();
+      }
+    } else if (this.store.state.geocode.status === null) {
+      // console.log('didTryGeocode is running, feature:', feature);
+      this.store.commit('setLastSearchMethod', 'owner search');
+      if(this.store.state.editableLayers !== null ){
+        this.store.state.editableLayers.clearLayers();
+      }
+      this.store.commit('setDrawShape', null);
+      this.store.commit('setShapeSearchStatus', null);
+      this.store.commit('setShapeSearchData', null);
+
+      var input$2 = this.store.state.geocode.input;
+      this.resetGeocode();
+      // const didOwnerSearch = this.didOwnerSearch.bind(this);
+      return this.clients.shapeSearch.fetch(input$2);
     }
   };
 
@@ -5963,7 +5964,7 @@
   };
 
   Controller.prototype.handleMapClick = function handleMapClick (e) {
-    console.log('handle map click', e, this);
+    // console.log('handle map click', e, this);
 
     // TODO figure out why form submits via enter key are generating a map
     // click event and remove this
@@ -5979,7 +5980,7 @@
     this.store.commit('setGeocodeInput', null);
 
     var parcels = this.store.state.parcels;
-    console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+    // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
   };
   Controller.prototype.geocodeDrawnShape = function geocodeDrawnShape (state) {
@@ -5988,7 +5989,7 @@
     this.dataManager.getParcelsByShape(shape, parcels);
   };
   Controller.prototype.geocodeOwnerSearch = function geocodeOwnerSearch (state) {
-    console.log("ownerSearch data:", this.store.state.ownerSearch.data);
+    // console.log("ownerSearch data:", this.store.state.ownerSearch.data);
     var ids = this.store.state.ownerSearch.data.map(function (item) { return item.properties.pwd_parcel_id; });
 
     var feature = this.dataManager.getParcelsById(ids, 'pwd');
