@@ -1,5 +1,5 @@
 {
-  "name": "@cityofphiladelphia/phila-vue-datafetch",
+  "name": "@philly/vue-datafetch",
   "description": "the infrastructure needed for fetching data for a vue app",
   "version": "0.0.13",
   "author": "City of Philadelphia <maps@phila.gov>",
