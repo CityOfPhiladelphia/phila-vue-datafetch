@@ -152,6 +152,9 @@ class HttpClient extends BaseClient {
     // if the data is not dependent on other data
     axios.get(url, { params }).then(response => {
       // call success fn
+      for (let row of response.data.rows) {
+        row.distance = row.distance * 3.28084;
+      }
       let data = response.data.rows;
       // console.log('table and data', table, data);
 

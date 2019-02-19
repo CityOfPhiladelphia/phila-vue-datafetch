@@ -4563,6 +4563,12 @@
       // if the data is not dependent on other data
       axios.get(url, { params: params }).then(function (response) {
         // call success fn
+        console.log('HTTP-CLIENT JS AXIOS TEST');
+        for (var i = 0, list = response.data.rows; i < list.length; i += 1) {
+          var row = list[i];
+
+          row.distance = row.distance * 3.28084;
+        }
         var data = response.data.rows;
         // console.log('table and data', table, data);
 
