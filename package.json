@@ -1,7 +1,7 @@
 {
-  "name": "@cityofphiladelphia/phila-vue-datafetch",
+  "name": "@philly/vue-datafetch",
   "description": "the infrastructure needed for fetching data for a vue app",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "author": "City of Philadelphia <maps@phila.gov>",
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -15,13 +15,13 @@
     "esri-leaflet": "^2.2.3",
     "leaflet": "^1.4.0",
     "proj4": "^2.5.0",
-    "vue": "2.5.22",
+    "vue": "^2.6.8",
     "vuex": "^3.0.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.0.5",
     "@vue/cli-service": "^3.0.5",
-    "vue-template-compiler": "2.5.22",
+    "vue-template-compiler": "^2.6.8",
     "webpack-visualizer-plugin": "^0.1.11"
   },
   "postcss": {
