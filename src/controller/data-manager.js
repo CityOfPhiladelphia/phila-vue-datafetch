@@ -364,7 +364,8 @@ class DataManager {
       }
 
       // reset other topic and map state
-      if (this.config.topics.length) {
+      // if (this.config.topics.length) {
+      if (this.config.topics != undefined) {
         if (this.config.defaultTopic || this.config.defaultTopic === null) {
           this.store.commit('setActiveTopic', this.config.defaultTopic);
         } else {
@@ -372,7 +373,6 @@ class DataManager {
           this.store.commit('setActiveTopic', this.config.topics[0].key);
         }
       }
-
 
       if (this.store.state.map) {
         this.store.commit('setBasemap', 'pwd');
