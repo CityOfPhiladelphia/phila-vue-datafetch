@@ -145,7 +145,6 @@ class HttpClient extends BaseClient {
       }
 
       // let test = format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD');
-      // params['q'] = params['q'] + " and " + dateField + " > '" + moment().subtract(dateMinNum, dateMinType).format('YYYY-MM-DD') + "'"
       params['q'] = params['q'] + " and " + dateField + " > '" + format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD') + "'"
     }
 
