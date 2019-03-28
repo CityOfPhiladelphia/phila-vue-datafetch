@@ -59,7 +59,8 @@ class OwnerSearchClient extends BaseClient {
     //     relatedFeatures.push(relatedFeature);
     //   }
     // }
-
+    store.commit('setShapeSearchStatus', null);
+    store.commit('setShapeSearchData', null);
     store.commit('setOwnerSearchData', features);
     // store.commit('setOwnerSearchData', data.features);
     // store.commit('setOwnerSearchRelated', relatedFeatures);

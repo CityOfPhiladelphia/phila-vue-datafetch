@@ -4391,7 +4391,8 @@
       //     relatedFeatures.push(relatedFeature);
       //   }
       // }
-
+      store.commit('setShapeSearchStatus', null);
+      store.commit('setShapeSearchData', null);
       store.commit('setOwnerSearchData', features);
       // store.commit('setOwnerSearchData', data.features);
       // store.commit('setOwnerSearchRelated', relatedFeatures);
@@ -4465,7 +4466,7 @@
     };
 
     ShapeSearchClient.prototype.success = function success (response) {
-      console.log("success respose: ", response);
+      // console.log("success respose: ", response);
 
       var store = this.store;
       var data = response.data;
@@ -5636,13 +5637,11 @@
   };
 
   DataManager.prototype.didGeocode = function didGeocode (feature$$1) {
+    // console.log("did Geocode is running")
     this.controller.router.didGeocode();
-    if (!this.config.parcels) {
-      if (this.store.state.map) {
-        this.store.commit('setMapZoom', 19);
-        this.store.commit('setMapCenter', feature$$1.geometry.coordinates);
-      }
-      return
+    if (this.store.state.map) {
+      this.store.commit('setMapZoom', 19);
+      this.store.commit('setMapCenter', feature$$1.geometry.coordinates);
     }
 
     if (feature$$1) {

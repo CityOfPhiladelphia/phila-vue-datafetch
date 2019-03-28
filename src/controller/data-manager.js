@@ -569,13 +569,11 @@ class DataManager {
   }
 
   didGeocode(feature) {
+    // console.log("did Geocode is running")
     this.controller.router.didGeocode();
-    if (!this.config.parcels) {
-      if (this.store.state.map) {
-        this.store.commit('setMapZoom', 19);
-        this.store.commit('setMapCenter', feature.geometry.coordinates);
-      }
-      return
+    if (this.store.state.map) {
+      this.store.commit('setMapZoom', 19);
+      this.store.commit('setMapCenter', feature.geometry.coordinates);
     }
 
     if (feature) {
