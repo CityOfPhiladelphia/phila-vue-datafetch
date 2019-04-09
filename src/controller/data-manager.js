@@ -116,11 +116,16 @@ class DataManager {
   }
 
 
-  fetchData() {
-    // console.log('\nFETCH DATA');
+  fetchData(optionalFeature) {
+    console.log('\nFETCH DATA');
     // console.log('-----------');
+    let geocodeObj;
 
-    const geocodeObj = this.store.state.geocode.data;
+    if (optionalFeature) {
+      geocodeObj = optionalFeature;
+    } else {
+      geocodeObj = this.store.state.geocode.data;
+    }
 
     // we always need a good geocode before we can get data, so return
     // if we don't have one yet.
@@ -511,9 +516,20 @@ class DataManager {
   didTryGeocode(feature) {
     console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
-      const input = this.store.state.geocode.input;
-      const didOwnerSearch = this.didOwnerSearch.bind(this);
-      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+      if (this.config.onGeocodeFail) {
+        console.log('onGeocodeFail exists');
+        let feature = {
+          properties: {}
+        }
+        feature.properties.opa_account_num = this.store.state.geocode.input;
+        this.resetData();
+        // this.resetGeocode();
+        this.fetchData(feature);
+      } else {
+        const input = this.store.state.geocode.input;
+        const didOwnerSearch = this.didOwnerSearch.bind(this);
+        return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+      }
     } else if (this.store.state.geocode.status === 'success') {
       this.didGeocode(feature);
       this.store.commit('setOwnerSearchStatus', null);
