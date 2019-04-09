@@ -117,10 +117,13 @@ class DataManager {
 
 
   fetchData(optionalFeature) {
-    console.log('\nFETCH DATA');
+    // console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
 
+    // this was added to allow fetchData to run even without a geocode result
+    // for the real estate tax site which sometimes needs data from TIPS
+    // even if the property is not in OPA and AIS
     if (optionalFeature) {
       geocodeObj = optionalFeature;
     } else {
@@ -516,6 +519,10 @@ class DataManager {
   didTryGeocode(feature) {
     console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
+
+      // this was added to allow fetchData to run even without a geocode result
+      // for the real estate tax site which sometimes needs data from TIPS
+      // even if the property is not in OPA and AIS
       if (this.config.onGeocodeFail) {
         console.log('onGeocodeFail exists');
         let feature = {
@@ -523,8 +530,8 @@ class DataManager {
         }
         feature.properties.opa_account_num = this.store.state.geocode.input;
         this.resetData();
-        // this.resetGeocode();
         this.fetchData(feature);
+        
       } else {
         const input = this.store.state.geocode.input;
         const didOwnerSearch = this.didOwnerSearch.bind(this);
