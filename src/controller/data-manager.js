@@ -65,7 +65,6 @@ class DataManager {
           input.push(relate);
         }
       }
-
     this.clients.activeSearch.fetch(input[0])
   }
 

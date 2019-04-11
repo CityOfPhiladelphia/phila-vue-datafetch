@@ -18,9 +18,6 @@ const initialState = {
     input: null,
   },
   activeSearch: {
-    status: null,
-    data: null,
-    input: null,
   },
   shapeSearch: {
     status: null,
@@ -54,6 +51,19 @@ const pvdStore = {
 
       o[key] = val;
 
+      return o;
+    }, {});
+    return sources;
+  },
+  createActivesearch(config) {
+    // console.log('createSources is running, config:', config);
+    const sourceKeys = Object.keys(config.activeSearch || {});
+    const sources = sourceKeys.reduce((o, key) => {
+      let val = {
+         status: null,
+         data: null
+       };
+      o[key] = val;
       return o;
     }, {});
     return sources;
@@ -198,10 +208,13 @@ const pvdStore = {
         state.shapeSearch.data = payload;
       },
       setActiveSearchStatus(state, payload) {
-        state.activeSearch.status = payload;
+        let key = payload.activeSearchKey;
+        state.activeSearch[payload.activeSearchKey].status = payload.status;
       },
       setActiveSearchData(state, payload) {
-        state.activeSearch.data = payload;
+        const key = payload.activeSearchKey
+        const data = payload.data;
+        state.activeSearch[key].data = data;
       },
       setDrawShape(state, payload) {
         state.drawShape.data = payload;

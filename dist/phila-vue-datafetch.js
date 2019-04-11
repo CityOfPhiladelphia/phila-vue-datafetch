@@ -4264,7 +4264,8 @@
 
     ActiveSearchClient.prototype.evaluateParams = function evaluateParams (feature, dataSource) {
       var params = {};
-      if (!dataSource.options.params) { return params }    var paramEntries = Object.entries(dataSource.options.params);
+      if (!dataSource.options.params) { return params }    // console.log("dataSource: ", dataSource);
+      var paramEntries = Object.entries(dataSource.options.params);
       var state = this.store.state;
 
       for (var i = 0, list = paramEntries; i < list.length; i += 1) {
@@ -4281,45 +4282,76 @@
         }
         params[key] = val;
       }
+      // console.log("params: ", params)
       return params;
     };
 
     ActiveSearchClient.prototype.fetch = function fetch (input) {
-      var data = [];
-      if(input.properties) {
-        data = input.properties.opa_account_num;
-      } else {
-        data = input.parcel_number;
-      }
+      var this$1 = this;
 
-      var store = this.store;
-      var activeSearchConfig = this.config.activeSearch;
-      var url = activeSearchConfig.url;
+      // console.log("fetch() input: ", input)
 
-      var params = this.evaluateParams(data, activeSearchConfig);
+      var activeSearches = this.config.activeSearch || {};
+      var activeSearchKeys = Object.entries(activeSearches);
 
-      var success = this.success.bind(this);
-      var error = this.error.bind(this);
+      var loop = function () {
+        var ref = list[i];
+        var activeSearchKey = ref[0];
+        var activeSearch = ref[1];
 
-      return axios.get(url, { params: params })
-                                      .then(success)
-                                      .catch(error);
-    };
+        var state = this$1.store.state;
+        var data = [];
 
-    ActiveSearchClient.prototype.success = function success (response) {
+        if(input.properties) {
+          data = input.properties.opa_account_num;
+        } else if (input.parcel_number) {
+          data = input.parcel_number;
+        } else {
+            data = input.map(function (a) { return a.parcel_number; });
+        }
 
-      var store = this.store;
-      var data = response.data;
-      var url = response.config.url;
+        var store = this$1.store;
+        var url = activeSearch.url;
 
-      store.commit('setActiveSearchData', data);
-      store.commit('setActiveSearchStatus', 'success');
+        var params = this$1.evaluateParams(data, activeSearch);
 
-      return data;
-    };
+        var successFn = activeSearch.options.success;
 
-    ActiveSearchClient.prototype.error = function error (error$1) {
-      return
+        // if the data is not dependent on other data
+        axios.get(url, { params: params }).then(function (response) {
+          // call success fn
+
+          var store = this$1.store;
+          var data = response.data;
+          var url = response.config.url;
+          var status = 'success';
+
+          if (successFn) {
+            data = successFn(data);
+          }
+
+          var setSourceDataOpts = {
+            activeSearchKey: activeSearchKey,
+            data: data,
+            status: status,
+          };
+
+          store.commit('setActiveSearchData', setSourceDataOpts);
+          store.commit('setActiveSearchStatus',setSourceDataOpts);
+
+        }, function (response) {
+          // console.log('fetch json error', response);
+          var status = 'error';
+          var setSourceDataOpts = {
+            activeSearchKey: activeSearchKey,
+            data: data,
+            status: status,
+          };
+          store.commit('setActiveSearchData', setSourceDataOpts);
+        });
+      };
+
+      for (var i = 0, list = activeSearchKeys; i < list.length; i += 1) loop();
     };
 
     return ActiveSearchClient;
@@ -5115,7 +5147,6 @@
             input.push(relate);
         }
       }
-
     this.clients.activeSearch.fetch(input[0]);
   };
 
@@ -6020,9 +6051,6 @@
       input: null,
     },
     activeSearch: {
-      status: null,
-      data: null,
-      input: null,
     },
     shapeSearch: {
       status: null,
@@ -6056,6 +6084,19 @@
 
         o[key] = val;
 
+        return o;
+      }, {});
+      return sources;
+    },
+    createActivesearch: function createActivesearch(config) {
+      // console.log('createSources is running, config:', config);
+      var sourceKeys = Object.keys(config.activeSearch || {});
+      var sources = sourceKeys.reduce(function (o, key) {
+        var val = {
+           status: null,
+           data: null
+         };
+        o[key] = val;
         return o;
       }, {});
       return sources;
@@ -6202,10 +6243,13 @@
           state.shapeSearch.data = payload;
         },
         setActiveSearchStatus: function setActiveSearchStatus(state, payload) {
-          state.activeSearch.status = payload;
+          var key = payload.activeSearchKey;
+          state.activeSearch[payload.activeSearchKey].status = payload.status;
         },
         setActiveSearchData: function setActiveSearchData(state, payload) {
-          state.activeSearch.data = payload;
+          var key = payload.activeSearchKey;
+          var data = payload.data;
+          state.activeSearch[key].data = data;
         },
         setDrawShape: function setDrawShape(state, payload) {
           state.drawShape.data = payload;
