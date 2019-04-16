@@ -5,7 +5,7 @@ import BaseClient from './base-client';
 // the result in state.
 class OwnerSearchClient extends BaseClient {
   fetch(input) {
-    // console.log('owner search client fetch', input);
+    console.log('owner search client fetch', input);
 
     const store = this.store;
 
@@ -16,7 +16,7 @@ class OwnerSearchClient extends BaseClient {
     // console.log('owner search client url', url);
     // update state
     this.store.commit('setOwnerSearchStatus', 'waiting');
-    // console.log('OWNER SEARCH CLIENT setting last search method to owner search');
+    console.log('OWNER SEARCH CLIENT setting last search method to owner search');
     // this.store.commit('setLastSearchMethod', 'owner search');
 
     const success = this.success.bind(this);
@@ -29,7 +29,7 @@ class OwnerSearchClient extends BaseClient {
   }
 
   success(response) {
-    // console.log('owner search success', response.data);
+    console.log('owner search success', response.data);
 
     const store = this.store;
     const data = response.data;
@@ -62,6 +62,7 @@ class OwnerSearchClient extends BaseClient {
     store.commit('setShapeSearchStatus', null);
     store.commit('setShapeSearchData', null);
     store.commit('setOwnerSearchData', features);
+
     // store.commit('setOwnerSearchData', data.features);
     // store.commit('setOwnerSearchRelated', relatedFeatures);
     store.commit('setOwnerSearchStatus', 'success');
@@ -70,7 +71,7 @@ class OwnerSearchClient extends BaseClient {
   }
 
   error(error) {
-    // console.log('owner search error', error);
+    console.log('owner search error', error);
 
     const store = this.store;
 

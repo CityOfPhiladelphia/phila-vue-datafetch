@@ -16,6 +16,7 @@ import {
   OwnerSearchClient,
   ShapeSearchClient,
   ActiveSearchClient,
+  CondoSearchClient,
   HttpClient,
   EsriClient
 } from './clients';
@@ -34,6 +35,7 @@ class DataManager {
     // response back to this?
     const clientOpts = { config, store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
+    this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
     this.clients.activeSearch = new ActiveSearchClient(clientOpts);
@@ -124,6 +126,7 @@ class DataManager {
   }
 
   defineTargets(dataSourceKey, targetsDef) {
+    console.log("Define Targets Starting")
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -497,13 +500,14 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input) {
-    // console.log('data-manager geocode is running, input:', input);
+    console.log('data-manager geocode is running, input:', input);
     const didTryGeocode = this.didTryGeocode.bind(this);
     const test = this.clients.geocode.fetch(input).then(didTryGeocode);
   }
 
   didOwnerSearch() {
     this.fetchData();
+    console.log()
   }
 
   didShapeSearch() {
@@ -511,8 +515,8 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    // console.log('didTryGeocode is running, feature:', feature);
-    if (this.store.state.geocode.status === 'error') {
+    console.log('didTryGeocode is running, feature:', feature);
+    if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
       // console.log('didTryGeocode is running, error: need to reset drawShape ');
       //TODO set up drawShape so that after running it removes the shape, resetting the field
       // and instead shows the polygons of the parcels selected on the map
@@ -525,19 +529,12 @@ class DataManager {
         this.store.commit('setOwnerSearchData', null);
         this.store.commit('setOwnerSearchInput', null);
         this.resetGeocode();
+        console.log("Shape search input: ", input)
         return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
-      } else {
-        this.store.commit('setLastSearchMethod', 'owner search');
-        if(this.store.state.editableLayers !== null ){
-          this.store.state.editableLayers.clearLayers();
-        }
-        const input = this.store.state.geocode.input;
-        this.resetGeocode();
-        const didOwnerSearch = this.didOwnerSearch.bind(this);
-        return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
       }
+      console.log("Feature is undefined")
     } else if (this.store.state.geocode.status === 'success') {
-      // console.log('didTryGeocode is running, success');
+      console.log('didTryGeocode is running, success');
       this.resetData();
       this.didGeocode(feature);
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -551,7 +548,7 @@ class DataManager {
         this.store.state.editableLayers.clearLayers();
       }
     } else if (this.store.state.geocode.status === null) {
-      // console.log('didTryGeocode is running, feature:', feature);
+      console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
       if(this.store.state.editableLayers !== null ){
         this.store.state.editableLayers.clearLayers();
@@ -564,7 +561,27 @@ class DataManager {
       this.resetGeocode();
       // const didOwnerSearch = this.didOwnerSearch.bind(this);
       return this.clients.shapeSearch.fetch(input);
-    }
+
+    } else if (this.store.state.geocode.input != null) {
+      this.store.commit('setLastSearchMethod', 'owner search');
+      if ( this.store.state.editableLayers !== null ) {
+        this.store.state.editableLayers.clearLayers();
+      }
+      const input = this.store.state.geocode.input;
+      console.log("didTryGeocode input: ", input )
+      const didOwnerSearch = this.didOwnerSearch.bind(this);
+      this.resetGeocode();
+      console.log("didTryGeocode input: ", input )
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
+    } else if (typeof feature === 'undefined' && this.store.state.ownerSearch.status != 'success') {
+      console.log(this.store.state.ownerSearch.status)
+
+      console.log("Figure out the input type based on the search")
+      const input =  this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input
+
+      console.log("Adding condo search client, input: ", input)
+      this.clients.condoSearch.fetch(input)
+    } else { console.log("Unknown misc didTryGeocode failure") }
   }
 
   didGeocode(feature) {
@@ -641,7 +658,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});

@@ -58,7 +58,7 @@ class Controller {
 
   handleSearchFormSubmit(value, searchCategory) {
     const input = value
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
@@ -81,7 +81,7 @@ class Controller {
     this.store.commit('setParcelData', payload);
 
     // tell router
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
     this.router.routeToAddress(input, searchCategory);
   }
 
@@ -102,7 +102,7 @@ class Controller {
     this.store.commit('setGeocodeInput', null);
 
     const parcels = this.store.state.parcels;
-    // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+    console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
   }
   geocodeDrawnShape(state) {
@@ -111,7 +111,7 @@ class Controller {
     this.dataManager.getParcelsByShape(shape, parcels);
   }
   geocodeOwnerSearch(state) {
-    // console.log("ownerSearch data:", this.store.state.ownerSearch.data);
+    console.log("ownerSearch data:", this.store.state.ownerSearch.data);
     const ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id);
 
     let feature = this.dataManager.getParcelsById(ids, 'pwd');

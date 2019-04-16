@@ -86,8 +86,9 @@ class Router {
 
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
-        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
+        console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
         this.dataManager.geocode(nextAddress, searchCategory);
+        console.log("Route to address line 91")
         // this.dataManager.geocode(nextAddress, 'address')
                         // .then(this.didGeocode.bind(this));
       }
@@ -95,7 +96,7 @@ class Router {
   }
 
   routeToOwner(nextOwner, searchCategory) {
-    // console.log('Router.routeToAddress', nextAddress);
+    console.log('Router.routeToOwner', nextOwner);
     if (nextOwner) {
       // check against current address
       // const prevOwner = this.getAddressFromState();
@@ -104,6 +105,7 @@ class Router {
       // if (!prevAddress || nextAddress !== prevAddress) {
         // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
         this.dataManager.geocode(nextOwner, searchCategory);
+        console.log(this.dataManager.geocode(nextOwner, searchCategory))
         // this.dataManager.geocode(nextOwner, 'owner')
                         // .then(this.didGeocode.bind(this));
       // }
