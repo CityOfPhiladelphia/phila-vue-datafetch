@@ -589,7 +589,7 @@ class DataManager {
       console.log("didTryGeocode input: ", input )
 
       // Fail on owner search here takes you to the condo search process with the input
-      return this.clients.ownerSearch.fetch(input).then( didOwnerSearch, condoSearch.bind(input) );
+      return this.clients.ownerSearch.fetch(input).then( didOwnerSearch, condoSearch(input) );
 
     } else if (typeof feature === 'undefined' && this.store.state.ownerSearch.status != 'success') {
       // This should be the default failure for geocode and shapeSearches that may have a condo

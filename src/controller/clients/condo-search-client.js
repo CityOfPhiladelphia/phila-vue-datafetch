@@ -8,13 +8,16 @@ class CondoSearchClient extends BaseClient {
   fetch(input) {
     console.log('condo client fetch', input);
 
-    // const store = this.store;
-    // let geocodeConfig;
-    //
-    // condoConfig = this.config.geocoder;
-    // condoConfig.params.opa_only = true
+    const store = this.store;
+
+    let condoConfig = this.config.geocoder;
+    condoConfig.params.opa_only = false
 
     console.log("Condo Building Config")
+
+    if (this.store.state.lastSearchMethod == "owner search") {
+
+    }
 
     // const url = geocodeConfig.url(input);
     // const params = geocodeConfig.params;

@@ -4373,13 +4373,16 @@
     CondoSearchClient.prototype.fetch = function fetch (input) {
       console.log('condo client fetch', input);
 
-      // const store = this.store;
-      // let geocodeConfig;
-      //
-      // condoConfig = this.config.geocoder;
-      // condoConfig.params.opa_only = true
+      var store = this.store;
+
+      var condoConfig = this.config.geocoder;
+      condoConfig.params.opa_only = false;
 
       console.log("Condo Building Config");
+
+      if (this.store.state.lastSearchMethod == "owner search") {
+
+      }
 
       // const url = geocodeConfig.url(input);
       // const params = geocodeConfig.params;
@@ -5744,7 +5747,7 @@
       console.log("didTryGeocode input: ", input$1 );
 
       // Fail on owner search here takes you to the condo search process with the input
-      return this.clients.ownerSearch.fetch(input$1).then( didOwnerSearch, condoSearch.bind(input$1) );
+      return this.clients.ownerSearch.fetch(input$1).then( didOwnerSearch, condoSearch(input$1) );
 
     } else if (typeof feature === 'undefined' && this.store.state.ownerSearch.status != 'success') {
       // This should be the default failure for geocode and shapeSearches that may have a condo
