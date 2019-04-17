@@ -4371,7 +4371,7 @@
     CondoSearchClient.prototype.constructor = CondoSearchClient;
 
     CondoSearchClient.prototype.fetch = function fetch (input) {
-      // console.log('geocode client fetch', input);
+      console.log('condo client fetch', input);
 
       // const store = this.store;
       // let geocodeConfig;
@@ -4443,8 +4443,7 @@
 
       // return a promise that can accept further chaining
       return axios.get(url, { params: params })
-        .then(success)
-        .catch(error);
+        .then(success, error);
     };
 
     OwnerSearchClient.prototype.success = function success (response) {
@@ -4491,12 +4490,11 @@
 
     OwnerSearchClient.prototype.error = function error (error$1) {
       console.log('owner search error', error$1);
-
       var store = this.store;
-
       store.commit('setOwnerSearchStatus', 'error');
       store.commit('setOwnerSearchData', null);
       // store.commit('setOwnerSearchRelated', null);
+      throw error$1
     };
 
     return OwnerSearchClient;
@@ -4512,7 +4510,7 @@
     ShapeSearchClient.prototype.constructor = ShapeSearchClient;
 
     ShapeSearchClient.prototype.evaluateParams = function evaluateParams (feature, dataSource) {
-      // console.log('http-client evaluateParams is running');
+      console.log('http-client evaluateParams is running');
       var params = {};
       if (!dataSource.options.params) { return params }    var paramEntries = Object.entries(dataSource.options.params);
       var state = this.store.state;
@@ -4540,6 +4538,7 @@
 
       var store = this.store;
 
+      console.log(this.config);
       var shapeSearchConfig = this.config.shapeSearch;
       var url = shapeSearchConfig.url;
 
@@ -4554,7 +4553,7 @@
     };
 
     ShapeSearchClient.prototype.success = function success (response) {
-      // console.log("success respose: ", response);
+      console.log("success respose: ", response);
 
       var store = this.store;
       var data = response.data;
@@ -4571,6 +4570,7 @@
     };
 
     ShapeSearchClient.prototype.error = function error (error$1) {
+      console.log("error respose: ", error$1);
       return
     };
 
@@ -5325,8 +5325,8 @@
   };
 
   DataManager.prototype.fetchData = function fetchData () {
-    // console.log('\nFETCH DATA');
-    // console.log('-----------');
+    console.log('\nFETCH DATA');
+    console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
@@ -5352,7 +5352,7 @@
       var targetsFn = (void 0);
 
       // targets may cause a looped axios call, or may just call one once and get multiple results
-      // console.log("targetsDef: ", targetsDef)
+      console.log("targetsDef: ", targetsDef);
       if (targetsDef) {
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
@@ -5472,7 +5472,7 @@
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-
+    console.log("Did fetch data about to try fetching more data");
     this.fetchData();
   };
 
@@ -5661,8 +5661,24 @@
   };
 
   DataManager.prototype.didOwnerSearch = function didOwnerSearch () {
+    console.log("Did Owner Search");
     this.fetchData();
     console.log();
+  };
+
+  DataManager.prototype.checkForShapeSearch = function checkForShapeSearch () {
+    console.log("Checking for shape search");
+    if(this.store.state.drawShape !== null ) {
+      this.store.commit('setLastSearchMethod', 'shape search');
+      var input = this.store.state.parcels.pwd;
+      var didShapeSearch = this.didShapeSearch.bind(this);
+      this.store.commit('setOwnerSearchStatus', null);
+      this.store.commit('setOwnerSearchData', null);
+      this.store.commit('setOwnerSearchInput', null);
+      this.resetGeocode();
+      console.log("Shape search input: ", input);
+      return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
+    }
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
@@ -5671,25 +5687,22 @@
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature) {
     console.log('didTryGeocode is running, feature:', feature);
+    console.log('this.store.state.geocode.status: ', this.store.state.geocode.status,
+                'typeof this.store.state.geocode.input: ', typeof this.store.state.geocode.input);
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
-      // console.log('didTryGeocode is running, error: need to reset drawShape ');
+      console.log('didTryGeocode is running, error: need to reset drawShape ');
       //TODO set up drawShape so that after running it removes the shape, resetting the field
       // and instead shows the polygons of the parcels selected on the map
       //probably need some way to clear that too though for owner, click and address searches.
-      if(this.store.state.drawShape !== null ) {
-        this.store.commit('setLastSearchMethod', 'shape search');
-        var input = this.store.state.parcels.pwd;
-        var didShapeSearch = this.didShapeSearch.bind(this);
-        this.store.commit('setOwnerSearchStatus', null);
-        this.store.commit('setOwnerSearchData', null);
-        this.store.commit('setOwnerSearchInput', null);
-        this.resetGeocode();
-        console.log("Shape search input: ", input);
-        return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
-      }
+
+      this.checkForShapeSearch();
+
       console.log("Feature is undefined");
+
     } else if (this.store.state.geocode.status === 'success') {
+
       console.log('didTryGeocode is running, success');
+
       this.resetData();
       this.didGeocode(feature);
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -5712,30 +5725,41 @@
       this.store.commit('setShapeSearchStatus', null);
       this.store.commit('setShapeSearchData', null);
 
-      var input$1 = this.store.state.geocode.input;
+      var input = this.store.state.geocode.input;
       this.resetGeocode();
-      // const didOwnerSearch = this.didOwnerSearch.bind(this);
-      return this.clients.shapeSearch.fetch(input$1);
-
+      return this.clients.shapeSearch.fetch(input);
     } else if (this.store.state.geocode.input != null) {
+      //Owner search
       this.store.commit('setLastSearchMethod', 'owner search');
+
       if ( this.store.state.editableLayers !== null ) {
         this.store.state.editableLayers.clearLayers();
       }
-      var input$2 = this.store.state.geocode.input;
-      console.log("didTryGeocode input: ", input$2 );
+      var input$1 = this.store.state.geocode.input;
+      console.log("didTryGeocode input: ", input$1 );
+      console.log("Line 573 - Running did owner search");
       var didOwnerSearch = this.didOwnerSearch.bind(this);
+      var condoSearch = this.clients.condoSearch.fetch.bind(this);
       this.resetGeocode();
-      console.log("didTryGeocode input: ", input$2 );
-      return this.clients.ownerSearch.fetch(input$2).then(didOwnerSearch);
+      console.log("didTryGeocode input: ", input$1 );
+
+      // Fail on owner search here takes you to the condo search process with the input
+      return this.clients.ownerSearch.fetch(input$1).then( didOwnerSearch, condoSearch.bind(input$1) );
+
     } else if (typeof feature === 'undefined' && this.store.state.ownerSearch.status != 'success') {
+      // This should be the default failure for geocode and shapeSearches that may have a condo
+
       console.log(this.store.state.ownerSearch.status);
-
       console.log("Figure out the input type based on the search");
-      var input$3 =this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input;
+      var input$2 =this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input;
+      console.log("Adding condo search client, input: ", input$2);
 
-      console.log("Adding condo search client, input: ", input$3);
-      this.clients.condoSearch.fetch(input$3);
+      //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
+
+      this.checkForShapeSearch();
+
+      //Run condoSearch to find and handle condo buildings and add to the results
+      this.clients.condoSearch.fetch(input$2);
     } else { console.log("Unknown misc didTryGeocode failure"); }
   };
 
@@ -5928,6 +5952,7 @@
       // at this point there is definitely a feature or features - put it in state
       this.setParcelsInState(parcelLayer, features);
       this.geocode(features);
+      console.log("Ending did get parcels by shape after this.geocode()");
 
       // this.fetchData();
   };

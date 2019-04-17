@@ -24,8 +24,7 @@ class OwnerSearchClient extends BaseClient {
 
     // return a promise that can accept further chaining
     return axios.get(url, { params })
-      .then(success)
-      .catch(error);
+      .then(success, error);
   }
 
   success(response) {
@@ -72,12 +71,11 @@ class OwnerSearchClient extends BaseClient {
 
   error(error) {
     console.log('owner search error', error);
-
     const store = this.store;
-
     store.commit('setOwnerSearchStatus', 'error');
     store.commit('setOwnerSearchData', null);
     // store.commit('setOwnerSearchRelated', null);
+    throw error
   }
 }
 
