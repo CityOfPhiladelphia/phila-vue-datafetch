@@ -5,7 +5,7 @@ import BaseClient from './base-client';
 // the result in state.
 class OwnerSearchClient extends BaseClient {
   fetch(input) {
-    console.log('owner search client fetch', input);
+    // console.log('owner search client fetch', input);
 
     const store = this.store;
 
@@ -16,7 +16,6 @@ class OwnerSearchClient extends BaseClient {
     // console.log('owner search client url', url);
     // update state
     this.store.commit('setOwnerSearchStatus', 'waiting');
-    console.log('OWNER SEARCH CLIENT setting last search method to owner search');
     // this.store.commit('setLastSearchMethod', 'owner search');
 
     const success = this.success.bind(this);
@@ -70,7 +69,7 @@ class OwnerSearchClient extends BaseClient {
   }
 
   error(error) {
-    console.log('owner search error', error);
+    // console.log('owner search error', error);
     const store = this.store;
     store.commit('setOwnerSearchStatus', 'error');
     store.commit('setOwnerSearchData', null);

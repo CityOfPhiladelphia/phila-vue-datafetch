@@ -58,7 +58,7 @@ class Controller {
 
   handleSearchFormSubmit(value, searchCategory) {
     const input = value
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
@@ -81,7 +81,7 @@ class Controller {
     this.store.commit('setParcelData', payload);
 
     // tell router
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
     this.router.routeToAddress(input, searchCategory);
   }
 

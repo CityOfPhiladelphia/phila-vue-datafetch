@@ -126,7 +126,7 @@ class DataManager {
   }
 
   defineTargets(dataSourceKey, targetsDef) {
-    console.log("Define Targets Starting")
+    // console.log("Define Targets Starting")
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -186,8 +186,8 @@ class DataManager {
   }
 
   fetchData() {
-    console.log('\nFETCH DATA');
-    console.log('-----------');
+    // console.log('\nFETCH DATA');
+    // console.log('-----------');
 
     const geocodeObj = this.store.state.geocode.data;
     const ownerSearchObj = this.store.state.ownerSearch.data;
@@ -209,7 +209,7 @@ class DataManager {
       let targetsFn;
 
       // targets may cause a looped axios call, or may just call one once and get multiple results
-      console.log("targetsDef: ", targetsDef)
+      // console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
@@ -327,7 +327,7 @@ class DataManager {
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    console.log("Did fetch data about to try fetching more data")
+    // console.log("Did fetch data about to try fetching more data")
     this.fetchData();
   }
 
@@ -500,19 +500,19 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input) {
-    console.log('data-manager geocode is running, input:', input);
+    // console.log('data-manager geocode is running, input:', input);
     const didTryGeocode = this.didTryGeocode.bind(this);
     const test = this.clients.geocode.fetch(input).then(didTryGeocode);
   }
 
   didOwnerSearch() {
-    console.log("Did Owner Search")
+    // console.log("Did Owner Search")
     this.fetchData();
     console.log()
   }
 
   checkForShapeSearch() {
-    console.log("Checking for shape search")
+    // console.log("Checking for shape search")
     if(this.store.state.drawShape !== null ) {
       this.store.commit('setLastSearchMethod', 'shape search');
       const input = this.store.state.parcels.pwd;
@@ -521,7 +521,7 @@ class DataManager {
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
       this.resetGeocode();
-      console.log("Shape search input: ", input)
+      // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
     }
   }
@@ -531,11 +531,9 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    console.log('didTryGeocode is running, feature:', feature);
-    console.log('this.store.state.geocode.status: ', this.store.state.geocode.status,
-                'typeof this.store.state.geocode.input: ', typeof this.store.state.geocode.input);
+    // console.log('didTryGeocode is running, feature:', feature);
+
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
-      console.log('didTryGeocode is running, error: need to reset drawShape ');
       //TODO set up drawShape so that after running it removes the shape, resetting the field
       // and instead shows the polygons of the parcels selected on the map
       //probably need some way to clear that too though for owner, click and address searches.
@@ -581,13 +579,12 @@ class DataManager {
         this.store.state.editableLayers.clearLayers();
       }
       const input = this.store.state.geocode.input;
-      console.log("didTryGeocode input: ", input )
-      console.log("Line 573 - Running did owner search")
+      // console.log("didTryGeocode input: ", input )
+
       const didOwnerSearch = this.didOwnerSearch.bind(this);
       const condoSearch = this.clients.condoSearch.fetch.bind(this.clients.condoSearch);
       const didGeocode = this.didGeocode.bind(this)
       this.resetGeocode();
-      console.log("didTryGeocode input: ", input )
 
       // Fail on owner search here takes you to the condo search process with the input
       return this.clients.ownerSearch.fetch(input).then( () => didOwnerSearch, () => condoSearch(input).then(didGeocode));
@@ -610,7 +607,7 @@ class DataManager {
   }
 
   didGeocode(feature) {
-    console.log("did Geocode is running", this)
+    // console.log("did Geocode is running", this)
     this.controller.router.didGeocode();
     if (this.store.state.map) {
       this.store.commit('setMapZoom', 19);
