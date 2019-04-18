@@ -3321,7 +3321,7 @@
    *
    * //=feature
    */
-  function feature$1(geometry, properties, options) {
+  function feature(geometry, properties, options) {
       // Optional Parameters
       options = options || {};
       if (!isObject$1(options)) { throw new Error('options is invalid'); }
@@ -3364,7 +3364,7 @@
       if (coordinates.length < 2) { throw new Error('coordinates must be at least 2 numbers long'); }
       if (!isNumber$1(coordinates[0]) || !isNumber$1(coordinates[1])) { throw new Error('coordinates must contain numbers'); }
 
-      return feature$1({
+      return feature({
           type: 'Point',
           coordinates: coordinates
       }, properties, options);
@@ -3402,7 +3402,7 @@
           }
       }
 
-      return feature$1({
+      return feature({
           type: 'Polygon',
           coordinates: coordinates
       }, properties, options);
@@ -4371,45 +4371,76 @@
     CondoSearchClient.prototype.constructor = CondoSearchClient;
 
     CondoSearchClient.prototype.fetch = function fetch (input) {
-      console.log('condo client fetch', input);
+      console.log('geocode client fetch', this);
 
       var store = this.store;
+      var condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
+      condoConfig.url = this.config.geocoder.url;
+      console.log(condoConfig);
 
-      var condoConfig = this.config.geocoder;
       condoConfig.params.opa_only = false;
 
-      console.log("Condo Building Config");
+      var url = condoConfig.url(input);
+      var params = condoConfig.params;
+      console.log(params);
 
-      if (this.store.state.lastSearchMethod == "owner search") {
+      // update state
+      this.store.commit('setGeocodeStatus', 'waiting');
 
-      }
+      var success = this.success.bind(this);
+      var error = this.error.bind(this);
 
-      // const url = geocodeConfig.url(input);
-      // const params = geocodeConfig.params;
-      //
-      // // update state
-      // this.store.commit('', '');
-      //
-      // const success = this.success.bind(this);
-      // const error = this.error.bind(this);
-      //
-      // // return a promise that can accept further chaining
-      // return axios.get(url, { params })
-      //   .then(success)
-      //   .catch(error);
+      // return a promise that can accept further chaining
+      return axios.get(url, { params: params })
+        .then(success)
+        .catch(error);
     };
 
     CondoSearchClient.prototype.success = function success (response) {
       var store = this.store;
       var data = response.data;
       var url = response.config.url;
-      // console.log('geocode search success', response.config.url);
+      console.log('geocode search success', data);
 
+      // TODO handle multiple results
+
+      if (!data.features || data.features.length < 1) {
+        return;
+      }
+
+      var features = data.features;
+
+      features = this.assignFeatureIds(features, 'geocode');
+
+      // TODO do some checking here
+      var feature = features[0];
+      var relatedFeatures = [];
+      for (var i = 0, list = features.slice(1); i < list.length; i += 1){
+        var relatedFeature = list[i];
+
+        if (!!feature.properties.address_high) {
+          if (relatedFeature.properties.address_high) {
+            relatedFeatures.push(relatedFeature);
+          }
+        } else {
+          relatedFeatures.push(relatedFeature);
+        }
+      }
+      store.commit('setGeocodeData', feature);
+      store.commit('setGeocodeRelated', relatedFeatures);
+      store.commit('setGeocodeStatus', 'success');
+      this.store.commit('setLastSearchMethod', 'geocode');
+
+      console.log(feature);
       return feature;
     };
 
     CondoSearchClient.prototype.error = function error (error$1) {
       var store = this.store;
+
+      store.commit('setGeocodeStatus', 'error');
+      store.commit('setGeocodeData', null);
+      store.commit('setGeocodeRelated', null);
     };
 
     return CondoSearchClient;
@@ -4741,9 +4772,9 @@
   function explode(geojson) {
       var points$$1 = [];
       if (geojson.type === 'FeatureCollection') {
-          featureEach(geojson, function (feature) {
-              coordEach(feature, function (coord) {
-                  points$$1.push(point(coord, feature.properties));
+          featureEach(geojson, function (feature$$1) {
+              coordEach(feature$$1, function (coord) {
+                  points$$1.push(point(coord, feature$$1.properties));
               });
           });
       } else {
@@ -4960,7 +4991,7 @@
     EsriClient.prototype = Object.create( BaseClient$$1 && BaseClient$$1.prototype );
     EsriClient.prototype.constructor = EsriClient;
 
-    EsriClient.prototype.fetch = function fetch (feature, dataSource, dataSourceKey) {
+    EsriClient.prototype.fetch = function fetch (feature$$1, dataSource, dataSourceKey) {
       // console.log('esriclient fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
 
       var url = dataSource.url;
@@ -4971,7 +5002,7 @@
       var options = rest;
       var parameters = dataSource.parameters;
       if (parameters) {
-        parameters['sourceValue'] = feature.properties[parameters.sourceField];
+        parameters['sourceValue'] = feature$$1.properties[parameters.sourceField];
       }
 
       // check if a target geometry fn was specified. otherwise, use geocode feat
@@ -4983,7 +5014,7 @@
         // to. use case: fetching regmaps.
         geom = targetGeometry(state, L);
       } else {
-        geom = feature.geometry;
+        geom = feature$$1.geometry;
       }
 
       // handle null geom
@@ -4995,7 +5026,7 @@
       this.fetchBySpatialQuery(dataSourceKey, url, relationship, geom, parameters, options);
     };
 
-    EsriClient.prototype.fetchNearby = function fetchNearby (feature, dataSource, dataSourceKey) {
+    EsriClient.prototype.fetchNearby = function fetchNearby (feature$$1, dataSource, dataSourceKey) {
       var this$1 = this;
 
       // console.log('esri fetchNearby running, dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
@@ -5014,7 +5045,7 @@
 
       // params.geometries = `[${feature.geometry.coordinates.join(', ')}]`
       // TODO get some of these values from map, etc.
-      var coords = feature.geometry.coordinates;
+      var coords = feature$$1.geometry.coordinates;
       var coords2272 = proj4(projection4326, projection2272, [coords[0], coords[1]]);
       // console.log('coords:', coords, 'coords2272:', coords2272);
       var params = {
@@ -5121,8 +5152,8 @@
         if (calculateDistancePt) {
           var from = point(calculateDistancePt);
 
-          features = features.map(function (feature) {
-            var featureCoords = feature.geometry.coordinates;
+          features = features.map(function (feature$$1) {
+            var featureCoords = feature$$1.geometry.coordinates;
             // console.log('featureCoords:', featureCoords);
             var dist;
             if (Array.isArray(featureCoords[0])) {
@@ -5139,9 +5170,9 @@
             var distFeet = parseInt(dist * 5280);
             // console.log('distFeet:', distFeet);
 
-            feature._distance = distFeet;
+            feature$$1._distance = distFeet;
 
-            return feature;
+            return feature$$1;
           });
         }
 
@@ -5211,7 +5242,7 @@
   };
 
   DataManager.prototype.fetchMoreData = function fetchMoreData (dataSourceKey, highestPageRetrieved) {
-    var feature = this.store.state.geocode.data;
+    var feature$$1 = this.store.state.geocode.data;
     var dataSource = this.config.dataSources[dataSourceKey];
     var state = this.store.state;
     var type = dataSource.type;
@@ -5227,7 +5258,7 @@
     switch(type) {
       case 'http-get':
         console.log('INCREMENT - http-get', dataSourceKey);
-        this.clients.http.fetchMore(feature,
+        this.clients.http.fetchMore(feature$$1,
                                 dataSource,
                                 dataSourceKey,
                                 highestPageRetrieved);
@@ -5394,8 +5425,8 @@
         // if it is set up to run a single axios call on a set of targets
         if (targetsDef) {
           if (targetsDef.runOnce) {
-            targetIdFn = function(feature) {
-              return feature.parcel_number;
+            targetIdFn = function(feature$$1) {
+              return feature$$1.parcel_number;
             };
           }
         }
@@ -5616,23 +5647,23 @@
     for (var i = 0; i < features.length; i++) {
       var suffix = (topicId ? topicId + '-' : '') + i;
       var id = "feat-" + dataSourceKey + "-" + suffix;
-      var feature = features[i];
+      var feature$$1 = features[i];
       // console.log(dataSourceKey, feature);
       try {
-        feature._featureId = id;
+        feature$$1._featureId = id;
       }
       catch (e) {
         console.warn(e);
       }
-      featuresWithIds.push(feature);
+      featuresWithIds.push(feature$$1);
     }
 
     // console.log(dataSourceKey, features, featuresWithIds);
     return featuresWithIds;
   };
 
-  DataManager.prototype.evaluateParams = function evaluateParams (feature, dataSource) {
-    console.log("evalutateParams data-manager feature:  ", feature);
+  DataManager.prototype.evaluateParams = function evaluateParams (feature$$1, dataSource) {
+    console.log("evalutateParams data-manager feature:  ", feature$$1);
     var params = {};
     var paramEntries = Object.entries(dataSource.options.params);
     var state = this.store.state;
@@ -5645,7 +5676,7 @@
         var val = (void 0);
 
       if (typeof valOrGetter === 'function') {
-        val = valOrGetter(feature, state);
+        val = valOrGetter(feature$$1, state);
       } else {
         val = valOrGetter;
       }
@@ -5688,8 +5719,8 @@
     this.fetchData();
   };
 
-  DataManager.prototype.didTryGeocode = function didTryGeocode (feature) {
-    console.log('didTryGeocode is running, feature:', feature);
+  DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
+    console.log('didTryGeocode is running, feature:', feature$$1);
     console.log('this.store.state.geocode.status: ', this.store.state.geocode.status,
                 'typeof this.store.state.geocode.input: ', typeof this.store.state.geocode.input);
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
@@ -5707,7 +5738,7 @@
       console.log('didTryGeocode is running, success');
 
       this.resetData();
-      this.didGeocode(feature);
+      this.didGeocode(feature$$1);
       this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
@@ -5719,7 +5750,7 @@
         this.store.state.editableLayers.clearLayers();
       }
     } else if (this.store.state.geocode.status === null) {
-      console.log('didTryGeocode is running, feature:', feature);
+      console.log('didTryGeocode is running, feature:', feature$$1);
       this.store.commit('setLastSearchMethod', 'owner search');
       if(this.store.state.editableLayers !== null ){
         this.store.state.editableLayers.clearLayers();
@@ -5742,14 +5773,15 @@
       console.log("didTryGeocode input: ", input$1 );
       console.log("Line 573 - Running did owner search");
       var didOwnerSearch = this.didOwnerSearch.bind(this);
-      var condoSearch = this.clients.condoSearch.fetch.bind(this);
+      var condoSearch = this.clients.condoSearch.fetch.bind(this.clients.condoSearch);
+      var didGeocode = this.didGeocode.bind(this);
       this.resetGeocode();
       console.log("didTryGeocode input: ", input$1 );
 
       // Fail on owner search here takes you to the condo search process with the input
-      return this.clients.ownerSearch.fetch(input$1).then( didOwnerSearch, condoSearch(input$1) );
+      return this.clients.ownerSearch.fetch(input$1).then( function () { return didOwnerSearch; }, function () { return condoSearch(input$1).then(didGeocode); });
 
-    } else if (typeof feature === 'undefined' && this.store.state.ownerSearch.status != 'success') {
+    } else if (typeof feature$$1 === 'undefined' && this.store.state.ownerSearch.status != 'success') {
       // This should be the default failure for geocode and shapeSearches that may have a condo
 
       console.log(this.store.state.ownerSearch.status);
@@ -5766,22 +5798,22 @@
     } else { console.log("Unknown misc didTryGeocode failure"); }
   };
 
-  DataManager.prototype.didGeocode = function didGeocode (feature) {
-    // console.log("did Geocode is running")
+  DataManager.prototype.didGeocode = function didGeocode (feature$$1) {
+    console.log("did Geocode is running", this);
     this.controller.router.didGeocode();
     if (this.store.state.map) {
       this.store.commit('setMapZoom', 19);
-      this.store.commit('setMapCenter', feature.geometry.coordinates);
+      this.store.commit('setMapCenter', feature$$1.geometry.coordinates);
     }
 
-    if (feature) {
-      if (feature.street_address) {
+    if (feature$$1) {
+      if (feature$$1.street_address) {
         return;
-      } else if (feature.properties.street_address) {
+      } else if (feature$$1.properties.street_address) {
         this.fetchData();
       }
-      if(feature.geometry.coordinates) {
-        this.store.commit('setMapCenter', feature.geometry.coordinates);
+      if(feature$$1.geometry.coordinates) {
+        this.store.commit('setMapCenter', feature$$1.geometry.coordinates);
       }
     } else {
       this.fetchData();
@@ -5865,8 +5897,8 @@
       return;
     }
 
-    var feature = features[0];
-    var coords = feature.geometry.coordinates;
+    var feature$$1 = features[0];
+    var coords = feature$$1.geometry.coordinates;
     // use turf to get area and perimeter of all parcels returned
 
     // console.log('feature:', feature, 'coords.length:', coords.length);
@@ -5881,20 +5913,20 @@
         distances.push(this.getDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
         areas.push(area(turfPolygon) * 10.7639);
       }
-      feature.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
-      feature.properties.TURF_AREA = areas.reduce(function(acc, val) { return acc + val; });
+      feature$$1.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
+      feature$$1.properties.TURF_AREA = areas.reduce(function(acc, val) { return acc + val; });
     } else {
       // console.log('coords:', coords);
       var turfPolygon$1 = polygon(coords);
       var distances$1 = this.getDistances(coords);
-      feature.properties.TURF_PERIMETER = distances$1.reduce(function(acc, val) { return acc + val; });
-      feature.properties.TURF_AREA = area(turfPolygon$1) * 10.7639;
+      feature$$1.properties.TURF_PERIMETER = distances$1.reduce(function(acc, val) { return acc + val; });
+      feature$$1.properties.TURF_AREA = area(turfPolygon$1) * 10.7639;
     }
     // console.log('after calcs, feature:', feature);
 
     // at this point there is definitely a feature or features - put it in state
 
-    this.setParcelsInState(parcelLayer, feature);
+    this.setParcelsInState(parcelLayer, feature$$1);
     // console.log("setParcelsInState: ", parcelLayer, feature);
 
     // shouldGeocode - true only if:
@@ -5915,7 +5947,7 @@
         var lng = ref[0];
         var lat = ref[1];
       var latlng = L.latLng(lat, lng);
-      var props = feature.properties || {};
+      var props = feature$$1.properties || {};
       var id = props[geocodeField];
       // console.log("id", id);
       // console.log('Line 701 data-manager.js didGetParcels - if shouldGeocode is running through router');
@@ -5998,13 +6030,13 @@
     return distances;
   };
 
-  DataManager.prototype.setParcelsInState = function setParcelsInState (parcelLayer, feature) {
+  DataManager.prototype.setParcelsInState = function setParcelsInState (parcelLayer, feature$$1) {
     var payload;
     // pwd
 
     payload = {
       parcelLayer: parcelLayer,
-      data: feature
+      data: feature$$1
     };
 
     // update state

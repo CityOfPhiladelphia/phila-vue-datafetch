@@ -584,12 +584,13 @@ class DataManager {
       console.log("didTryGeocode input: ", input )
       console.log("Line 573 - Running did owner search")
       const didOwnerSearch = this.didOwnerSearch.bind(this);
-      const condoSearch = this.clients.condoSearch.fetch.bind(this);
+      const condoSearch = this.clients.condoSearch.fetch.bind(this.clients.condoSearch);
+      const didGeocode = this.didGeocode.bind(this)
       this.resetGeocode();
       console.log("didTryGeocode input: ", input )
 
       // Fail on owner search here takes you to the condo search process with the input
-      return this.clients.ownerSearch.fetch(input).then( didOwnerSearch, condoSearch(input) );
+      return this.clients.ownerSearch.fetch(input).then( () => didOwnerSearch, () => condoSearch(input).then(didGeocode));
 
     } else if (typeof feature === 'undefined' && this.store.state.ownerSearch.status != 'success') {
       // This should be the default failure for geocode and shapeSearches that may have a condo
@@ -609,7 +610,7 @@ class DataManager {
   }
 
   didGeocode(feature) {
-    // console.log("did Geocode is running")
+    console.log("did Geocode is running", this)
     this.controller.router.didGeocode();
     if (this.store.state.map) {
       this.store.commit('setMapZoom', 19);
