@@ -5698,19 +5698,21 @@
     console.log();
   };
 
-  DataManager.prototype.checkForShapeSearch = function checkForShapeSearch () {
+  DataManager.prototype.checkForShapeSearch = function checkForShapeSearch (input) {
     // console.log("Checking for shape search")
     if(this.store.state.drawShape !== null ) {
       this.store.commit('setLastSearchMethod', 'shape search');
-      var input = this.store.state.parcels.pwd;
+      var input$1 = this.store.state.parcels.pwd;
       var didShapeSearch = this.didShapeSearch.bind(this);
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
       this.resetGeocode();
-      // console.log("Shape search input: ", input)
-      return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
-    }
+      console.log("Shape search input: ", input$1);
+      return this.clients.shapeSearch.fetch(input$1).then(didShapeSearch).then(this.clients.condoSearch.fetch(input$1));
+    } else {
+      console.log("Not shape search, input: ", input);
+      this.clients.condoSearch.fetch(input);}
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
@@ -5718,7 +5720,7 @@
   };
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
-    // console.log('didTryGeocode is running, feature:', feature);
+    console.log('didTryGeocode is running, feature:', feature$$1);
 
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
       //TODO set up drawShape so that after running it removes the shape, resetting the field
@@ -5786,10 +5788,9 @@
 
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
 
-      this.checkForShapeSearch();
+      this.checkForShapeSearch(input$2);
 
       //Run condoSearch to find and handle condo buildings and add to the results
-      this.clients.condoSearch.fetch(input$2);
     } else { console.log("Unknown misc didTryGeocode failure"); }
   };
 

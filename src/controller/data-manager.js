@@ -511,7 +511,7 @@ class DataManager {
     console.log()
   }
 
-  checkForShapeSearch() {
+  checkForShapeSearch(input) {
     // console.log("Checking for shape search")
     if(this.store.state.drawShape !== null ) {
       this.store.commit('setLastSearchMethod', 'shape search');
@@ -521,9 +521,11 @@ class DataManager {
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
       this.resetGeocode();
-      // console.log("Shape search input: ", input)
-      return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
-    }
+      console.log("Shape search input: ", input)
+      return this.clients.shapeSearch.fetch(input).then(didShapeSearch).then(this.clients.condoSearch.fetch(input));
+    } else {
+      console.log("Not shape search, input: ", input)
+      this.clients.condoSearch.fetch(input)}
   }
 
   didShapeSearch() {
@@ -531,7 +533,7 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    // console.log('didTryGeocode is running, feature:', feature);
+    console.log('didTryGeocode is running, feature:', feature);
 
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
       //TODO set up drawShape so that after running it removes the shape, resetting the field
@@ -599,10 +601,9 @@ class DataManager {
 
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
 
-      this.checkForShapeSearch()
+      this.checkForShapeSearch(input)
 
       //Run condoSearch to find and handle condo buildings and add to the results
-      this.clients.condoSearch.fetch(input)
     } else { console.log("Unknown misc didTryGeocode failure") }
   }
 
