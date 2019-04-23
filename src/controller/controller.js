@@ -102,7 +102,7 @@ class Controller {
     this.store.commit('setGeocodeInput', null);
 
     const parcels = this.store.state.parcels;
-    console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+    // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
   }
   geocodeDrawnShape(state) {

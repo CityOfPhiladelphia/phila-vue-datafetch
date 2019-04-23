@@ -478,7 +478,7 @@ class DataManager {
   }
 
   evaluateParams(feature, dataSource) {
-    console.log("evalutateParams data-manager feature:  ", feature)
+    // console.log("evalutateParams data-manager feature:  ", feature)
     const params = {};
     const paramEntries = Object.entries(dataSource.options.params);
     const state = this.store.state;
@@ -512,19 +512,20 @@ class DataManager {
   }
 
   checkForShapeSearch(input) {
-    // console.log("Checking for shape search")
+    // console.log("Checking for shape search", input)
     if(this.store.state.drawShape !== null ) {
-      this.store.commit('setLastSearchMethod', 'shape search');
       const input = this.store.state.parcels.pwd;
+      this.store.commit('setLastSearchMethod', 'shape search');
       const didShapeSearch = this.didShapeSearch.bind(this);
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
       this.resetGeocode();
-      console.log("Shape search input: ", input)
+      // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
     } else {
-      console.log("Not shape search, input: ", input)
+      const input = this.store.state.parcels.pwd.properties.PARCELID;
+      // console.log("Not shape search, input: ", input)
       this.clients.condoSearch.fetch(input)}
   }
 
@@ -533,7 +534,7 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    console.log('didTryGeocode is running, feature:', feature);
+    // console.log('didTryGeocode is running, feature:', feature);
 
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
       //TODO set up drawShape so that after running it removes the shape, resetting the field
@@ -542,11 +543,9 @@ class DataManager {
 
       this.checkForShapeSearch()
 
-      console.log("Feature is undefined")
-
     } else if (this.store.state.geocode.status === 'success') {
 
-      console.log('didTryGeocode is running, success');
+      // console.log('didTryGeocode is running, success');
 
       this.resetData();
       this.didGeocode(feature);
@@ -681,7 +680,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});

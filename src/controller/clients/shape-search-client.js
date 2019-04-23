@@ -5,7 +5,7 @@ import BaseClient from './base-client';
 class ShapeSearchClient extends BaseClient {
 
   evaluateParams(feature, dataSource) {
-    console.log('http-client evaluateParams is running');
+    // console.log('http-client evaluateParams is running');
     const params = {};
     if (!dataSource.options.params) { return params };
     const paramEntries = Object.entries(dataSource.options.params);
@@ -45,7 +45,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   success(response) {
-    console.log("success respose: ", response);
+    // console.log("success respose: ", response);
 
     const store = this.store;
     let data = response.data;
@@ -62,7 +62,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   error(error) {
-    console.log("error respose: ", error);
+    // console.log("error respose: ", error);
     return
   }
 }

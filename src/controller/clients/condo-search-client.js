@@ -14,7 +14,7 @@ class CondoSearchClient extends BaseClient {
   //
   // }
   fetch(input) {
-    console.log('geocode client fetch', this);
+    // console.log('geocode client fetch', input);
 
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder))
@@ -72,7 +72,6 @@ class CondoSearchClient extends BaseClient {
     store.commit('setGeocodeStatus', 'success');
     this.store.commit('setLastSearchMethod', 'geocode');
 
-    console.log(feature)
     return feature;
   }
 

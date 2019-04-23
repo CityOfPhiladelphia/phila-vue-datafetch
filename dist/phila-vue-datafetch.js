@@ -4370,7 +4370,7 @@
     CondoSearchClient.prototype.constructor = CondoSearchClient;
 
     CondoSearchClient.prototype.fetch = function fetch (input) {
-      console.log('geocode client fetch', this);
+      // console.log('geocode client fetch', input);
 
       var store = this.store;
       var condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
@@ -4430,7 +4430,6 @@
       store.commit('setGeocodeStatus', 'success');
       this.store.commit('setLastSearchMethod', 'geocode');
 
-      console.log(feature);
       return feature;
     };
 
@@ -4479,7 +4478,7 @@
     };
 
     OwnerSearchClient.prototype.success = function success (response) {
-      console.log('owner search success', response.data);
+      // console.log('owner search success', response.data);
 
       var store = this.store;
       var data = response.data;
@@ -4542,7 +4541,7 @@
     ShapeSearchClient.prototype.constructor = ShapeSearchClient;
 
     ShapeSearchClient.prototype.evaluateParams = function evaluateParams (feature, dataSource) {
-      console.log('http-client evaluateParams is running');
+      // console.log('http-client evaluateParams is running');
       var params = {};
       if (!dataSource.options.params) { return params }    var paramEntries = Object.entries(dataSource.options.params);
       var state = this.store.state;
@@ -4585,7 +4584,7 @@
     };
 
     ShapeSearchClient.prototype.success = function success (response) {
-      console.log("success respose: ", response);
+      // console.log("success respose: ", response);
 
       var store = this.store;
       var data = response.data;
@@ -4602,7 +4601,7 @@
     };
 
     ShapeSearchClient.prototype.error = function error (error$1) {
-      console.log("error respose: ", error$1);
+      // console.log("error respose: ", error);
       return
     };
 
@@ -5661,7 +5660,7 @@
   };
 
   DataManager.prototype.evaluateParams = function evaluateParams (feature$$1, dataSource) {
-    console.log("evalutateParams data-manager feature:  ", feature$$1);
+    // console.log("evalutateParams data-manager feature:", feature)
     var params = {};
     var paramEntries = Object.entries(dataSource.options.params);
     var state = this.store.state;
@@ -5699,20 +5698,21 @@
   };
 
   DataManager.prototype.checkForShapeSearch = function checkForShapeSearch (input) {
-    // console.log("Checking for shape search")
+    // console.log("Checking for shape search", input)
     if(this.store.state.drawShape !== null ) {
-      this.store.commit('setLastSearchMethod', 'shape search');
       var input$1 = this.store.state.parcels.pwd;
+      this.store.commit('setLastSearchMethod', 'shape search');
       var didShapeSearch = this.didShapeSearch.bind(this);
       this.store.commit('setOwnerSearchStatus', null);
       this.store.commit('setOwnerSearchData', null);
       this.store.commit('setOwnerSearchInput', null);
       this.resetGeocode();
-      console.log("Shape search input: ", input$1);
+      // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input$1).then(didShapeSearch);
     } else {
-      console.log("Not shape search, input: ", input);
-      this.clients.condoSearch.fetch(input);}
+      var input$2 = this.store.state.parcels.pwd.properties.PARCELID;
+      // console.log("Not shape search, input: ", input)
+      this.clients.condoSearch.fetch(input$2);}
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
@@ -5720,7 +5720,7 @@
   };
 
   DataManager.prototype.didTryGeocode = function didTryGeocode (feature$$1) {
-    console.log('didTryGeocode is running, feature:', feature$$1);
+    // console.log('didTryGeocode is running, feature:', feature);
 
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
       //TODO set up drawShape so that after running it removes the shape, resetting the field
@@ -5729,11 +5729,9 @@
 
       this.checkForShapeSearch();
 
-      console.log("Feature is undefined");
-
     } else if (this.store.state.geocode.status === 'success') {
 
-      console.log('didTryGeocode is running, success');
+      // console.log('didTryGeocode is running, success');
 
       this.resetData();
       this.didGeocode(feature$$1);
@@ -5865,7 +5863,7 @@
   };
 
   DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch) {
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     var configForParcelLayer = this.config.parcels.pwd;
     var geocodeField = configForParcelLayer.geocodeField;
     var otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -6138,7 +6136,7 @@
     this.store.commit('setGeocodeInput', null);
 
     var parcels = this.store.state.parcels;
-    console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+    // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
   };
   Controller.prototype.geocodeDrawnShape = function geocodeDrawnShape (state) {
