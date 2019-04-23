@@ -5709,7 +5709,7 @@
       this.store.commit('setOwnerSearchInput', null);
       this.resetGeocode();
       console.log("Shape search input: ", input$1);
-      return this.clients.shapeSearch.fetch(input$1).then(didShapeSearch).then(this.clients.condoSearch.fetch(input$1));
+      return this.clients.shapeSearch.fetch(input$1).then(didShapeSearch);
     } else {
       console.log("Not shape search, input: ", input);
       this.clients.condoSearch.fetch(input);}
@@ -5776,7 +5776,7 @@
       this.resetGeocode();
 
       // Fail on owner search here takes you to the condo search process with the input
-      return this.clients.ownerSearch.fetch(input$1).then( function () { return didOwnerSearch; }, function () { return condoSearch(input$1).then(didGeocode); });
+      return this.clients.ownerSearch.fetch(input$1).then( didOwnerSearch, function () { return condoSearch(input$1).then(didGeocode); });
 
     } else if (typeof feature$$1 === 'undefined' && this.store.state.ownerSearch.status != 'success') {
       // This should be the default failure for geocode and shapeSearches that may have a condo
