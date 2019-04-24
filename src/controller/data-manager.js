@@ -126,7 +126,6 @@ class DataManager {
   }
 
   defineTargets(dataSourceKey, targetsDef) {
-    // console.log("Define Targets Starting")
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -138,6 +137,7 @@ class DataManager {
     let targets = targetsFn(state);
     let targetIdFn = targetsDef.getTargetId;
 
+    // console.log("Define Targets Starting", targets)
     // check if target objs exist in state.
     const targetIds = targets.map(targetIdFn);
     const stateTargets = state.sources[dataSourceKey].targets;
@@ -212,6 +212,7 @@ class DataManager {
       // console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
+        // console.log("targetsFn: ", targetsFn)
         targetIdFn = targetsDef.getTargetId;
         targets = this.defineTargets(dataSourceKey, targetsDef);
       } else if (this.store.state.lastSearchMethod !== 'owner search') {
@@ -592,12 +593,7 @@ class DataManager {
 
     } else if (typeof feature === 'undefined' && this.store.state.ownerSearch.status != 'success') {
       // This should be the default failure for geocode and shapeSearches that may have a condo
-
-      console.log(this.store.state.ownerSearch.status)
-      console.log("Figure out the input type based on the search")
       const input =  this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input
-      console.log("Adding condo search client, input: ", input)
-
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
 
       this.checkForShapeSearch(input)

@@ -4531,6 +4531,9 @@
     return OwnerSearchClient;
   }(BaseClient));
 
+  require('lodash');
+
+
   var ShapeSearchClient = /*@__PURE__*/(function (BaseClient$$1) {
     function ShapeSearchClient () {
       BaseClient$$1.apply(this, arguments);
@@ -4564,8 +4567,32 @@
       return params;
     };
 
+    ShapeSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
+      console.log("evaluateDataForUnits data: ", data);
+      var dataRows = data.rows;
+      // console.log("evaluateDataForUnits dataRows: ",dataRows);
+      var groupedData = _.groupBy(dataRows, function (a) { return a.pwd_parcel_id; });
+      // console.log("evaluateDataForUnits groupedData: ", groupedData);
+
+      var unitsList = [],
+      dataList = [];
+
+      for (var item in groupedData){
+        groupedData[item].length > 1 ? unitsList.push.apply(unitsList,groupedData[item]) :
+        dataList.push(groupedData[item][0]);
+      }
+
+      unitsList.length > 0 ? unitsList = _.groupBy(unitsList, function (a) { return a.pwd_parcel_id; }): "";
+
+      console.log("Units List: ", unitsList, "Data list: ", dataList );
+
+      return unitsList
+    };
+
     ShapeSearchClient.prototype.fetch = function fetch (input) {
-      var data =  input.map(function (a) { return a.properties.BRT_ID; });
+      console.log('shapeSearch client fetch', input);
+      var data =  input.map(function (a) { return a.properties.PARCELID.toString(); });
+      console.log('shapeSearch DATA', data);
 
       var store = this.store;
 
@@ -4590,9 +4617,18 @@
       var data = response.data;
       var url = response.config.url;
 
-      var features = data.rows;
-      features = this.assignFeatureIds(features, 'shape');
+      // this.evaluateDataForCondos(data);
 
+      var units = this.evaluateDataForUnits(data);
+      // console.log(data)
+
+      var features = data.rows;
+      // console.log(features)
+      features = this.assignFeatureIds(features, 'shape');
+      // console.log(features)
+
+      console.log(units);
+      store.commit('setShapeSearchUnits', units);
       store.commit('setShapeSearchData', data);
       store.commit('setShapeSearchStatus', 'success');
       store.commit('setDrawShape', null);
@@ -5294,7 +5330,6 @@
   };
 
   DataManager.prototype.defineTargets = function defineTargets (dataSourceKey, targetsDef) {
-    // console.log("Define Targets Starting")
     var state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     var targetsFn = targetsDef.get;
@@ -5306,6 +5341,7 @@
     var targets = targetsFn(state);
     var targetIdFn = targetsDef.getTargetId;
 
+    // console.log("Define Targets Starting", targets)
     // check if target objs exist in state.
     var targetIds = targets.map(targetIdFn);
     var stateTargets = state.sources[dataSourceKey].targets;
@@ -5386,6 +5422,7 @@
       // console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
+        // console.log("targetsFn: ", targetsFn)
         targetIdFn = targetsDef.getTargetId;
         targets = this.defineTargets(dataSourceKey, targetsDef);
       } else if (this.store.state.lastSearchMethod !== 'owner search') {
@@ -5778,12 +5815,7 @@
 
     } else if (typeof feature$$1 === 'undefined' && this.store.state.ownerSearch.status != 'success') {
       // This should be the default failure for geocode and shapeSearches that may have a condo
-
-      console.log(this.store.state.ownerSearch.status);
-      console.log("Figure out the input type based on the search");
       var input$2 =this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input;
-      console.log("Adding condo search client, input: ", input$2);
-
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
 
       this.checkForShapeSearch(input$2);
@@ -6182,6 +6214,7 @@
       status: null,
       data: null,
       input: null,
+      units: null,
     },
     lastSearchMethod: 'geocode',
   };
@@ -6367,6 +6400,10 @@
         },
         setShapeSearchData: function setShapeSearchData(state, payload) {
           state.shapeSearch.data = payload;
+        },
+        setShapeSearchUnits: function setShapeSearchUnits(state, payload) {
+          console.log("setShapeSearchUnits: ", payload);
+          state.shapeSearch.units = payload;
         },
         setActiveSearchStatus: function setActiveSearchStatus(state, payload) {
           var key = payload.activeSearchKey;

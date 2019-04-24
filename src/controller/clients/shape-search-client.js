@@ -1,5 +1,6 @@
 import axios from 'axios';
 import BaseClient from './base-client';
+require('lodash');
 
 
 class ShapeSearchClient extends BaseClient {
@@ -25,8 +26,32 @@ class ShapeSearchClient extends BaseClient {
     return params;
   }
 
+  evaluateDataForUnits(data) {
+    console.log("evaluateDataForUnits data: ", data);
+    let dataRows = data.rows;
+    // console.log("evaluateDataForUnits dataRows: ",dataRows);
+    let groupedData = _.groupBy(dataRows, a => a.pwd_parcel_id);
+    // console.log("evaluateDataForUnits groupedData: ", groupedData);
+
+    var unitsList = [],
+    dataList = [];
+
+    for (let item in groupedData){
+      groupedData[item].length > 1 ? unitsList.push.apply(unitsList,groupedData[item]) :
+      dataList.push(groupedData[item][0])
+    }
+
+    unitsList.length > 0 ? unitsList = _.groupBy(unitsList, a => a.pwd_parcel_id): ""
+
+    console.log("Units List: ", unitsList, "Data list: ", dataList )
+
+    return unitsList
+  }
+
   fetch(input) {
-    const data =  input.map(a => a.properties.BRT_ID)
+    console.log('shapeSearch client fetch', input);
+    const data =  input.map(a => a.properties.PARCELID.toString())
+    console.log('shapeSearch DATA', data);
 
     const store = this.store;
 
@@ -51,9 +76,18 @@ class ShapeSearchClient extends BaseClient {
     let data = response.data;
     const url = response.config.url;
 
-    let features = data.rows
-    features = this.assignFeatureIds(features, 'shape');
+    // this.evaluateDataForCondos(data);
 
+    let units = this.evaluateDataForUnits(data);
+    // console.log(data)
+
+    let features = data.rows
+    // console.log(features)
+    features = this.assignFeatureIds(features, 'shape');
+    // console.log(features)
+
+    console.log(units)
+    store.commit('setShapeSearchUnits', units);
     store.commit('setShapeSearchData', data);
     store.commit('setShapeSearchStatus', 'success');
     store.commit('setDrawShape', null)
