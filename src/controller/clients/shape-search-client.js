@@ -27,25 +27,41 @@ class ShapeSearchClient extends BaseClient {
   }
 
   evaluateDataForUnits(data) {
-    console.log("evaluateDataForUnits data: ", data);
-    let dataRows = data.rows;
+    console.log("evaluateDataForUnits this: ", this);
     // console.log("evaluateDataForUnits dataRows: ",dataRows);
-    let groupedData = _.groupBy(dataRows, a => a.pwd_parcel_id);
+    let groupedData = _.groupBy(data.rows, a => a.pwd_parcel_id);
     // console.log("evaluateDataForUnits groupedData: ", groupedData);
 
-    var unitsList = [],
-    dataList = [];
+    var units = [], filteredData, dataList = [];
 
     for (let item in groupedData){
-      groupedData[item].length > 1 ? unitsList.push.apply(unitsList,groupedData[item]) :
+      groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) :
       dataList.push(groupedData[item][0])
     }
 
-    unitsList.length > 0 ? unitsList = _.groupBy(unitsList, a => a.pwd_parcel_id): ""
+    let mObj = JSON.parse(JSON.stringify(data.rows[0]))
 
-    console.log("Units List: ", unitsList, "Data list: ", dataList )
+    if(units.length > 0) {
+      units = _.groupBy(units, a => a.pwd_parcel_id);
+      data.rows = data.rows.filter(a => !Object.keys(units).includes(a.pwd_parcel_id));
+    }
 
-    return unitsList
+    console.log("Units List: ", units, "Data: ", data )
+    this.store.commit('setShapeSearchUnits', units);
+
+    for (let unit in units) {
+      console.log("Unit: ", units[unit])
+      for (let i in mObj) { mObj[i] = ""  }
+      let mObjPush = JSON.parse(JSON.stringify(mObj))
+      mObjPush.location = units[unit][0].location
+      mObjPush.pwd_parcel_id = units[unit][0].pwd_parcel_id
+      data.rows.push(mObjPush)
+    }
+
+    console.log(data)
+
+
+    return data
   }
 
   fetch(input) {
@@ -78,16 +94,16 @@ class ShapeSearchClient extends BaseClient {
 
     // this.evaluateDataForCondos(data);
 
-    let units = this.evaluateDataForUnits(data);
-    // console.log(data)
+    data = this.evaluateDataForUnits(data);
+    console.log(data)
 
     let features = data.rows
     // console.log(features)
     features = this.assignFeatureIds(features, 'shape');
     // console.log(features)
 
-    console.log(units)
-    store.commit('setShapeSearchUnits', units);
+
+    // store.commit('setShapeSearchUnits', units);
     store.commit('setShapeSearchData', data);
     store.commit('setShapeSearchStatus', 'success');
     store.commit('setDrawShape', null)

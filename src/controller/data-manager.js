@@ -175,7 +175,7 @@ class DataManager {
         if(target.properties){
           idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
         } else {
-          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.parcel_number + "',";
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.pwd_parcel_id + "',";
         }
       }
       idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);

@@ -4568,25 +4568,41 @@
     };
 
     ShapeSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
-      console.log("evaluateDataForUnits data: ", data);
-      var dataRows = data.rows;
+      console.log("evaluateDataForUnits this: ", this);
       // console.log("evaluateDataForUnits dataRows: ",dataRows);
-      var groupedData = _.groupBy(dataRows, function (a) { return a.pwd_parcel_id; });
+      var groupedData = _.groupBy(data.rows, function (a) { return a.pwd_parcel_id; });
       // console.log("evaluateDataForUnits groupedData: ", groupedData);
 
-      var unitsList = [],
-      dataList = [];
+      var units = [], dataList = [];
 
       for (var item in groupedData){
-        groupedData[item].length > 1 ? unitsList.push.apply(unitsList,groupedData[item]) :
+        groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) :
         dataList.push(groupedData[item][0]);
       }
 
-      unitsList.length > 0 ? unitsList = _.groupBy(unitsList, function (a) { return a.pwd_parcel_id; }): "";
+      var mObj = JSON.parse(JSON.stringify(data.rows[0]));
 
-      console.log("Units List: ", unitsList, "Data list: ", dataList );
+      if(units.length > 0) {
+        units = _.groupBy(units, function (a) { return a.pwd_parcel_id; });
+        data.rows = data.rows.filter(function (a) { return !Object.keys(units).includes(a.pwd_parcel_id); });
+      }
 
-      return unitsList
+      console.log("Units List: ", units, "Data: ", data );
+      this.store.commit('setShapeSearchUnits', units);
+
+      for (var unit in units) {
+        console.log("Unit: ", units[unit]);
+        for (var i in mObj) { mObj[i] = "";  }
+        var mObjPush = JSON.parse(JSON.stringify(mObj));
+        mObjPush.location = units[unit][0].location;
+        mObjPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
+        data.rows.push(mObjPush);
+      }
+
+      console.log(data);
+
+
+      return data
     };
 
     ShapeSearchClient.prototype.fetch = function fetch (input) {
@@ -4619,16 +4635,16 @@
 
       // this.evaluateDataForCondos(data);
 
-      var units = this.evaluateDataForUnits(data);
-      // console.log(data)
+      data = this.evaluateDataForUnits(data);
+      console.log(data);
 
       var features = data.rows;
       // console.log(features)
       features = this.assignFeatureIds(features, 'shape');
       // console.log(features)
 
-      console.log(units);
-      store.commit('setShapeSearchUnits', units);
+
+      // store.commit('setShapeSearchUnits', units);
       store.commit('setShapeSearchData', data);
       store.commit('setShapeSearchStatus', 'success');
       store.commit('setDrawShape', null);
@@ -5381,7 +5397,7 @@
           if(target.properties){
           idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
         } else {
-          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.parcel_number + "',";
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.pwd_parcel_id + "',";
         }
       }
       idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
