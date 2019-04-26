@@ -61,7 +61,7 @@ class HttpClient extends BaseClient {
 
       this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
     }, response => {
-      console.log('fetch json error', response);
+      // console.log('fetch json error', response);
       this.dataManager.didFetchData(dataSourceKey, 'error');
     });
   }
@@ -88,7 +88,7 @@ class HttpClient extends BaseClient {
       // console.log('data', data);
       this.dataManager.didFetchMoreData(dataSourceKey, 'success', data);
     }, response => {
-      console.log('fetch json error', response);
+      // console.log('fetch json error', response);
       this.dataManager.didFetchMoreData(dataSourceKey, 'error');
     });
   }
@@ -145,7 +145,7 @@ class HttpClient extends BaseClient {
 
       this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId);
     }, response => {
-      console.log('fetch json error', response);
+      // console.log('fetch json error', response);
       this.dataManager.didFetchData(dataSourceKey, 'error');
     });
   }

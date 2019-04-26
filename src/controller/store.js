@@ -209,7 +209,7 @@ const pvdStore = {
         state.shapeSearch.data = payload;
       },
       setShapeSearchUnits(state, payload) {
-        console.log("setShapeSearchUnits: ", payload)
+        // console.log("setShapeSearchUnits: ", payload)
         state.shapeSearch.units = payload;
       },
       setActiveSearchStatus(state, payload) {

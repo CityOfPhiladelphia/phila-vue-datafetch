@@ -126,6 +126,7 @@ class DataManager {
   }
 
   defineTargets(dataSourceKey, targetsDef) {
+    // console.log("defineTargets: ", dataSourceKey, targetsDef)
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -140,8 +141,10 @@ class DataManager {
     // console.log("Define Targets Starting", targets)
     // check if target objs exist in state.
     const targetIds = targets.map(targetIdFn);
+    // console.log("targetIds: ", targetIds)
     const stateTargets = state.sources[dataSourceKey].targets;
     const stateTargetIds = Object.keys(stateTargets);
+    // console.log("stateTargetIds: ", stateTargetIds)
     // the inclusion check wasn't working because ids were strings in
     // one set and ints in another, so do this.
     const stateTargetIdsStr = stateTargetIds.map(String);
@@ -288,6 +291,8 @@ class DataManager {
   }
 
   didFetchData(key, status, data, targetId, targetIdFn) {
+
+    // console.log("didFetchData: ", data)
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
     let rows;
@@ -790,7 +795,6 @@ class DataManager {
       // at this point there is definitely a feature or features - put it in state
       this.setParcelsInState(parcelLayer, features);
       this.geocode(features);
-      console.log("Ending did get parcels by shape after this.geocode()")
 
       // this.fetchData();
   }

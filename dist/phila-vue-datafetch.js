@@ -4568,7 +4568,7 @@
     };
 
     ShapeSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
-      console.log("evaluateDataForUnits this: ", this);
+      // console.log("evaluateDataForUnits data: ", data);
       // console.log("evaluateDataForUnits dataRows: ",dataRows);
       var groupedData = _.groupBy(data.rows, function (a) { return a.pwd_parcel_id; });
       // console.log("evaluateDataForUnits groupedData: ", groupedData);
@@ -4587,32 +4587,26 @@
         data.rows = data.rows.filter(function (a) { return !Object.keys(units).includes(a.pwd_parcel_id); });
       }
 
-      console.log("Units List: ", units, "Data: ", data );
+      // console.log("Units List: ", units, "Data: ", data )
       this.store.commit('setShapeSearchUnits', units);
 
       for (var unit in units) {
-        console.log("Unit: ", units[unit]);
+        // console.log("Unit: ", units[unit])
         for (var i in mObj) { mObj[i] = "";  }
         var mObjPush = JSON.parse(JSON.stringify(mObj));
         mObjPush.location = units[unit][0].location;
         mObjPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
         data.rows.push(mObjPush);
       }
-
-      console.log(data);
-
-
       return data
     };
 
     ShapeSearchClient.prototype.fetch = function fetch (input) {
-      console.log('shapeSearch client fetch', input);
+      // console.log('shapeSearch client fetch', input);
       var data =  input.map(function (a) { return a.properties.PARCELID.toString(); });
-      console.log('shapeSearch DATA', data);
+      // console.log('shapeSearch DATA', data);
 
       var store = this.store;
-
-      console.log(this.config);
       var shapeSearchConfig = this.config.shapeSearch;
       var url = shapeSearchConfig.url;
 
@@ -4634,9 +4628,7 @@
       var url = response.config.url;
 
       // this.evaluateDataForCondos(data);
-
       data = this.evaluateDataForUnits(data);
-      console.log(data);
 
       var features = data.rows;
       // console.log(features)
@@ -4707,7 +4699,7 @@
 
         this$1.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
       }, function (response) {
-        console.log('fetch json error', response);
+        // console.log('fetch json error', response);
         this$1.dataManager.didFetchData(dataSourceKey, 'error');
       });
     };
@@ -4736,7 +4728,7 @@
         // console.log('data', data);
         this$1.dataManager.didFetchMoreData(dataSourceKey, 'success', data);
       }, function (response) {
-        console.log('fetch json error', response);
+        // console.log('fetch json error', response);
         this$1.dataManager.didFetchMoreData(dataSourceKey, 'error');
       });
     };
@@ -4795,7 +4787,7 @@
 
         this$1.dataManager.didFetchData(dataSourceKey, 'success', data, targetId);
       }, function (response) {
-        console.log('fetch json error', response);
+        // console.log('fetch json error', response);
         this$1.dataManager.didFetchData(dataSourceKey, 'error');
       });
     };
@@ -5346,6 +5338,7 @@
   };
 
   DataManager.prototype.defineTargets = function defineTargets (dataSourceKey, targetsDef) {
+    // console.log("defineTargets: ", dataSourceKey, targetsDef)
     var state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     var targetsFn = targetsDef.get;
@@ -5360,8 +5353,10 @@
     // console.log("Define Targets Starting", targets)
     // check if target objs exist in state.
     var targetIds = targets.map(targetIdFn);
+    // console.log("targetIds: ", targetIds)
     var stateTargets = state.sources[dataSourceKey].targets;
     var stateTargetIds = Object.keys(stateTargets);
+    // console.log("stateTargetIds: ", stateTargetIds)
     // the inclusion check wasn't working because ids were strings in
     // one set and ints in another, so do this.
     var stateTargetIdsStr = stateTargetIds.map(String);
@@ -5397,13 +5392,13 @@
           if(target.properties){
           idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
         } else {
-          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.pwd_parcel_id + "',";
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.parcel_number + "',";
         }
       }
       idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
       targets = [idsOfOwnersOrProps];
     }
-
+    // console.log("defineTargets targets: ", targets)
     return targets;
   };
 
@@ -5516,6 +5511,8 @@
   };
 
   DataManager.prototype.didFetchData = function didFetchData (key, status, data, targetId, targetIdFn) {
+
+    // console.log("didFetchData: ", data)
     var dataOrNull = status === 'error' ? null : data;
     var stateData = dataOrNull;
     var rows;
@@ -6029,7 +6026,6 @@
       // at this point there is definitely a feature or features - put it in state
       this.setParcelsInState(parcelLayer, features);
       this.geocode(features);
-      console.log("Ending did get parcels by shape after this.geocode()");
 
       // this.fetchData();
   };
@@ -6418,7 +6414,7 @@
           state.shapeSearch.data = payload;
         },
         setShapeSearchUnits: function setShapeSearchUnits(state, payload) {
-          console.log("setShapeSearchUnits: ", payload);
+          // console.log("setShapeSearchUnits: ", payload)
           state.shapeSearch.units = payload;
         },
         setActiveSearchStatus: function setActiveSearchStatus(state, payload) {
