@@ -5857,6 +5857,14 @@
     } else {
       this.fetchData();
     }
+
+    if (this.store.state.lastSearchMethod === 'geocode') {
+      var latLng = {lat: feature$$1.geometry.coordinates[1], lng: feature$$1.geometry.coordinates[0]};
+      console.log(latLng);
+      this.getParcelsByLatLng(latLng, 'pwd', null);
+    }
+  //
+
   }; // end didGeocode
 
   DataManager.prototype.getParcelsById = function getParcelsById (id, parcelLayer) {

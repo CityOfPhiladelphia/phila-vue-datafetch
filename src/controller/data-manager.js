@@ -627,6 +627,14 @@ class DataManager {
     } else {
       this.fetchData();
     }
+
+    if (this.store.state.lastSearchMethod === 'geocode') {
+      const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
+      console.log(latLng)
+      this.getParcelsByLatLng(latLng, 'pwd', null)
+    }
+//
+
   } // end didGeocode
 
   getParcelsById(id, parcelLayer) {
