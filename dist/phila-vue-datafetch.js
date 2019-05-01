@@ -4425,6 +4425,7 @@
           relatedFeatures.push(relatedFeature);
         }
       }
+      feature.properties.condo = true;
       store.commit('setGeocodeData', feature);
       store.commit('setGeocodeRelated', relatedFeatures);
       store.commit('setGeocodeStatus', 'success');
@@ -4595,6 +4596,7 @@
         for (var i in mObj) { mObj[i] = "";  }
         var mObjPush = JSON.parse(JSON.stringify(mObj));
         mObjPush.location = units[unit][0].location;
+        mObjPush.condo = true;
         mObjPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
         data.rows.push(mObjPush);
       }

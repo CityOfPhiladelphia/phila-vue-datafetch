@@ -67,6 +67,7 @@ class CondoSearchClient extends BaseClient {
         relatedFeatures.push(relatedFeature);
       }
     }
+    feature.properties.condo = true;
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');
