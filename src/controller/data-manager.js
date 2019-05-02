@@ -144,13 +144,13 @@ class DataManager {
     if (!geocodeObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
         if (dataSourceKey[1].dependent) {
-          if (dataSourceKey[1].dependent === 'parcel') {
+          if (dataSourceKey[1].dependent === 'parcel' || dataSourceKey[1].dependent === 'none') {
             return true;
           }
         }
       })
     }
-    // console.log('in fetchData, dataSources after filter:', dataSources);
+    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {

@@ -21,7 +21,9 @@ class EsriClient extends BaseClient {
     const { relationship, targetGeometry, ...options } = dataSource.options;
     const parameters = dataSource.parameters;
     if (parameters) {
-      parameters['sourceValue'] = feature.properties[parameters.sourceField];
+      if (feature) {
+        parameters['sourceValue'] = feature.properties[parameters.sourceField];
+      }
     }
 
     // check if a target geometry fn was specified. otherwise, use geocode feat
@@ -32,14 +34,26 @@ class EsriClient extends BaseClient {
       // geometry (such as the lat lng bounds of a set of parcels) if it needs
       // to. use case: fetching regmaps.
       geom = targetGeometry(state, L);
-    } else {
+    } else if (feature) {
       geom = feature.geometry;
+    } else {
+      geom = null;
     }
 
-    // handle null geom
-    if (!geom) {
-      this.dataManager.didFetchData(dataSourceKey, 'error');
-      return;
+    if (dataSource.dependent) {
+      if (dataSource.dependent !== 'none') {
+        // handle null geom
+        if (!geom) {
+          this.dataManager.didFetchData(dataSourceKey, 'error');
+          return;
+        }
+      }
+    } else {
+      // handle null geom
+      if (!geom) {
+        this.dataManager.didFetchData(dataSourceKey, 'error');
+        return;
+      }
     }
 
     this.fetchBySpatialQuery(dataSourceKey, url, relationship, geom, parameters, options);
