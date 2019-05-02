@@ -47,7 +47,7 @@ class ShapeSearchClient extends BaseClient {
     }
 
     // console.log("Units List: ", units, "Data: ", data )
-    this.store.commit('setShapeSearchUnits', units);
+    this.store.commit('setUnits', units);
 
     for (let unit in units) {
       // console.log("Unit: ", units[unit])

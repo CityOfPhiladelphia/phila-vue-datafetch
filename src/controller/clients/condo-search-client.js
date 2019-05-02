@@ -4,28 +4,48 @@ import BaseClient from './base-client';
 // the high-level purpose of this is: take an address, geocode it, and put
 // the result in state.
 class CondoSearchClient extends BaseClient {
-  // fetch(input, category) {
-  // const store = this.store;
-  //
-  //
-  // console.log("Condo Building Config")
-  //
-  // if (this.store.state.lastSearchMethod == "owner search") {
-  //
-  // }
+
+
+
+  evaluateDataForUnits(data) {
+
+    // console.log(data)
+
+    var units = [], filteredData, dataList = [];
+
+    let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
+
+    for (let item in groupedData){
+      groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) :
+      dataList.push(groupedData[item][0])
+    }
+
+    console.log("groupedData: ", groupedData)
+    //
+    let mObj = JSON.parse(JSON.stringify(data[0]))
+
+    if(units.length > 0) {
+      units = _.groupBy(units, a => a.properties.pwd_parcel_id);
+      data = data.filter(a => !Object.keys(units).includes(a.properties.pwd_parcel_id));
+    }
+
+    console.log("Units List: ", units, "Data: ", data )
+    this.store.commit('setUnits', units);
+    //
+  }
+
   fetch(input) {
-    // console.log('geocode client fetch', input);
+    console.log('geocode client fetch', input);
 
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder))
     condoConfig.url = this.config.geocoder.url
-    console.log(condoConfig)
 
     condoConfig.params.opa_only = false
+    condoConfig.params.include_units = true
 
     const url = condoConfig.url(input);
     const params = condoConfig.params;
-    console.log(params)
 
     // update state
     this.store.commit('setGeocodeStatus', 'waiting');
@@ -41,7 +61,7 @@ class CondoSearchClient extends BaseClient {
 
   success(response) {
     const store = this.store;
-    const data = response.data;
+    const data = response.data
     const url = response.config.url;
     console.log('geocode search success', data);
 
@@ -51,7 +71,9 @@ class CondoSearchClient extends BaseClient {
       return;
     }
 
-    let features = data.features;
+    let features = data.features.filter(a => a.properties.unit_num === "");
+    features.map( a => a.condo = true)
+    let units = data.features.filter(a => a.properties.unit_num != "");
 
     features = this.assignFeatureIds(features, 'geocode');
 
@@ -68,6 +90,9 @@ class CondoSearchClient extends BaseClient {
       }
     }
     feature.properties.condo = true;
+
+    units = this.evaluateDataForUnits(units);
+
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');

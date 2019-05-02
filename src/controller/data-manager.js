@@ -530,7 +530,7 @@ class DataManager {
       // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
     } else {
-      const input = this.store.state.parcels.pwd.properties.PARCELID;
+      const input = this.store.state.parcels.pwd.properties.ADDRESS;
       // console.log("Not shape search, input: ", input)
       this.clients.condoSearch.fetch(input)}
   }

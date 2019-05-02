@@ -6,7 +6,7 @@ import BaseClient from './base-client';
 class GeocodeClient extends BaseClient {
   // fetch(input, category) {
   fetch(input) {
-    // console.log('geocode client fetch', input);
+    console.log('geocode client fetch', input);
 
     const store = this.store;
     let geocodeConfig;

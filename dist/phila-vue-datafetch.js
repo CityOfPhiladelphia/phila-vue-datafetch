@@ -4188,7 +4188,7 @@
     GeocodeClient.prototype.constructor = GeocodeClient;
 
     GeocodeClient.prototype.fetch = function fetch (input) {
-      // console.log('geocode client fetch', input);
+      console.log('geocode client fetch', input);
 
       var store = this.store;
       var geocodeConfig;
@@ -4369,19 +4369,45 @@
     CondoSearchClient.prototype = Object.create( BaseClient$$1 && BaseClient$$1.prototype );
     CondoSearchClient.prototype.constructor = CondoSearchClient;
 
+    CondoSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
+
+      // console.log(data)
+
+      var units = [], dataList = [];
+
+      var groupedData = _.groupBy(data, function (a) { return a.properties.pwd_parcel_id; });
+
+      for (var item in groupedData){
+        groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) :
+        dataList.push(groupedData[item][0]);
+      }
+
+      console.log("groupedData: ", groupedData);
+      //
+      var mObj = JSON.parse(JSON.stringify(data[0]));
+
+      if(units.length > 0) {
+        units = _.groupBy(units, function (a) { return a.properties.pwd_parcel_id; });
+        data = data.filter(function (a) { return !Object.keys(units).includes(a.properties.pwd_parcel_id); });
+      }
+
+      console.log("Units List: ", units, "Data: ", data );
+      this.store.commit('setUnits', units);
+      //
+    };
+
     CondoSearchClient.prototype.fetch = function fetch (input) {
-      // console.log('geocode client fetch', input);
+      console.log('geocode client fetch', input);
 
       var store = this.store;
       var condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
       condoConfig.url = this.config.geocoder.url;
-      console.log(condoConfig);
 
       condoConfig.params.opa_only = false;
+      condoConfig.params.include_units = true;
 
       var url = condoConfig.url(input);
       var params = condoConfig.params;
-      console.log(params);
 
       // update state
       this.store.commit('setGeocodeStatus', 'waiting');
@@ -4407,7 +4433,9 @@
         return;
       }
 
-      var features = data.features;
+      var features = data.features.filter(function (a) { return a.properties.unit_num === ""; });
+      features.map( function (a) { return a.condo = true; });
+      var units = data.features.filter(function (a) { return a.properties.unit_num != ""; });
 
       features = this.assignFeatureIds(features, 'geocode');
 
@@ -4426,6 +4454,9 @@
         }
       }
       feature.properties.condo = true;
+
+      units = this.evaluateDataForUnits(units);
+
       store.commit('setGeocodeData', feature);
       store.commit('setGeocodeRelated', relatedFeatures);
       store.commit('setGeocodeStatus', 'success');
@@ -4589,7 +4620,7 @@
       }
 
       // console.log("Units List: ", units, "Data: ", data )
-      this.store.commit('setShapeSearchUnits', units);
+      this.store.commit('setUnits', units);
 
       for (var unit in units) {
         // console.log("Unit: ", units[unit])
@@ -5762,7 +5793,7 @@
       // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input$1).then(didShapeSearch);
     } else {
-      var input$2 = this.store.state.parcels.pwd.properties.PARCELID;
+      var input$2 = this.store.state.parcels.pwd.properties.ADDRESS;
       // console.log("Not shape search, input: ", input)
       this.clients.condoSearch.fetch(input$2);}
   };
@@ -6235,6 +6266,8 @@
       status: null,
       data: null,
       input: null,
+    },
+    condoUnits: {
       units: null,
     },
     lastSearchMethod: 'geocode',
@@ -6422,9 +6455,9 @@
         setShapeSearchData: function setShapeSearchData(state, payload) {
           state.shapeSearch.data = payload;
         },
-        setShapeSearchUnits: function setShapeSearchUnits(state, payload) {
+        setUnits: function setUnits(state, payload) {
           // console.log("setShapeSearchUnits: ", payload)
-          state.shapeSearch.units = payload;
+          state.condoUnits.units = payload;
         },
         setActiveSearchStatus: function setActiveSearchStatus(state, payload) {
           var key = payload.activeSearchKey;

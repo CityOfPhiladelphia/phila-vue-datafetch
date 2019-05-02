@@ -23,6 +23,8 @@ const initialState = {
     status: null,
     data: null,
     input: null,
+  },
+  condoUnits: {
     units: null,
   },
   lastSearchMethod: 'geocode',
@@ -208,9 +210,9 @@ const pvdStore = {
       setShapeSearchData(state, payload) {
         state.shapeSearch.data = payload;
       },
-      setShapeSearchUnits(state, payload) {
+      setUnits(state, payload) {
         // console.log("setShapeSearchUnits: ", payload)
-        state.shapeSearch.units = payload;
+        state.condoUnits.units = payload;
       },
       setActiveSearchStatus(state, payload) {
         let key = payload.activeSearchKey;
