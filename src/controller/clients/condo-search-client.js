@@ -5,23 +5,15 @@ import BaseClient from './base-client';
 // the result in state.
 class CondoSearchClient extends BaseClient {
 
-
-
   evaluateDataForUnits(data) {
 
-    // console.log(data)
-
     var units = [], filteredData, dataList = [];
-
     let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
 
     for (let item in groupedData){
       groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) :
       dataList.push(groupedData[item][0])
     }
-
-    console.log("groupedData: ", groupedData)
-    //
     let mObj = JSON.parse(JSON.stringify(data[0]))
 
     if(units.length > 0) {
@@ -29,13 +21,11 @@ class CondoSearchClient extends BaseClient {
       data = data.filter(a => !Object.keys(units).includes(a.properties.pwd_parcel_id));
     }
 
-    console.log("Units List: ", units, "Data: ", data )
     this.store.commit('setUnits', units);
-    //
   }
 
   fetch(input) {
-    console.log('geocode client fetch', input);
+    // console.log('geocode client fetch', input);
 
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder))
@@ -63,9 +53,7 @@ class CondoSearchClient extends BaseClient {
     const store = this.store;
     const data = response.data
     const url = response.config.url;
-    console.log('geocode search success', data);
-
-    // TODO handle multiple results
+    // console.log('geocode search success', data);
 
     if (!data.features || data.features.length < 1) {
       return;
@@ -77,7 +65,6 @@ class CondoSearchClient extends BaseClient {
 
     features = this.assignFeatureIds(features, 'geocode');
 
-    // TODO do some checking here
     let feature = features[0];
     let relatedFeatures = [];
     for (let relatedFeature of features.slice(1)){

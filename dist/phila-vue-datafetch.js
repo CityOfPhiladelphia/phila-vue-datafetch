@@ -4371,19 +4371,13 @@
 
     CondoSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
 
-      // console.log(data)
-
       var units = [], dataList = [];
-
       var groupedData = _.groupBy(data, function (a) { return a.properties.pwd_parcel_id; });
 
       for (var item in groupedData){
         groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) :
         dataList.push(groupedData[item][0]);
       }
-
-      console.log("groupedData: ", groupedData);
-      //
       var mObj = JSON.parse(JSON.stringify(data[0]));
 
       if(units.length > 0) {
@@ -4391,13 +4385,11 @@
         data = data.filter(function (a) { return !Object.keys(units).includes(a.properties.pwd_parcel_id); });
       }
 
-      console.log("Units List: ", units, "Data: ", data );
       this.store.commit('setUnits', units);
-      //
     };
 
     CondoSearchClient.prototype.fetch = function fetch (input) {
-      console.log('geocode client fetch', input);
+      // console.log('geocode client fetch', input);
 
       var store = this.store;
       var condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
@@ -4425,9 +4417,7 @@
       var store = this.store;
       var data = response.data;
       var url = response.config.url;
-      console.log('geocode search success', data);
-
-      // TODO handle multiple results
+      // console.log('geocode search success', data);
 
       if (!data.features || data.features.length < 1) {
         return;
@@ -4439,7 +4429,6 @@
 
       features = this.assignFeatureIds(features, 'geocode');
 
-      // TODO do some checking here
       var feature = features[0];
       var relatedFeatures = [];
       for (var i = 0, list = features.slice(1); i < list.length; i += 1){
