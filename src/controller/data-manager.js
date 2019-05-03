@@ -387,6 +387,7 @@ class DataManager {
   resetGeocode() {
     // console.log('resetGeocode is running');
     // reset geocode
+    this.store.commit('setUnits', null);
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
@@ -561,6 +562,7 @@ class DataManager {
       this.store.commit('setOwnerSearchInput', null);
       this.store.commit('setShapeSearchStatus', null);
       this.store.commit('setShapeSearchData', null);
+      this.store.commit('setUnits', null);
       this.store.commit('setDrawShape', null);
       if(this.store.state.editableLayers !== null ){
         this.store.state.editableLayers.clearLayers();
@@ -571,6 +573,7 @@ class DataManager {
       if(this.store.state.editableLayers !== null ){
         this.store.state.editableLayers.clearLayers();
       }
+      this.store.commit('setUnits', null);
       this.store.commit('setDrawShape', null);
       this.store.commit('setShapeSearchStatus', null);
       this.store.commit('setShapeSearchData', null);

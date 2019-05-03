@@ -4371,6 +4371,8 @@
 
     CondoSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
 
+      console.log("units input:", data);
+
       var units = [], dataList = [];
       var groupedData = _.groupBy(data, function (a) { return a.properties.pwd_parcel_id; });
 
@@ -4384,7 +4386,7 @@
         units = _.groupBy(units, function (a) { return a.properties.pwd_parcel_id; });
         data = data.filter(function (a) { return !Object.keys(units).includes(a.properties.pwd_parcel_id); });
       }
-
+      console.log("commit setUnits: ", units);
       this.store.commit('setUnits', units);
     };
 
@@ -4416,42 +4418,50 @@
     CondoSearchClient.prototype.success = function success (response) {
       var store = this.store;
       var data = response.data;
+      var features = data.features;
       var url = response.config.url;
-      // console.log('geocode search success', data);
+      var params = response.config.params;
+      // console.log('geocode search success', url, 'data:', data, 'params:', params, response.config.params);
 
       if (!data.features || data.features.length < 1) {
         return;
       }
 
-      var features = data.features.filter(function (a) { return a.properties.unit_num === ""; });
-      features.map( function (a) { return a.condo = true; });
-      var units = data.features.filter(function (a) { return a.properties.unit_num != ""; });
+      async function getPages(features) {
+        // console.log('still going 2, pages:', );
 
-      features = this.assignFeatureIds(features, 'geocode');
+        var pages = Math.ceil(data.total_size / 100);
 
-      var feature = features[0];
-      var relatedFeatures = [];
-      for (var i = 0, list = features.slice(1); i < list.length; i += 1){
-        var relatedFeature = list[i];
-
-        if (!!feature.properties.address_high) {
-          if (relatedFeature.properties.address_high) {
-            relatedFeatures.push(relatedFeature);
+        if (pages > 1) {
+          console.log(this);
+          for (var counter = 2; counter<=pages; counter++) {
+            console.log('in loop, counter:', counter, this);
+            params.page = counter;
+            var pageResponse = await axios.get(url, { params: params });
+            features = await features.concat(pageResponse.data.features);
+            console.log('response:', pageResponse, 'features:', features);
           }
-        } else {
-          relatedFeatures.push(relatedFeature);
         }
+
+        features = features.filter(function (a) { return a.geometry.geocode_type === "pwd_parcel"; });
+        var feature = features.filter(function (a) { return a.properties.unit_num === ""; });
+        feature.map( function (a) { return a.condo = true; });
+        feature = this.assignFeatureIds(feature, 'geocode');
+        feature = feature[0];
+        feature.properties.condo = true;
+
+        var units = features.filter(function (a) { return a.properties.unit_num != ""; });
+        units = this.evaluateDataForUnits(units);
+
+        store.commit('setGeocodeData', feature);
+        store.commit('setGeocodeStatus', 'success');
+        this.store.commit('setLastSearchMethod', 'geocode');
+
+        return feature;
       }
-      feature.properties.condo = true;
 
-      units = this.evaluateDataForUnits(units);
-
-      store.commit('setGeocodeData', feature);
-      store.commit('setGeocodeRelated', relatedFeatures);
-      store.commit('setGeocodeStatus', 'success');
-      this.store.commit('setLastSearchMethod', 'geocode');
-
-      return feature;
+      getPages = getPages.bind(this);
+      return getPages(features)
     };
 
     CondoSearchClient.prototype.error = function error (error$1) {
@@ -5633,6 +5643,7 @@
   DataManager.prototype.resetGeocode = function resetGeocode () {
     // console.log('resetGeocode is running');
     // reset geocode
+    this.store.commit('setUnits', null);
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
@@ -5813,6 +5824,7 @@
       this.store.commit('setOwnerSearchInput', null);
       this.store.commit('setShapeSearchStatus', null);
       this.store.commit('setShapeSearchData', null);
+      this.store.commit('setUnits', null);
       this.store.commit('setDrawShape', null);
       if(this.store.state.editableLayers !== null ){
         this.store.state.editableLayers.clearLayers();
@@ -5823,6 +5835,7 @@
       if(this.store.state.editableLayers !== null ){
         this.store.state.editableLayers.clearLayers();
       }
+      this.store.commit('setUnits', null);
       this.store.commit('setDrawShape', null);
       this.store.commit('setShapeSearchStatus', null);
       this.store.commit('setShapeSearchData', null);
