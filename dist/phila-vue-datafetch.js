@@ -4188,7 +4188,7 @@
     GeocodeClient.prototype.constructor = GeocodeClient;
 
     GeocodeClient.prototype.fetch = function fetch (input) {
-      console.log('geocode client fetch', input);
+      // console.log('geocode client fetch', input);
 
       var store = this.store;
       var geocodeConfig;
@@ -4371,7 +4371,7 @@
 
     CondoSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
 
-      console.log("units input:", data);
+      // console.log("units input:", data)
 
       var units = [], dataList = [];
       var groupedData = _.groupBy(data, function (a) { return a.properties.pwd_parcel_id; });
@@ -4384,20 +4384,20 @@
 
       if(units.length > 0) {
         units = _.groupBy(units, function (a) { return a.properties.pwd_parcel_id; });
-        data = data.filter(function (a) { return !Object.keys(units).includes(a.properties.pwd_parcel_id); });
       }
       console.log("commit setUnits: ", units);
       this.store.commit('setUnits', units);
+
+      return data
     };
 
     CondoSearchClient.prototype.fetch = function fetch (input) {
-      // console.log('geocode client fetch', input);
+      console.log('condo search client fetch', input);
 
       var store = this.store;
       var condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
       condoConfig.url = this.config.geocoder.url;
 
-      condoConfig.params.opa_only = false;
       condoConfig.params.include_units = true;
 
       var url = condoConfig.url(input);
@@ -4433,25 +4433,46 @@
         var pages = Math.ceil(data.total_size / 100);
 
         if (pages > 1) {
-          console.log(this);
           for (var counter = 2; counter<=pages; counter++) {
-            console.log('in loop, counter:', counter, this);
+            // console.log('in loop, counter:', counter, this);
             params.page = counter;
             var pageResponse = await axios.get(url, { params: params });
             features = await features.concat(pageResponse.data.features);
-            console.log('response:', pageResponse, 'features:', features);
+            // console.log('response:', pageResponse, 'features:', features)
           }
         }
 
-        features = features.filter(function (a) { return a.geometry.geocode_type === "pwd_parcel"; });
-        var feature = features.filter(function (a) { return a.properties.unit_num === ""; });
-        feature.map( function (a) { return a.condo = true; });
-        feature = this.assignFeatureIds(feature, 'geocode');
-        feature = feature[0];
-        feature.properties.condo = true;
+        // features = features.filter(a => a.geometry.geocode_type === "pwd_parcel");
 
         var units = features.filter(function (a) { return a.properties.unit_num != ""; });
         units = this.evaluateDataForUnits(units);
+
+        console.log("about to start feature: ", units[0]);
+
+        var feature = JSON.parse(JSON.stringify(units[0]));
+        for (var i in feature.properties) {
+          feature.properties[i] = "";
+          console.log(feature.properties[i]);
+          }
+
+        if(this.store.state.parcels.pwd != null) {
+          feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
+          feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
+          feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
+          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString();
+        } else {
+          // feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
+          // feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS
+          feature.properties.pwd_parcel_id = units[0].properties.pwd_parcel_id;
+          feature._featureId = units[0].properties.pwd_parcel_id.toString();
+        }
+
+        console.log(this);
+
+        // feature = this.assignFeatureIds(feature, 'geocode');
+        feature.condo = true;
+
+        console.log("feature: ", feature);
 
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
@@ -4635,7 +4656,7 @@
 
     ShapeSearchClient.prototype.fetch = function fetch (input) {
       // console.log('shapeSearch client fetch', input);
-      var data =  input.map(function (a) { return a.properties.PARCELID.toString(); });
+      var data =  input.map(function (a) { return a.properties.PARCELID; });
       // console.log('shapeSearch DATA', data);
 
       var store = this.store;
@@ -6231,7 +6252,7 @@
     this.dataManager.getParcelsByShape(shape, parcels);
   };
   Controller.prototype.geocodeOwnerSearch = function geocodeOwnerSearch (state) {
-    console.log("ownerSearch data:", this.store.state.ownerSearch.data);
+    // console.log("ownerSearch data:", this.store.state.ownerSearch.data);
     var ids = this.store.state.ownerSearch.data.map(function (item) { return item.properties.pwd_parcel_id; });
 
     var feature = this.dataManager.getParcelsById(ids, 'pwd');

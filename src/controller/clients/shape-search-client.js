@@ -63,7 +63,7 @@ class ShapeSearchClient extends BaseClient {
 
   fetch(input) {
     // console.log('shapeSearch client fetch', input);
-    const data =  input.map(a => a.properties.PARCELID.toString())
+    const data =  input.map(a => a.properties.PARCELID)
     // console.log('shapeSearch DATA', data);
 
     const store = this.store;

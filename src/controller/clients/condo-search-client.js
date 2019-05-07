@@ -7,7 +7,7 @@ class CondoSearchClient extends BaseClient {
 
   evaluateDataForUnits(data) {
 
-    console.log("units input:", data)
+    // console.log("units input:", data)
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
@@ -20,20 +20,20 @@ class CondoSearchClient extends BaseClient {
 
     if(units.length > 0) {
       units = _.groupBy(units, a => a.properties.pwd_parcel_id);
-      data = data.filter(a => !Object.keys(units).includes(a.properties.pwd_parcel_id));
     }
     console.log("commit setUnits: ", units)
     this.store.commit('setUnits', units);
+
+    return data
   }
 
   fetch(input) {
-    // console.log('geocode client fetch', input);
+    console.log('condo search client fetch', input);
 
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder))
     condoConfig.url = this.config.geocoder.url
 
-    condoConfig.params.opa_only = false
     condoConfig.params.include_units = true
 
     const url = condoConfig.url(input);
@@ -69,25 +69,46 @@ class CondoSearchClient extends BaseClient {
       let pages = Math.ceil(data.total_size / 100)
 
       if (pages > 1) {
-        console.log(this)
         for (let counter = 2; counter<=pages; counter++) {
-          console.log('in loop, counter:', counter, this);
+          // console.log('in loop, counter:', counter, this);
           params.page = counter;
           let pageResponse = await axios.get(url, { params })
           features = await features.concat(pageResponse.data.features)
-          console.log('response:', pageResponse, 'features:', features)
+          // console.log('response:', pageResponse, 'features:', features)
         }
       }
 
-      features = features.filter(a => a.geometry.geocode_type === "pwd_parcel");
-      let feature = features.filter(a => a.properties.unit_num === "");
-      feature.map( a => a.condo = true)
-      feature = this.assignFeatureIds(feature, 'geocode');
-      feature = feature[0];
-      feature.properties.condo = true;
+      // features = features.filter(a => a.geometry.geocode_type === "pwd_parcel");
 
       let units = features.filter(a => a.properties.unit_num != "");
       units = this.evaluateDataForUnits(units);
+
+      console.log("about to start feature: ", units[0])
+
+      var feature = JSON.parse(JSON.stringify(units[0]))
+      for (let i in feature.properties) {
+        feature.properties[i] = ""
+        console.log(feature.properties[i])
+        }
+
+      if(this.store.state.parcels.pwd != null) {
+        feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
+        feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS
+        feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID
+        feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString()
+      } else {
+        // feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
+        // feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS
+        feature.properties.pwd_parcel_id = units[0].properties.pwd_parcel_id
+        feature._featureId = units[0].properties.pwd_parcel_id.toString()
+      }
+
+      console.log(this)
+
+      // feature = this.assignFeatureIds(feature, 'geocode');
+      feature.condo = true
+
+      console.log("feature: ", feature)
 
       store.commit('setGeocodeData', feature);
       store.commit('setGeocodeStatus', 'success');
