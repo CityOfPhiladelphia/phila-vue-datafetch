@@ -97,15 +97,17 @@ class CondoSearchClient extends BaseClient {
         feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID
         feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString()
       } else {
-        // feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
+        const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
+        this.dataManager.getParcelsByLatLng(latLng, 'pwd', null)
+        console.log("feature: ", feature, "parcel: ", this.store.state.parcels)
+        feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
         // feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS
-        feature.properties.pwd_parcel_id = units[0].properties.pwd_parcel_id
-        feature._featureId = units[0].properties.pwd_parcel_id.toString()
+        feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID
+        feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString()
       }
 
-      console.log(this)
-
-      // feature = this.assignFeatureIds(feature, 'geocode');
+      console.log("Starting assignFeatureIds: ", feature)
+      feature = this.assignFeatureIds(feature, 'geocode');
       feature.condo = true
 
       console.log("feature: ", feature)

@@ -4461,15 +4461,17 @@
           feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
           feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString();
         } else {
-          // feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
+          var latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]};
+          this.dataManager.getParcelsByLatLng(latLng, 'pwd', null);
+          console.log("feature: ", feature, "parcel: ", this.store.state.parcels);
+          feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
           // feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS
-          feature.properties.pwd_parcel_id = units[0].properties.pwd_parcel_id;
-          feature._featureId = units[0].properties.pwd_parcel_id.toString();
+          feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
+          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString();
         }
 
-        console.log(this);
-
-        // feature = this.assignFeatureIds(feature, 'geocode');
+        console.log("Starting assignFeatureIds: ", feature);
+        feature = this.assignFeatureIds(feature, 'geocode');
         feature.condo = true;
 
         console.log("feature: ", feature);
@@ -5391,7 +5393,7 @@
   };
 
   DataManager.prototype.defineTargets = function defineTargets (dataSourceKey, targetsDef) {
-    // console.log("defineTargets: ", dataSourceKey, targetsDef)
+    console.log("defineTargets: ", dataSourceKey, targetsDef);
     var state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     var targetsFn = targetsDef.get;
@@ -5403,7 +5405,7 @@
     var targets = targetsFn(state);
     var targetIdFn = targetsDef.getTargetId;
 
-    // console.log("Define Targets Starting", targets)
+    console.log("Define Targets Starting", targets);
     // check if target objs exist in state.
     var targetIds = targets.map(targetIdFn);
     // console.log("targetIds: ", targetIds)
@@ -5456,8 +5458,8 @@
   };
 
   DataManager.prototype.fetchData = function fetchData () {
-    // console.log('\nFETCH DATA');
-    // console.log('-----------');
+    console.log('\nFETCH DATA');
+    console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
@@ -5486,7 +5488,7 @@
       // console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
-        // console.log("targetsFn: ", targetsFn)
+        console.log("targetsFn: ", targetsFn);
         targetIdFn = targetsDef.getTargetId;
         targets = this.defineTargets(dataSourceKey, targetsDef);
       } else if (this.store.state.lastSearchMethod !== 'owner search') {
@@ -5606,7 +5608,7 @@
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    // console.log("Did fetch data about to try fetching more data")
+    console.log("Did fetch data about to try fetching more data");
     this.fetchData();
   };
 
@@ -5796,7 +5798,7 @@
   };
 
   DataManager.prototype.didOwnerSearch = function didOwnerSearch () {
-    // console.log("Did Owner Search")
+    console.log("Did Owner Search");
     this.fetchData();
     console.log();
   };
@@ -5820,6 +5822,7 @@
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
+    console.log("shape search fetchData");
     this.fetchData();
   };
 
@@ -5880,7 +5883,7 @@
       this.resetGeocode();
 
       // Fail on owner search here takes you to the condo search process with the input
-      return this.clients.ownerSearch.fetch(input$1).then( didOwnerSearch, function () { return condoSearch(input$1).then(didGeocode); });
+      return this.clients.ownerSearch.fetch(input$1).then( didOwnerSearch, function () { return condoSearch(input$1); });
 
     } else if (typeof feature$$1 === 'undefined' && this.store.state.ownerSearch.status != 'success') {
       // This should be the default failure for geocode and shapeSearches that may have a condo
@@ -5905,12 +5908,14 @@
       if (feature$$1.street_address) {
         return;
       } else if (feature$$1.properties.street_address) {
+        console.log("fetching data");
         this.fetchData();
       }
       if(feature$$1.geometry.coordinates) {
         this.store.commit('setMapCenter', feature$$1.geometry.coordinates);
       }
     } else {
+      console.log("fetching data");
       this.fetchData();
     }
 
@@ -5941,16 +5946,18 @@
   };
 
   DataManager.prototype.getParcelsByLatLng = function getParcelsByLatLng (latlng, parcelLayer, fetch) {
-    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     var latLng = L.latLng(latlng.lat, latlng.lng);
     var url = this.config.map.featureLayers.pwdParcels.url;
     var parcelQuery = esriLeaflet.query({ url: url });
     // console.log(parcelQuery);
     parcelQuery.contains(latLng);
+    console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
     parcelQuery.run((function(error, featureCollection$$1, response) {
         this.didGetParcels(error, featureCollection$$1, response, parcelLayer, fetch);
       }).bind(this)
     );
+    console.log("finished getParcelsByLatLng");
   };
 
   DataManager.prototype.getParcelsByShape = function getParcelsByShape (latlng, parcelLayer) {
@@ -6059,7 +6066,7 @@
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
       if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt') {
-        // console.log('180405 data-manager.js - didGetParcels - is calling fetchData() on feature w address', feature.properties.street_address);
+        console.log('180405 data-manager.js - didGetParcels - is calling fetchData() on feature w address', feature$$1.properties.street_address);
         this.fetchData();
       }
     }
