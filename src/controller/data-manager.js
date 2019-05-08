@@ -661,18 +661,20 @@ class DataManager {
     );
   }
 
-  getParcelsByLatLng(latlng, parcelLayer, fetch) {
+  getParcelsByLatLng(latlng, parcelLayer, fetch, callback = () => {}) {
     console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const parcelQuery = Query({ url });
     // console.log(parcelQuery);
     parcelQuery.contains(latLng);
-    console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
-    const test = 5;
+    console.log("parcelQuery.contains(latLng)", latLng);
+
 
     parcelQuery.run((function(error, featureCollection, response) {
-      this.didGetParcels(error, featureCollection, response, parcelLayer, fetch);
+      console.log("about to start didGetParcels")
+      this.didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback);
+      console.log("finishing parcelQuery")
     }).bind(this))
     console.log("Finishing getParcelsByLatLng")
 
@@ -695,7 +697,7 @@ class DataManager {
 
   }
 
-  didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
+  didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
     console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -785,6 +787,7 @@ class DataManager {
       }
     }
     console.log("Finishing didGetParcels")
+    callback()
   }
 
   didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {

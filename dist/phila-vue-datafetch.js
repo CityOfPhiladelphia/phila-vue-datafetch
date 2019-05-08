@@ -4428,6 +4428,8 @@
       }
 
       async function getPages(features) {
+        var this$1 = this;
+
         // console.log('still going 2, pages:', );
 
         var pages = Math.ceil(data.total_size / 100);
@@ -4459,13 +4461,17 @@
         if(this.store.state.parcels.pwd === null) {
           var latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]};
           console.log("about to run getParcelsByLatLng");
-          this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch');
+          var callback = function () {
+            console.log('this should happen at the end');
+            feature.properties.street_address = this$1.store.state.parcels.pwd.properties.ADDRESS;
+            feature.properties.opa_address = this$1.store.state.parcels.pwd.properties.ADDRESS;
+            feature.properties.pwd_parcel_id = this$1.store.state.parcels.pwd.properties.PARCELID;
+            feature._featureId = this$1.store.state.parcels.pwd.properties.PARCELID.toString();
+          };
+          this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
 
           console.log("Condo search client after getParcelsByLatLng finished");
           console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
-
-
-          feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
 
         } else {
           console.log("Parcels are not null");
@@ -5952,17 +5958,22 @@
     );
   };
 
-  DataManager.prototype.getParcelsByLatLng = function getParcelsByLatLng (latlng, parcelLayer, fetch) {
+  DataManager.prototype.getParcelsByLatLng = function getParcelsByLatLng (latlng, parcelLayer, fetch, callback) {
+      if ( callback === void 0 ) callback = function () {};
+
     console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     var latLng = L.latLng(latlng.lat, latlng.lng);
     var url = this.config.map.featureLayers.pwdParcels.url;
     var parcelQuery = esriLeaflet.query({ url: url });
     // console.log(parcelQuery);
     parcelQuery.contains(latLng);
-    console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
+    console.log("parcelQuery.contains(latLng)", latLng);
+
 
     parcelQuery.run((function(error, featureCollection$$1, response) {
-      this.didGetParcels(error, featureCollection$$1, response, parcelLayer, fetch);
+      console.log("about to start didGetParcels");
+      this.didGetParcels(error, featureCollection$$1, response, parcelLayer, fetch, callback);
+      console.log("finishing parcelQuery");
     }).bind(this));
     console.log("Finishing getParcelsByLatLng");
 
@@ -5985,7 +5996,9 @@
 
   };
 
-  DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch) {
+  DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch, callback) {
+      if ( callback === void 0 ) callback = function () {};
+
     console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     var configForParcelLayer = this.config.parcels.pwd;
     var geocodeField = configForParcelLayer.geocodeField;
@@ -6079,6 +6092,7 @@
       }
     }
     console.log("Finishing didGetParcels");
+    callback();
   };
 
   DataManager.prototype.didGetParcelsByShape = function didGetParcelsByShape (error, featureCollection$$1, response, parcelLayer, fetch) {

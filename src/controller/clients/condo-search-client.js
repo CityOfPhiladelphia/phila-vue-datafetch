@@ -95,13 +95,17 @@ class CondoSearchClient extends BaseClient {
       if(this.store.state.parcels.pwd === null) {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
         console.log("about to run getParcelsByLatLng")
-        this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch')
+        const callback = () => {
+          console.log('this should happen at the end')
+          feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
+          feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
+          feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
+          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString();
+        }
+        this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
 
-        console.log("Condo search client after getParcelsByLatLng finished")
-        console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd)
-
-
-        feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
+        console.log("Condo search client after getParcelsByLatLng finished");
+        console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
 
       } else {
         console.log("Parcels are not null")
