@@ -670,11 +670,12 @@ class DataManager {
     parcelQuery.contains(latLng);
     console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
     const test = 5;
+
     parcelQuery.run((function(error, featureCollection, response) {
-        this.didGetParcels(error, featureCollection, response, parcelLayer, fetch);
-      }).bind(this)
-    )
-    console.log("finished getParcelsByLatLng")
+      this.didGetParcels(error, featureCollection, response, parcelLayer, fetch);
+    }).bind(this))
+    console.log("Finishing getParcelsByLatLng")
+
   }
 
   getParcelsByShape(latlng, parcelLayer) {
@@ -695,7 +696,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -751,7 +752,7 @@ class DataManager {
     // at this point there is definitely a feature or features - put it in state
 
     this.setParcelsInState(parcelLayer, feature);
-    // console.log("setParcelsInState: ", parcelLayer, feature);
+    console.log("setParcelsInState: ", parcelLayer, feature);
 
     // shouldGeocode - true only if:
     // 1. didGetParcels is running because the map was clicked (lastSearchMethod = reverseGeocode)
@@ -783,6 +784,7 @@ class DataManager {
         this.fetchData();
       }
     }
+    console.log("Finishing didGetParcels")
   }
 
   didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {

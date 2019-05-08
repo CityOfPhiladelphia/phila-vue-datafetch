@@ -4369,11 +4369,6 @@
     CondoSearchClient.prototype = Object.create( BaseClient$$1 && BaseClient$$1.prototype );
     CondoSearchClient.prototype.constructor = CondoSearchClient;
 
-    CondoSearchClient.prototype.parcelPromise = function parcelPromise (latLng) {
-      console.log(this);
-      this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch');
-    };
-
     CondoSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
 
       // console.log("units input:", data)
@@ -4463,12 +4458,11 @@
         console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
         if(this.store.state.parcels.pwd === null) {
           var latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]};
-          console.log("about to define promise");
-          // parcelPromise = parcelPromise.bind(this)
-          var parcelResult = Promise.resolve(this.parcelPromise(latLng));
-          console.log("parcel promise: ", parcelResult);
+          console.log("about to run getParcelsByLatLng");
+          this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch');
 
-
+          console.log("Condo search client after getParcelsByLatLng finished");
+          console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
 
 
           feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
@@ -5966,11 +5960,12 @@
     // console.log(parcelQuery);
     parcelQuery.contains(latLng);
     console.log("parcelQuery.contains(latLng)", parcelQuery.contains(latLng));
+
     parcelQuery.run((function(error, featureCollection$$1, response) {
-        this.didGetParcels(error, featureCollection$$1, response, parcelLayer, fetch);
-      }).bind(this)
-    );
-    console.log("finished getParcelsByLatLng");
+      this.didGetParcels(error, featureCollection$$1, response, parcelLayer, fetch);
+    }).bind(this));
+    console.log("Finishing getParcelsByLatLng");
+
   };
 
   DataManager.prototype.getParcelsByShape = function getParcelsByShape (latlng, parcelLayer) {
@@ -5991,7 +5986,7 @@
   };
 
   DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     var configForParcelLayer = this.config.parcels.pwd;
     var geocodeField = configForParcelLayer.geocodeField;
     var otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -6049,7 +6044,7 @@
     // at this point there is definitely a feature or features - put it in state
 
     this.setParcelsInState(parcelLayer, feature$$1);
-    // console.log("setParcelsInState: ", parcelLayer, feature);
+    console.log("setParcelsInState: ", parcelLayer, feature$$1);
 
     // shouldGeocode - true only if:
     // 1. didGetParcels is running because the map was clicked (lastSearchMethod = reverseGeocode)
@@ -6083,6 +6078,7 @@
         this.fetchData();
       }
     }
+    console.log("Finishing didGetParcels");
   };
 
   DataManager.prototype.didGetParcelsByShape = function didGetParcelsByShape (error, featureCollection$$1, response, parcelLayer, fetch) {

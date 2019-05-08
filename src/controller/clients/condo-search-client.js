@@ -5,11 +5,6 @@ import BaseClient from './base-client';
 // the result in state.
 class CondoSearchClient extends BaseClient {
 
-  parcelPromise(latLng) {
-    console.log(this)
-    this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch')
-  }
-
   evaluateDataForUnits(data) {
 
     // console.log("units input:", data)
@@ -99,12 +94,11 @@ class CondoSearchClient extends BaseClient {
       console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd)
       if(this.store.state.parcels.pwd === null) {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
-        console.log("about to define promise")
-        // parcelPromise = parcelPromise.bind(this)
-        let parcelResult = Promise.resolve(this.parcelPromise(latLng));
-        console.log("parcel promise: ", parcelResult)
+        console.log("about to run getParcelsByLatLng")
+        this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch')
 
-
+        console.log("Condo search client after getParcelsByLatLng finished")
+        console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd)
 
 
         feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
