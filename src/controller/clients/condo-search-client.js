@@ -7,7 +7,7 @@ class CondoSearchClient extends BaseClient {
 
   parcelPromise(latLng) {
     console.log(this)
-    return new Promise.resolve(this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch'))
+    this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch')
   }
 
   evaluateDataForUnits(data) {
@@ -101,10 +101,10 @@ class CondoSearchClient extends BaseClient {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
         console.log("about to define promise")
         // parcelPromise = parcelPromise.bind(this)
-        let parcelResult = await this.parcelPromise.bind(this);
-        console.log("Promise created")
-        console.log("parcel promise: ", parcelResult(latLng))
-        console.log("Does the parcel stuff exist yet?: ", this.store.state.parcels.pwd)
+        let parcelResult = Promise.resolve(this.parcelPromise(latLng));
+        console.log("parcel promise: ", parcelResult)
+
+
 
 
         feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS

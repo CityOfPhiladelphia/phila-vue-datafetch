@@ -4371,7 +4371,7 @@
 
     CondoSearchClient.prototype.parcelPromise = function parcelPromise (latLng) {
       console.log(this);
-      return new Promise.resolve(this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch'))
+      this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch');
     };
 
     CondoSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
@@ -4465,10 +4465,10 @@
           var latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]};
           console.log("about to define promise");
           // parcelPromise = parcelPromise.bind(this)
-          var parcelResult = await this.parcelPromise.bind(this);
-          console.log("Promise created");
-          console.log("parcel promise: ", parcelResult(latLng));
-          console.log("Does the parcel stuff exist yet?: ", this.store.state.parcels.pwd);
+          var parcelResult = Promise.resolve(this.parcelPromise(latLng));
+          console.log("parcel promise: ", parcelResult);
+
+
 
 
           feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
@@ -5764,7 +5764,7 @@
       var suffix = (topicId ? topicId + '-' : '') + i;
       var id = "feat-" + dataSourceKey + "-" + suffix;
       var feature$$1 = features[i];
-      console.log(dataSourceKey, feature$$1);
+      // console.log(dataSourceKey, feature);
       try {
         feature$$1._featureId = id;
       }
@@ -5774,7 +5774,7 @@
       featuresWithIds.push(feature$$1);
     }
 
-    console.log(dataSourceKey, features, featuresWithIds);
+    // console.log(dataSourceKey, features, featuresWithIds);
     return featuresWithIds;
   };
 
