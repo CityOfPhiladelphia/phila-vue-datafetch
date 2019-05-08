@@ -4369,6 +4369,11 @@
     CondoSearchClient.prototype = Object.create( BaseClient$$1 && BaseClient$$1.prototype );
     CondoSearchClient.prototype.constructor = CondoSearchClient;
 
+    CondoSearchClient.prototype.parcelPromise = function parcelPromise (latLng) {
+      console.log(this);
+      return new Promise.resolve(this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch'))
+    };
+
     CondoSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
 
       // console.log("units input:", data)
@@ -4455,23 +4460,31 @@
           console.log(feature.properties[i]);
           }
 
-        if(this.store.state.parcels.pwd != null) {
+        console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
+        if(this.store.state.parcels.pwd === null) {
+          var latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]};
+          console.log("about to define promise");
+          // parcelPromise = parcelPromise.bind(this)
+          var parcelResult = await this.parcelPromise.bind(this);
+          console.log("Promise created");
+          console.log("parcel promise: ", parcelResult(latLng));
+          console.log("Does the parcel stuff exist yet?: ", this.store.state.parcels.pwd);
+
+
+          feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
+
+        } else {
+          console.log("Parcels are not null");
           feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
           feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString();
-        } else {
-          var latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]};
-          this.dataManager.getParcelsByLatLng(latLng, 'pwd', null);
-          console.log("feature: ", feature, "parcel: ", this.store.state.parcels);
-          feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
-          // feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS
-          feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
-          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString();
+
         }
 
-        console.log("Starting assignFeatureIds: ", feature);
-        feature = this.assignFeatureIds(feature, 'geocode');
+        console.log("feature: ", feature.properties, "parcel: ", this.store.state.parcels);
+
+        // feature = this.dataManager.assignFeatureIds(feature, 'geocode');
         feature.condo = true;
 
         console.log("feature: ", feature);
@@ -5751,7 +5764,7 @@
       var suffix = (topicId ? topicId + '-' : '') + i;
       var id = "feat-" + dataSourceKey + "-" + suffix;
       var feature$$1 = features[i];
-      // console.log(dataSourceKey, feature);
+      console.log(dataSourceKey, feature$$1);
       try {
         feature$$1._featureId = id;
       }
@@ -5761,7 +5774,7 @@
       featuresWithIds.push(feature$$1);
     }
 
-    // console.log(dataSourceKey, features, featuresWithIds);
+    console.log(dataSourceKey, features, featuresWithIds);
     return featuresWithIds;
   };
 

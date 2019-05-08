@@ -5,6 +5,11 @@ import BaseClient from './base-client';
 // the result in state.
 class CondoSearchClient extends BaseClient {
 
+  parcelPromise(latLng) {
+    console.log(this)
+    return new Promise.resolve(this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch'))
+  }
+
   evaluateDataForUnits(data) {
 
     // console.log("units input:", data)
@@ -91,23 +96,31 @@ class CondoSearchClient extends BaseClient {
         console.log(feature.properties[i])
         }
 
-      if(this.store.state.parcels.pwd != null) {
-        feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
-        feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS
-        feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID
-        feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString()
-      } else {
+      console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd)
+      if(this.store.state.parcels.pwd === null) {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
-        this.dataManager.getParcelsByLatLng(latLng, 'pwd', null)
-        console.log("feature: ", feature, "parcel: ", this.store.state.parcels)
+        console.log("about to define promise")
+        // parcelPromise = parcelPromise.bind(this)
+        let parcelResult = await this.parcelPromise.bind(this);
+        console.log("Promise created")
+        console.log("parcel promise: ", parcelResult(latLng))
+        console.log("Does the parcel stuff exist yet?: ", this.store.state.parcels.pwd)
+
+
         feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS
-        // feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS
-        feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID
+
+      } else {
+        console.log("Parcels are not null")
+        feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
+        feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
+        feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
         feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString()
+
       }
 
-      console.log("Starting assignFeatureIds: ", feature)
-      feature = this.assignFeatureIds(feature, 'geocode');
+      console.log("feature: ", feature.properties, "parcel: ", this.store.state.parcels)
+
+      // feature = this.dataManager.assignFeatureIds(feature, 'geocode');
       feature.condo = true
 
       console.log("feature: ", feature)

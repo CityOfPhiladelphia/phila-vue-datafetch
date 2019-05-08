@@ -470,7 +470,7 @@ class DataManager {
       const suffix = (topicId ? topicId + '-' : '') + i;
       const id = `feat-${dataSourceKey}-${suffix}`;
       const feature = features[i];
-      // console.log(dataSourceKey, feature);
+      console.log(dataSourceKey, feature);
       try {
         feature._featureId = id;
       }
@@ -480,7 +480,7 @@ class DataManager {
       featuresWithIds.push(feature);
     }
 
-    // console.log(dataSourceKey, features, featuresWithIds);
+    console.log(dataSourceKey, features, featuresWithIds);
     return featuresWithIds;
   }
 
