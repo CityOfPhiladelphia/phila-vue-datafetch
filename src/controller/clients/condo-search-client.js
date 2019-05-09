@@ -18,10 +18,7 @@ class CondoSearchClient extends BaseClient {
     }
     let mObj = JSON.parse(JSON.stringify(data[0]))
 
-    if(units.length > 0) {
-      units = _.groupBy(units, a => a.properties.pwd_parcel_id);
-    }
-    console.log("commit setUnits: ", units)
+    units.length > 0 ? units = _.groupBy(units, a => a.properties.pwd_parcel_id) : ""
     this.store.commit('setUnits', units);
 
     return data
@@ -100,34 +97,37 @@ class CondoSearchClient extends BaseClient {
           feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
-          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString();
-        }
-        this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
+          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID;
 
         console.log("Condo search client after getParcelsByLatLng finished");
         console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
+          feature.condo = true
+          store.commit('setGeocodeData', feature);
+          store.commit('setGeocodeStatus', 'success');
+          this.store.commit('setLastSearchMethod', 'geocode');
 
+          return feature;
+        }
+        this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
       } else {
         console.log("Parcels are not null")
         feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
         feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
         feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
-        feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString()
+        feature._featureId = this.store.state.parcels.pwd.properties.PARCELID;
 
-      }
+        feature.condo = true
+        store.commit('setGeocodeData', feature);
+        store.commit('setGeocodeStatus', 'success');
+        this.store.commit('setLastSearchMethod', 'geocode');
 
       console.log("feature: ", feature.properties, "parcel: ", this.store.state.parcels)
+        return feature;
+      }
 
       // feature = this.dataManager.assignFeatureIds(feature, 'geocode');
-      feature.condo = true
-
       console.log("feature: ", feature)
 
-      store.commit('setGeocodeData', feature);
-      store.commit('setGeocodeStatus', 'success');
-      this.store.commit('setLastSearchMethod', 'geocode');
-
-      return feature;
     }
 
     getPages = getPages.bind(this);

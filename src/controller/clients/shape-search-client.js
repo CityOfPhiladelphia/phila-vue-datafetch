@@ -91,6 +91,7 @@ class ShapeSearchClient extends BaseClient {
     data = this.evaluateDataForUnits(data);
 
     let features = data.rows
+    features.map(a => typeof a.pwd_parcel_id === 'string' ? a.pwd_parcel_id = Number(a.pwd_parcel_id):"")
     // console.log(features)
     features = this.assignFeatureIds(features, 'shape');
     // console.log(features)
