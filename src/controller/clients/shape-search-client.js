@@ -81,7 +81,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   success(response) {
-    // console.log("success respose: ", response);
+    // console.log("success respose: ", response.data);
 
     const store = this.store;
     let data = response.data;

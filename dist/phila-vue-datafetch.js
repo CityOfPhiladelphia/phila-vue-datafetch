@@ -4370,7 +4370,6 @@
     CondoSearchClient.prototype.constructor = CondoSearchClient;
 
     CondoSearchClient.prototype.evaluateDataForUnits = function evaluateDataForUnits (data) {
-
       // console.log("units input:", data)
 
       var units = [], dataList = [];
@@ -4382,17 +4381,13 @@
       }
       var mObj = JSON.parse(JSON.stringify(data[0]));
 
-      if(units.length > 0) {
-        units = _.groupBy(units, function (a) { return a.properties.pwd_parcel_id; });
-      }
-      console.log("commit setUnits: ", units);
+      units.length > 0 ? units = _.groupBy(units, function (a) { return a.properties.pwd_parcel_id; }) : "";
       this.store.commit('setUnits', units);
 
       return data
     };
 
     CondoSearchClient.prototype.fetch = function fetch (input) {
-      console.log('condo search client fetch', input);
 
       var store = this.store;
       var condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
@@ -4449,51 +4444,46 @@
         var units = features.filter(function (a) { return a.properties.unit_num != ""; });
         units = this.evaluateDataForUnits(units);
 
-        console.log("about to start feature: ", units[0]);
-
         var feature = JSON.parse(JSON.stringify(units[0]));
         for (var i in feature.properties) {
           feature.properties[i] = "";
-          console.log(feature.properties[i]);
           }
 
-        console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
         if(this.store.state.parcels.pwd === null) {
           var latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]};
-          console.log("about to run getParcelsByLatLng");
           var callback = function () {
-            console.log('this should happen at the end');
             feature.properties.street_address = this$1.store.state.parcels.pwd.properties.ADDRESS;
             feature.properties.opa_address = this$1.store.state.parcels.pwd.properties.ADDRESS;
             feature.properties.pwd_parcel_id = this$1.store.state.parcels.pwd.properties.PARCELID;
-            feature._featureId = this$1.store.state.parcels.pwd.properties.PARCELID.toString();
+            feature._featureId = this$1.store.state.parcels.pwd.properties.PARCELID;
+
+            feature.condo = true;
+            store.commit('setGeocodeData', feature);
+            store.commit('setGeocodeStatus', 'success');
+            this$1.store.commit('setLastSearchMethod', 'geocode');
+
+            return feature;
           };
           this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
-
-          console.log("Condo search client after getParcelsByLatLng finished");
-          console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
-
         } else {
-          console.log("Parcels are not null");
+
           feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
-          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID.toString();
+          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID;
 
+          feature.condo = true;
+          store.commit('setGeocodeData', feature);
+          store.commit('setGeocodeStatus', 'success');
+          this.store.commit('setLastSearchMethod', 'geocode');
+
+          return feature;
         }
 
-        console.log("feature: ", feature.properties, "parcel: ", this.store.state.parcels);
-
+        // console.log("feature: ", feature.properties, "parcel: ", this.store.state.parcels)
         // feature = this.dataManager.assignFeatureIds(feature, 'geocode');
-        feature.condo = true;
+        // console.log("feature: ", feature)
 
-        console.log("feature: ", feature);
-
-        store.commit('setGeocodeData', feature);
-        store.commit('setGeocodeStatus', 'success');
-        this.store.commit('setLastSearchMethod', 'geocode');
-
-        return feature;
       }
 
       getPages = getPages.bind(this);
@@ -4689,7 +4679,7 @@
     };
 
     ShapeSearchClient.prototype.success = function success (response) {
-      // console.log("success respose: ", response);
+      // console.log("success respose: ", response.data);
 
       var store = this.store;
       var data = response.data;
@@ -4699,6 +4689,7 @@
       data = this.evaluateDataForUnits(data);
 
       var features = data.rows;
+      features.map(function (a) { return typeof a.pwd_parcel_id === 'string' ? a.pwd_parcel_id = Number(a.pwd_parcel_id):""; });
       // console.log(features)
       features = this.assignFeatureIds(features, 'shape');
       // console.log(features)
@@ -5362,11 +5353,11 @@
       secondaryStatus: 'waiting'
     };
     this.store.commit('setSecondarySourceStatus', setSecondarySourceStatusOpts);
-    console.log('INCREMENT - datamanager get 100 More was clicked, type', type, 'dataSource', dataSource, 'highestPageRetrieved', highestPageRetrieved);
+    // console.log('INCREMENT - datamanager get 100 More was clicked, type', type, 'dataSource', dataSource, 'highestPageRetrieved', highestPageRetrieved);
 
     switch(type) {
       case 'http-get':
-        console.log('INCREMENT - http-get', dataSourceKey);
+        // console.log('INCREMENT - http-get', dataSourceKey);
         this.clients.http.fetchMore(feature$$1,
                                 dataSource,
                                 dataSourceKey,
@@ -5406,7 +5397,7 @@
   };
 
   DataManager.prototype.defineTargets = function defineTargets (dataSourceKey, targetsDef) {
-    console.log("defineTargets: ", dataSourceKey, targetsDef);
+    // console.log("defineTargets: ", dataSourceKey, targetsDef)
     var state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     var targetsFn = targetsDef.get;
@@ -5418,7 +5409,7 @@
     var targets = targetsFn(state);
     var targetIdFn = targetsDef.getTargetId;
 
-    console.log("Define Targets Starting", targets);
+    // console.log("Define Targets Starting", targets)
     // check if target objs exist in state.
     var targetIds = targets.map(targetIdFn);
     // console.log("targetIds: ", targetIds)
@@ -5471,8 +5462,8 @@
   };
 
   DataManager.prototype.fetchData = function fetchData () {
-    console.log('\nFETCH DATA');
-    console.log('-----------');
+    // console.log('\nFETCH DATA');
+    // console.log('-----------');
 
     var geocodeObj = this.store.state.geocode.data;
     var ownerSearchObj = this.store.state.ownerSearch.data;
@@ -5501,7 +5492,7 @@
       // console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
-        console.log("targetsFn: ", targetsFn);
+        // console.log("targetsFn: ", targetsFn)
         targetIdFn = targetsDef.getTargetId;
         targets = this.defineTargets(dataSourceKey, targetsDef);
       } else if (this.store.state.lastSearchMethod !== 'owner search') {
@@ -5621,7 +5612,6 @@
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    console.log("Did fetch data about to try fetching more data");
     this.fetchData();
   };
 
@@ -5811,7 +5801,7 @@
   };
 
   DataManager.prototype.didOwnerSearch = function didOwnerSearch () {
-    console.log("Did Owner Search");
+    // console.log("Did Owner Search")
     this.fetchData();
     console.log();
   };
@@ -5835,7 +5825,7 @@
   };
 
   DataManager.prototype.didShapeSearch = function didShapeSearch () {
-    console.log("shape search fetchData");
+    // console.log("shape search fetchData")
     this.fetchData();
   };
 
@@ -5867,7 +5857,7 @@
         this.store.state.editableLayers.clearLayers();
       }
     } else if (this.store.state.geocode.status === null) {
-      console.log('didTryGeocode is running, feature:', feature$$1);
+      // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
       if(this.store.state.editableLayers !== null ){
         this.store.state.editableLayers.clearLayers();
@@ -5921,14 +5911,12 @@
       if (feature$$1.street_address) {
         return;
       } else if (feature$$1.properties.street_address) {
-        console.log("fetching data");
         this.fetchData();
       }
       if(feature$$1.geometry.coordinates) {
         this.store.commit('setMapCenter', feature$$1.geometry.coordinates);
       }
     } else {
-      console.log("fetching data");
       this.fetchData();
     }
 
@@ -5961,21 +5949,16 @@
   DataManager.prototype.getParcelsByLatLng = function getParcelsByLatLng (latlng, parcelLayer, fetch, callback) {
       if ( callback === void 0 ) callback = function () {};
 
-    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     var latLng = L.latLng(latlng.lat, latlng.lng);
     var url = this.config.map.featureLayers.pwdParcels.url;
     var parcelQuery = esriLeaflet.query({ url: url });
     // console.log(parcelQuery);
     parcelQuery.contains(latLng);
-    console.log("parcelQuery.contains(latLng)", latLng);
-
 
     parcelQuery.run((function(error, featureCollection$$1, response) {
-      console.log("about to start didGetParcels");
       this.didGetParcels(error, featureCollection$$1, response, parcelLayer, fetch, callback);
-      console.log("finishing parcelQuery");
     }).bind(this));
-    console.log("Finishing getParcelsByLatLng");
 
   };
 
@@ -5999,7 +5982,7 @@
   DataManager.prototype.didGetParcels = function didGetParcels (error, featureCollection$$1, response, parcelLayer, fetch, callback) {
       if ( callback === void 0 ) callback = function () {};
 
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     var configForParcelLayer = this.config.parcels.pwd;
     var geocodeField = configForParcelLayer.geocodeField;
     var otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -6057,7 +6040,7 @@
     // at this point there is definitely a feature or features - put it in state
 
     this.setParcelsInState(parcelLayer, feature$$1);
-    console.log("setParcelsInState: ", parcelLayer, feature$$1);
+    // console.log("setParcelsInState: ", parcelLayer, feature);
 
     // shouldGeocode - true only if:
     // 1. didGetParcels is running because the map was clicked (lastSearchMethod = reverseGeocode)
@@ -6087,11 +6070,10 @@
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
       if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt') {
-        console.log('180405 data-manager.js - didGetParcels - is calling fetchData() on feature w address', feature$$1.properties.street_address);
+        // console.log('180405 data-manager.js - didGetParcels - is calling fetchData() on feature w address', feature.properties.street_address);
         this.fetchData();
       }
     }
-    console.log("Finishing didGetParcels");
     callback();
   };
 

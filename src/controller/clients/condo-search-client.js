@@ -6,7 +6,6 @@ import BaseClient from './base-client';
 class CondoSearchClient extends BaseClient {
 
   evaluateDataForUnits(data) {
-
     // console.log("units input:", data)
 
     var units = [], filteredData, dataList = [];
@@ -25,7 +24,6 @@ class CondoSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    console.log('condo search client fetch', input);
 
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder))
@@ -80,27 +78,19 @@ class CondoSearchClient extends BaseClient {
       let units = features.filter(a => a.properties.unit_num != "");
       units = this.evaluateDataForUnits(units);
 
-      console.log("about to start feature: ", units[0])
-
       var feature = JSON.parse(JSON.stringify(units[0]))
       for (let i in feature.properties) {
         feature.properties[i] = ""
-        console.log(feature.properties[i])
         }
 
-      console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd)
       if(this.store.state.parcels.pwd === null) {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
-        console.log("about to run getParcelsByLatLng")
         const callback = () => {
-          console.log('this should happen at the end')
           feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
           feature._featureId = this.store.state.parcels.pwd.properties.PARCELID;
 
-        console.log("Condo search client after getParcelsByLatLng finished");
-        console.log("this.store.state.parcels.pwd: ", this.store.state.parcels.pwd);
           feature.condo = true
           store.commit('setGeocodeData', feature);
           store.commit('setGeocodeStatus', 'success');
@@ -110,7 +100,7 @@ class CondoSearchClient extends BaseClient {
         }
         this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
       } else {
-        console.log("Parcels are not null")
+
         feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
         feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
         feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
@@ -121,12 +111,12 @@ class CondoSearchClient extends BaseClient {
         store.commit('setGeocodeStatus', 'success');
         this.store.commit('setLastSearchMethod', 'geocode');
 
-      console.log("feature: ", feature.properties, "parcel: ", this.store.state.parcels)
         return feature;
       }
 
+      // console.log("feature: ", feature.properties, "parcel: ", this.store.state.parcels)
       // feature = this.dataManager.assignFeatureIds(feature, 'geocode');
-      console.log("feature: ", feature)
+      // console.log("feature: ", feature)
 
     }
 

@@ -82,11 +82,11 @@ class DataManager {
       secondaryStatus: 'waiting'
     };
     this.store.commit('setSecondarySourceStatus', setSecondarySourceStatusOpts);
-    console.log('INCREMENT - datamanager get 100 More was clicked, type', type, 'dataSource', dataSource, 'highestPageRetrieved', highestPageRetrieved);
+    // console.log('INCREMENT - datamanager get 100 More was clicked, type', type, 'dataSource', dataSource, 'highestPageRetrieved', highestPageRetrieved);
 
     switch(type) {
       case 'http-get':
-        console.log('INCREMENT - http-get', dataSourceKey);
+        // console.log('INCREMENT - http-get', dataSourceKey);
         this.clients.http.fetchMore(feature,
                                 dataSource,
                                 dataSourceKey,
@@ -126,7 +126,7 @@ class DataManager {
   }
 
   defineTargets(dataSourceKey, targetsDef) {
-    console.log("defineTargets: ", dataSourceKey, targetsDef)
+    // console.log("defineTargets: ", dataSourceKey, targetsDef)
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -138,7 +138,7 @@ class DataManager {
     let targets = targetsFn(state);
     let targetIdFn = targetsDef.getTargetId;
 
-    console.log("Define Targets Starting", targets)
+    // console.log("Define Targets Starting", targets)
     // check if target objs exist in state.
     const targetIds = targets.map(targetIdFn);
     // console.log("targetIds: ", targetIds)
@@ -189,8 +189,8 @@ class DataManager {
   }
 
   fetchData() {
-    console.log('\nFETCH DATA');
-    console.log('-----------');
+    // console.log('\nFETCH DATA');
+    // console.log('-----------');
 
     const geocodeObj = this.store.state.geocode.data;
     const ownerSearchObj = this.store.state.ownerSearch.data;
@@ -215,7 +215,7 @@ class DataManager {
       // console.log("targetsDef: ", targetsDef)
       if (targetsDef) {
         targetsFn = targetsDef.get;
-        console.log("targetsFn: ", targetsFn)
+        // console.log("targetsFn: ", targetsFn)
         targetIdFn = targetsDef.getTargetId;
         targets = this.defineTargets(dataSourceKey, targetsDef);
       } else if (this.store.state.lastSearchMethod !== 'owner search') {
@@ -333,7 +333,6 @@ class DataManager {
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    console.log("Did fetch data about to try fetching more data")
     this.fetchData();
   }
 
@@ -513,7 +512,7 @@ class DataManager {
   }
 
   didOwnerSearch() {
-    console.log("Did Owner Search")
+    // console.log("Did Owner Search")
     this.fetchData();
     console.log()
   }
@@ -537,7 +536,7 @@ class DataManager {
   }
 
   didShapeSearch() {
-    console.log("shape search fetchData")
+    // console.log("shape search fetchData")
     this.fetchData();
   }
 
@@ -569,7 +568,7 @@ class DataManager {
         this.store.state.editableLayers.clearLayers();
       }
     } else if (this.store.state.geocode.status === null) {
-      console.log('didTryGeocode is running, feature:', feature);
+      // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
       if(this.store.state.editableLayers !== null ){
         this.store.state.editableLayers.clearLayers();
@@ -623,14 +622,12 @@ class DataManager {
       if (feature.street_address) {
         return;
       } else if (feature.properties.street_address) {
-        console.log("fetching data")
         this.fetchData();
       }
       if(feature.geometry.coordinates) {
         this.store.commit('setMapCenter', feature.geometry.coordinates);
       }
     } else {
-      console.log("fetching data")
       this.fetchData();
     }
 
@@ -662,21 +659,16 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch, callback = () => {}) {
-    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const parcelQuery = Query({ url });
     // console.log(parcelQuery);
     parcelQuery.contains(latLng);
-    console.log("parcelQuery.contains(latLng)", latLng);
-
 
     parcelQuery.run((function(error, featureCollection, response) {
-      console.log("about to start didGetParcels")
       this.didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback);
-      console.log("finishing parcelQuery")
     }).bind(this))
-    console.log("Finishing getParcelsByLatLng")
 
   }
 
@@ -698,7 +690,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -754,7 +746,7 @@ class DataManager {
     // at this point there is definitely a feature or features - put it in state
 
     this.setParcelsInState(parcelLayer, feature);
-    console.log("setParcelsInState: ", parcelLayer, feature);
+    // console.log("setParcelsInState: ", parcelLayer, feature);
 
     // shouldGeocode - true only if:
     // 1. didGetParcels is running because the map was clicked (lastSearchMethod = reverseGeocode)
@@ -782,11 +774,10 @@ class DataManager {
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
       if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt') {
-        console.log('180405 data-manager.js - didGetParcels - is calling fetchData() on feature w address', feature.properties.street_address);
+        // console.log('180405 data-manager.js - didGetParcels - is calling fetchData() on feature w address', feature.properties.street_address);
         this.fetchData();
       }
     }
-    console.log("Finishing didGetParcels")
     callback()
   }
 
