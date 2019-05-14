@@ -5464,10 +5464,19 @@
   DataManager.prototype.fetchData = function fetchData () {
     // console.log('\nFETCH DATA');
     // console.log('-----------');
+    if(typeof this.store.state.activeCondo != 'undefined' && this.store.state.activeCondo.featureId != null) {
 
-    var geocodeObj = this.store.state.geocode.data;
-    var ownerSearchObj = this.store.state.ownerSearch.data;
-    if(this.store.state.shapeSearch.data) {var shapeSearchObj = this.store.state.shapeSearch.data.rows;}
+      var geocodeObj$1 = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      var ownerSearchObj$1 = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      if(this.store.state.shapeSearch.data) {
+        var shapeSearchObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      }
+    } else {
+        var geocodeObj$2 = this.store.state.geocode.data;
+        var ownerSearchObj$2 = this.store.state.ownerSearch.data;
+        if(this.store.state.shapeSearch.data) {var shapeSearchObj$1 = this.store.state.shapeSearch.data.rows;}
+    }
+
 
     var dataSources = this.config.dataSources || {};
     var dataSourceKeys = Object.entries(dataSources);

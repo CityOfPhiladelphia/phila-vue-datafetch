@@ -191,10 +191,19 @@ class DataManager {
   fetchData() {
     // console.log('\nFETCH DATA');
     // console.log('-----------');
+    if(typeof this.store.state.activeCondo != 'undefined' && this.store.state.activeCondo.featureId != null) {
 
-    const geocodeObj = this.store.state.geocode.data;
-    const ownerSearchObj = this.store.state.ownerSearch.data;
-    if(this.store.state.shapeSearch.data) {const shapeSearchObj = this.store.state.shapeSearch.data.rows;}
+      const geocodeObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      const ownerSearchObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      if(this.store.state.shapeSearch.data) {
+        const shapeSearchObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      }
+    } else {
+        const geocodeObj = this.store.state.geocode.data;
+        const ownerSearchObj = this.store.state.ownerSearch.data;
+        if(this.store.state.shapeSearch.data) {const shapeSearchObj = this.store.state.shapeSearch.data.rows;}
+    }
+
 
     let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
