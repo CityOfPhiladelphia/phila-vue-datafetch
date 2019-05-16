@@ -5331,12 +5331,14 @@
                      return object._featureId === state.activeFeature.featureId
                      });
       } else {
-        input.push(state.geocode.data);
-        for (var i = 0, list = state.geocode.related; i < list.length; i += 1) {
-          var relate = list[i];
-
-            input.push(relate);
+        var data;
+        if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
+          var result = state.geocode.related.filter(function (object) { return object._featureId === state.activeFeature.featureId; });
+          data = result[0];
+        } else {
+          data = state.geocode.data;
         }
+        input.push(data);
       }
     this.clients.activeSearch.fetch(input[0]);
   };

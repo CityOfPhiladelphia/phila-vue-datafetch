@@ -62,12 +62,16 @@ class DataManager {
                      return object._featureId === state.activeFeature.featureId
                      });
       } else {
-        input.push(state.geocode.data);
-        for (let relate of state.geocode.related) {
-          input.push(relate);
+        let data;
+        if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
+          let result = state.geocode.related.filter(object => object._featureId === state.activeFeature.featureId);
+          data = result[0]
+        } else {
+          data = state.geocode.data;
         }
+        input.push(data);
       }
-    this.clients.activeSearch.fetch(input[0])
+    this.clients.activeSearch.fetch(input[0]);
   }
 
   fetchMoreData(dataSourceKey, highestPageRetrieved) {
