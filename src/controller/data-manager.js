@@ -324,20 +324,22 @@ class DataManager {
         const dataSource = dataSources[dataSourceKey];
         const targetsDef = dataSource.targets;
 
-        // null out existing data in state
-        if (targetsDef) {
-          this.store.commit('clearSourceTargets', {
-            key: dataSourceKey
-          });
-        } else {
-          this.store.commit('setSourceData', {
-            key: dataSourceKey,
-            data: null
-          })
-          this.store.commit('setSourceStatus', {
-            key: dataSourceKey,
-            status: null
-          })
+        if (dataSource.resettable !== false) {
+          // null out existing data in state
+          if (targetsDef) {
+            this.store.commit('clearSourceTargets', {
+              key: dataSourceKey
+            });
+          } else {
+            this.store.commit('setSourceData', {
+              key: dataSourceKey,
+              data: null
+            })
+            this.store.commit('setSourceStatus', {
+              key: dataSourceKey,
+              status: null
+            })
+          }
         }
       }
     }
@@ -531,7 +533,7 @@ class DataManager {
         feature.properties.opa_account_num = this.store.state.geocode.input;
         this.resetData();
         this.fetchData(feature);
-        
+
       } else {
         const input = this.store.state.geocode.input;
         const didOwnerSearch = this.didOwnerSearch.bind(this);
