@@ -62,12 +62,16 @@ class DataManager {
                      return object._featureId === state.activeFeature.featureId
                      });
       } else {
-        input.push(state.geocode.data);
-        for (let relate of state.geocode.related) {
-          input.push(relate);
+        let data;
+        if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
+          let result = state.geocode.related.filter(object => object._featureId === state.activeFeature.featureId);
+          data = result[0]
+        } else {
+          data = state.geocode.data;
         }
+        input.push(data);
       }
-    this.clients.activeSearch.fetch(input[0])
+    this.clients.activeSearch.fetch(input[0]);
   }
 
   fetchMoreData(dataSourceKey, highestPageRetrieved) {
@@ -191,10 +195,22 @@ class DataManager {
   fetchData() {
     // console.log('\nFETCH DATA');
     // console.log('-----------');
+    if(typeof this.store.state.activeCondo != 'undefined' && this.store.state.activeCondo.featureId != null) {
 
-    const geocodeObj = this.store.state.geocode.data;
-    const ownerSearchObj = this.store.state.ownerSearch.data;
-    if(this.store.state.shapeSearch.data) {const shapeSearchObj = this.store.state.shapeSearch.data.rows;}
+      const geocodeObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      const ownerSearchObj = geocodeObj;
+      if(this.store.state.shapeSearch.data != null) {
+        let result = this.store.state.shapeSearch.data.rows.filter(
+          a => a._featureId === this.store.state.activeCondo.featureId
+        )
+        const shapeSearchObj = this.store.state.condoUnits.units[result[0].pwd_parcel_id];
+      }
+    } else {
+        const geocodeObj = this.store.state.geocode.data;
+        const ownerSearchObj = this.store.state.ownerSearch.data;
+        if(this.store.state.shapeSearch.data) {const shapeSearchObj = this.store.state.shapeSearch.data.rows;}
+    }
+
 
     let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
