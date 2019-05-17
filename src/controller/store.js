@@ -212,7 +212,6 @@ const pvdStore = {
       },
       setShapeSearchDataPush(state, payload) {
         console.log(state.shapeSearch.data.rows , payload )
-        // state.shapeSearch.data.rows.concat(payload);
         state.shapeSearch.data.rows = state.shapeSearch.data.rows.concat(payload)
       },
       setUnits(state, payload) {

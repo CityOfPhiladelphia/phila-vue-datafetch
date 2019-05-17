@@ -199,8 +199,11 @@ class DataManager {
 
       const geocodeObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
       const ownerSearchObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
-      if(this.store.state.shapeSearch.data) {
-        const shapeSearchObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      if(this.store.state.shapeSearch.data != null) {
+        let result = this.store.state.shapeSearch.data.rows.filter(
+          a => a._featureId === this.store.state.activeCondo.featureId
+        )
+        const shapeSearchObj = this.store.state.condoUnits.units[result[0].pwd_parcel_id];
       }
     } else {
         const geocodeObj = this.store.state.geocode.data;

@@ -5464,14 +5464,19 @@
   };
 
   DataManager.prototype.fetchData = function fetchData () {
+      var this$1 = this;
+
     // console.log('\nFETCH DATA');
     // console.log('-----------');
     if(typeof this.store.state.activeCondo != 'undefined' && this.store.state.activeCondo.featureId != null) {
 
       var geocodeObj$1 = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
       var ownerSearchObj$1 = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
-      if(this.store.state.shapeSearch.data) {
-        var shapeSearchObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      if(this.store.state.shapeSearch.data != null) {
+        var result = this.store.state.shapeSearch.data.rows.filter(
+          function (a) { return a._featureId === this$1.store.state.activeCondo.featureId; }
+        );
+        var shapeSearchObj = this.store.state.condoUnits.units[result[0].pwd_parcel_id];
       }
     } else {
         var geocodeObj$2 = this.store.state.geocode.data;
@@ -6500,6 +6505,10 @@
         },
         setShapeSearchData: function setShapeSearchData(state, payload) {
           state.shapeSearch.data = payload;
+        },
+        setShapeSearchDataPush: function setShapeSearchDataPush(state, payload) {
+          console.log(state.shapeSearch.data.rows , payload );
+          state.shapeSearch.data.rows = state.shapeSearch.data.rows.concat(payload);
         },
         setUnits: function setUnits(state, payload) {
           // console.log("setShapeSearchUnits: ", payload)
