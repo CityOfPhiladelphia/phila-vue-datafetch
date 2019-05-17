@@ -197,7 +197,8 @@ class DataManager {
     // console.log('-----------');
     if(typeof this.store.state.activeCondo != 'undefined' && this.store.state.activeCondo.featureId != null) {
 
-      const geocodeObj = ownerSearchObj =  this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      const geocodeObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      const ownerSearchObj = geocodeObj;
       if(this.store.state.shapeSearch.data != null) {
         let result = this.store.state.shapeSearch.data.rows.filter(
           a => a._featureId === this.store.state.activeCondo.featureId
