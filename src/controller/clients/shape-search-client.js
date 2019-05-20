@@ -46,17 +46,19 @@ class ShapeSearchClient extends BaseClient {
       data.rows = data.rows.filter(a => !Object.keys(units).includes(a.pwd_parcel_id));
     }
 
-    // console.log("Units List: ", units, "Data: ", data )
+    console.log("Units List: ", units, "Data: ", data )
     this.store.commit('setUnits', units);
 
     for (let unit in units) {
       // console.log("Unit: ", units[unit])
       for (let i in mObj) { mObj[i] = ""  }
-      let mObjPush = JSON.parse(JSON.stringify(mObj))
-      mObjPush.location = units[unit][0].location
-      mObjPush.condo = true
-      mObjPush.pwd_parcel_id = units[unit][0].pwd_parcel_id
-      data.rows.push(mObjPush)
+      let mObjPush = JSON.parse(JSON.stringify(mObj));
+      mObjPush.owner_1 = "Condominium (" + units[unit].length + " Units)";
+      mObjPush.owner_2 = null;
+      mObjPush.location = units[unit][0].location;
+      mObjPush.condo = true;
+      mObjPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
+      data.rows.push(mObjPush);
     }
     return data
   }

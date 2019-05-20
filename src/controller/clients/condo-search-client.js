@@ -88,7 +88,7 @@ class CondoSearchClient extends BaseClient {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
         const callback = () => {
 
-          feature.properties.opa_owners = ["Condominium ( " + totalUnits + " Units )"];
+          feature.properties.opa_owners = ["Condominium (" + totalUnits + " Units)"];
           feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
