@@ -522,7 +522,7 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input) {
-    // console.log('data-manager geocode is running, input:', input);
+    // console.log('data-manager geocode is running, input:', input, "this", this);
     const didTryGeocode = this.didTryGeocode.bind(this);
     const test = this.clients.geocode.fetch(input).then(didTryGeocode);
   }
@@ -615,7 +615,7 @@ class DataManager {
       // Fail on owner search here takes you to the condo search process with the input
       return this.clients.ownerSearch.fetch(input).then( didOwnerSearch, () => condoSearch(input));
 
-    } else if (typeof feature === 'undefined' && this.store.state.ownerSearch.status != 'success') {
+    } else if (typeof feature === 'undefined') {
       // This should be the default failure for geocode and shapeSearches that may have a condo
       const input =  this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
