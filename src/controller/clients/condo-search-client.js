@@ -52,7 +52,8 @@ class CondoSearchClient extends BaseClient {
     let features = data.features;
     const url = response.config.url;
     let params = response.config.params;
-    // console.log('geocode search success', url, 'data:', data, 'params:', params, response.config.params);
+    console.log('geocode search success', url, 'data:', data, 'params:', params, response.config.params);
+    const totalUnits = data.total_size
 
     if (!data.features || data.features.length < 1) {
       return;
@@ -86,6 +87,8 @@ class CondoSearchClient extends BaseClient {
       if(this.store.state.parcels.pwd === null) {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
         const callback = () => {
+
+          feature.properties.opa_owners = ["Condominium ( " + totalUnits + " Units )"];
           feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
           feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
@@ -98,9 +101,12 @@ class CondoSearchClient extends BaseClient {
 
           return feature;
         }
+
         this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
+
       } else {
 
+        feature.properties.opa_owners = ["Condominium ( " + totalUnits + " Units )"];
         feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
         feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
         feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
