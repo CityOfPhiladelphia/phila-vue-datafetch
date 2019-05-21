@@ -23,6 +23,17 @@ class CondoSearchClient extends BaseClient {
     return data
   }
 
+  setFeatureProperties(feature, totalUnits) {
+
+    feature.properties.opa_owners = ["Condominium (" + totalUnits + " Units)"];
+    feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
+    feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
+    feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
+    feature._featureId = this.store.state.parcels.pwd.properties.PARCELID;
+    feature.condo = true;
+
+  }
+
   fetch(input) {
 
     const store = this.store;
@@ -52,7 +63,7 @@ class CondoSearchClient extends BaseClient {
     let features = data.features;
     const url = response.config.url;
     let params = response.config.params;
-    console.log('geocode search success', url, 'data:', data, 'params:', params, response.config.params);
+    // console.log('geocode search success', url, 'data:', data, 'params:', params, response.config.params);
     const totalUnits = data.total_size
 
     if (!data.features || data.features.length < 1) {
@@ -74,8 +85,6 @@ class CondoSearchClient extends BaseClient {
         }
       }
 
-      // features = features.filter(a => a.geometry.geocode_type === "pwd_parcel");
-
       let units = features.filter(a => a.properties.unit_num != "");
       units = this.evaluateDataForUnits(units);
 
@@ -88,13 +97,8 @@ class CondoSearchClient extends BaseClient {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
         const callback = () => {
 
-          feature.properties.opa_owners = ["Condominium (" + totalUnits + " Units)"];
-          feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
-          feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
-          feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
-          feature._featureId = this.store.state.parcels.pwd.properties.PARCELID;
+          this.setFeatureProperties(feature, totalUnits)
 
-          feature.condo = true
           store.commit('setGeocodeData', feature);
           store.commit('setGeocodeStatus', 'success');
           this.store.commit('setLastSearchMethod', 'geocode');
@@ -106,23 +110,14 @@ class CondoSearchClient extends BaseClient {
 
       } else {
 
-        feature.properties.opa_owners = ["Condominium ( " + totalUnits + " Units )"];
-        feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
-        feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
-        feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
-        feature._featureId = this.store.state.parcels.pwd.properties.PARCELID;
+        this.setFeatureProperties(feature, totalUnits)
 
-        feature.condo = true
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
         this.store.commit('setLastSearchMethod', 'geocode');
 
         return feature;
       }
-
-      // console.log("feature: ", feature.properties, "parcel: ", this.store.state.parcels)
-      // feature = this.dataManager.assignFeatureIds(feature, 'geocode');
-      // console.log("feature: ", feature)
 
     }
 

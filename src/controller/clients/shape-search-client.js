@@ -39,7 +39,7 @@ class ShapeSearchClient extends BaseClient {
       dataList.push(groupedData[item][0])
     }
 
-    let mObj = JSON.parse(JSON.stringify(data.rows[0]))
+    let bldgRecord = JSON.parse(JSON.stringify(data.rows[0]))
 
     if(units.length > 0) {
       units = _.groupBy(units, a => a.pwd_parcel_id);
@@ -51,14 +51,14 @@ class ShapeSearchClient extends BaseClient {
 
     for (let unit in units) {
       // console.log("Unit: ", units[unit])
-      for (let i in mObj) { mObj[i] = ""  }
-      let mObjPush = JSON.parse(JSON.stringify(mObj));
-      mObjPush.owner_1 = "Condominium (" + units[unit].length + " Units)";
-      mObjPush.owner_2 = null;
-      mObjPush.location = units[unit][0].location;
-      mObjPush.condo = true;
-      mObjPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
-      data.rows.push(mObjPush);
+      for (let i in bldgRecord) { bldgRecord[i] = ""  }
+      let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
+      bldgRecordPush.owner_1 = "Condominium (" + units[unit].length + " Units)";
+      bldgRecordPush.owner_2 = null;
+      bldgRecordPush.location = units[unit][0].location;
+      bldgRecordPush.condo = true;
+      bldgRecordPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
+      data.rows.push(bldgRecordPush);
     }
     return data
   }
