@@ -144,7 +144,9 @@ class DataManager {
 
     // console.log("Define Targets Starting", targets)
     // check if target objs exist in state.
-    const targetIds = targets.map(targetIdFn);
+    if ( typeof targets.length != 'undefined'){
+      const targetIds = targets.map(targetIdFn);
+    }
     // console.log("targetIds: ", targetIds)
     const stateTargets = state.sources[dataSourceKey].targets;
     const stateTargetIds = Object.keys(stateTargets);
