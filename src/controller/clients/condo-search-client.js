@@ -75,13 +75,15 @@ class CondoSearchClient extends BaseClient {
 
       let pages = Math.ceil(data.total_size / 100)
 
-      if (pages > 1) {
-        for (let counter = 2; counter<=pages; counter++) {
-          // console.log('in loop, counter:', counter, this);
-          params.page = counter;
-          let pageResponse = await axios.get(url, { params })
-          features = await features.concat(pageResponse.data.features)
-          // console.log('response:', pageResponse, 'features:', features)
+      if (store.state.activeCondo.featureId != null) {
+        if (pages > 1) {
+          for (let counter = 2; counter<=pages; counter++) {
+            // console.log('in loop, counter:', counter, this);
+            params.page = counter;
+            let pageResponse = await axios.get(url, { params })
+            features = await features.concat(pageResponse.data.features)
+            // console.log('response:', pageResponse, 'features:', features)
+          }
         }
       }
 
@@ -118,7 +120,6 @@ class CondoSearchClient extends BaseClient {
 
         return feature;
       }
-
     }
 
     getPages = getPages.bind(this);
