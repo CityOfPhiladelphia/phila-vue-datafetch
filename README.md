@@ -16,3 +16,13 @@ phila-vue-datafetch is a library of functions used for fetching data for an app 
 
 ## Usage
 Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/wiki) for usage documentation.
+
+## Release Notes
+
+### 0.0.18 - 6/2/2019
+
+* Uses axios 0.19.0 to fix security bug
+
+### 0.0.17 - 5/30/2019
+
+* Ran `yarn upgrade` to upgrade all packages
