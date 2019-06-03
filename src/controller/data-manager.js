@@ -556,8 +556,8 @@ class DataManager {
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {
-        this.store.commit('setMapZoom', geocodeZoom);
         this.store.commit('setMapCenter', feature.geometry.coordinates);
+        this.store.commit('setMapZoom', geocodeZoom);
       }
       return
     }
