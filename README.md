@@ -19,6 +19,10 @@ Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/w
 
 ## Release Notes
 
+### 0.0.19
+
+* In 2 places where data-manager.js didGeocode() calls `setMapZoom`, it attempts to use `this.config.map.geocodeZoom`. The default is set to 19. 
+
 ### 0.0.18 - 6/2/2019
 
 * Uses axios 0.19.0 to fix security bug

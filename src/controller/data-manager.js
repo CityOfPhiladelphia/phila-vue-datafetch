@@ -548,11 +548,15 @@ class DataManager {
   }
 
   didGeocode(feature) {
-    console.log('DataManager.didGeocode:', feature);
+    let geocodeZoom = 19;
+    if (this.config.map.geocodeZoom) {
+      geocodeZoom = this.config.map.geocodeZoom;
+    }
+    console.log('DataManager.didGeocode:', feature, 'geocodeZoom:', geocodeZoom);
     this.controller.router.didGeocode();
     if (!this.config.parcels) {
       if (this.store.state.map) {
-        this.store.commit('setMapZoom', 19);
+        this.store.commit('setMapZoom', geocodeZoom);
         this.store.commit('setMapCenter', feature.geometry.coordinates);
       }
       return
@@ -666,8 +670,12 @@ class DataManager {
       if (!activeTopicConfig.zoomToShape) {
         // console.log('NO ZOOM TO SHAPE - NOW IT SHOULD NOT BE ZOOMING TO THE SHAPE ON GEOCODE');
         if (this.store.state.map) {
+          let geocodeZoom = 19;
+          if (this.config.map.geocodeZoom) {
+            geocodeZoom = this.config.map.geocodeZoom;
+          }
           this.store.commit('setMapCenter', coords);
-          this.store.commit('setMapZoom', 19);
+          this.store.commit('setMapZoom', geocodeZoom);
         }
       } else {
         // console.log('ZOOM TO SHAPE - NOW IT SHOULD BE ZOOMING TO THE SHAPE ON GEOCODE');
