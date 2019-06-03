@@ -40,17 +40,35 @@ class Router {
     }
   }
 
-  makeHash(address, topic) {
-    // console.log('make hash', address, topic);
+  makeHash(address, topicOrServices) {
+    console.log('make hash, address:', address, 'topicOrServices:', topicOrServices);
 
     // must have an address
     if (!address || address.length === 0) {
       return null;
     }
 
-    let hash = `#/${encodeURIComponent(address)}`;
-    if (topic) {
-      hash += `/${topic}`;
+    let hash = `#/${encodeURIComponent(address)}/`;
+    if (topicOrServices) {
+      if (Array.isArray(topicOrServices)) {
+        console.log('topicOrServices is an Array');
+        if (topicOrServices.length > 1) {
+          console.log('topicOrServices is an Array and length is greater than 1')
+          for (let [index, topicOrService] of topicOrServices.entries()) {
+            console.log('topicOrService:', topicOrService, 'index:', index);
+            hash += `${encodeURIComponent(topicOrService)}`
+            if (index < topicOrServices.length - 1) {
+              hash += `${encodeURIComponent(',')}`
+            }
+          }
+        } else {
+          console.log('topicOrServices is an Array and length is not greater than 1')
+          hash += `${encodeURIComponent(topicOrServices)}`
+        }
+      } else {
+        console.log('topicOrServices is not an array')
+        hash += `${topicOrServices}`;
+      }
     }
 
     return hash;
@@ -68,7 +86,7 @@ class Router {
   }
 
   hashChanged() {
-    // console.log('hashChanged is running, this.store.state.activeTopic:', this.store.state.activeTopic);
+    console.log('hashChanged is running, this.store.state.activeTopic:', this.store.state.activeTopic);
     const location = window.location;
     const hash = location.hash;
 
@@ -83,6 +101,7 @@ class Router {
     // parse path
     const pathComps = hash.split('/').splice(1);
     const addressComp = pathComps[0];
+    console.log('addressComp:', addressComp);
 
     // if there's no address, erase it
     if (!addressComp) {
@@ -92,7 +111,7 @@ class Router {
     }
 
     const nextAddress = decodeURIComponent(addressComp);
-    let nextTopic;
+    let nextTopicOrServices;
 
     const modalKeys = this.config.modals || [];
     // console.log('pathComps:', pathComps, 'modalKeys:', modalKeys);
@@ -103,18 +122,31 @@ class Router {
     }
 
     if (pathComps.length > 1) {
-      nextTopic = decodeURIComponent(pathComps[1]);
+      nextTopicOrServices = decodeURIComponent(pathComps[1]);
     }
+
+    console.log('nextTopicOrServices:', nextTopicOrServices);
 
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
     }
 
-    this.routeToAddress(nextAddress);
+    if (addressComp !== 'noaddress') {
+      this.routeToAddress(nextAddress);
+    }
+
     if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
-      if (this.config.topics.length) {
-        this.routeToTopic(nextTopic);
+      if (this.config.topics) {
+        if (this.config.topics.length) {
+          this.routeToTopic(nextTopicOrServices);
+        }
       }
+    }
+
+    if (this.store.state.selectedServices) {
+      let nextTopicOrServicesArray = nextTopicOrServices.split(',');
+      console.log('nextTopicOrServicesArray:', nextTopicOrServicesArray)
+      this.store.commit('setSelectedServices', nextTopicOrServicesArray);
     }
   }
 
@@ -194,6 +226,19 @@ class Router {
     }
   }
 
+  routeToServices(nextServices) {
+    console.log('routeToServices is running, nextServices:', nextServices);
+    if (!this.silent) {
+      let address = this.getAddressFromState();
+      if (!address) {
+        address='noaddress'
+      }
+      const nextHash = this.makeHash(address, nextServices);
+      const lastHistoryState = this.history.state;
+      this.history.replaceState(lastHistoryState, null, nextHash);
+    }
+  }
+
   didGeocode() {
     const geocodeData = this.store.state.geocode.data;
 
@@ -213,6 +258,7 @@ class Router {
       }
 
       const topic = this.store.state.activeTopic;
+      const selectedServices = this.store.state.selectedServices;
 
       // REVIEW this is only pushing state when routing is turned on. but maybe we
       // want this to happen all the time, right?
@@ -221,7 +267,12 @@ class Router {
         const nextHistoryState = {
           geocode: geocodeData
         };
-        const nextHash = this.makeHash(address, topic);
+        let nextHash;
+        if (selectedServices) {
+          nextHash = this.makeHash(address, selectedServices);
+        } else {
+          nextHash = this.makeHash(address, topic);
+        }
         // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
         this.history.pushState(nextHistoryState, null, nextHash);
       }
