@@ -544,25 +544,25 @@ class DataManager {
   checkForShapeSearch(input) {
     // console.log("Checking for shape search", input)
     if(this.store.state.drawShape !== null ) {
+      this.clearShapeSearch()
       const input = this.store.state.parcels.pwd;
       this.store.commit('setLastSearchMethod', 'shape search');
       const didShapeSearch = this.didShapeSearch.bind(this);
-      this.clearOwnerSearch()
       this.resetGeocode();
       // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
     } else {
       const input = this.store.state.parcels.pwd.properties.ADDRESS;
-      console.log("Not shape search, input: ", input)
+      // console.log("Not shape search, input: ", input)
       this.clearShapeSearch()
       this.clients.condoSearch.fetch(input)}
   }
-  
+
   didShapeSearch() {
     // console.log("shape search fetchData")
     this.fetchData();
   }
-  
+
     clearShapeSearch() {
       this.store.commit('setShapeSearchStatus', null);
       this.store.commit('setShapeSearchData', null);
