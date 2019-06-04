@@ -78,6 +78,7 @@ class Router {
     // TODO add an address getter fn to config so this isn't ais-specific
     const geocodeData = this.store.state.geocode.data || {};
     const props = geocodeData.properties || {};
+    console.log('getAddressFromState is running, geocodeData:', geocodeData, 'props:', props);
     if (geocodeData.street_address) {
       return geocodeData.street_address;
     } else if (props.street_address) {
@@ -101,7 +102,7 @@ class Router {
     // parse path
     const pathComps = hash.split('/').splice(1);
     const addressComp = pathComps[0];
-    console.log('addressComp:', addressComp);
+    console.log('hash:', hash, 'pathComps:', pathComps, 'addressComp:', addressComp);
 
     // if there's no address, erase it
     if (!addressComp) {
@@ -144,7 +145,12 @@ class Router {
     }
 
     if (this.store.state.selectedServices) {
-      let nextTopicOrServicesArray = nextTopicOrServices.split(',');
+      let nextTopicOrServicesArray;
+      if (nextTopicOrServices) {
+        nextTopicOrServicesArray = nextTopicOrServices.split(',');
+      } else {
+        nextTopicOrServicesArray = []
+      }
       console.log('nextTopicOrServicesArray:', nextTopicOrServicesArray)
       this.store.commit('setSelectedServices', nextTopicOrServicesArray);
     }
@@ -233,6 +239,7 @@ class Router {
       if (!address) {
         address='noaddress'
       }
+      console.log('in routeToServices, address:', address)
       const nextHash = this.makeHash(address, nextServices);
       const lastHistoryState = this.history.state;
       this.history.replaceState(lastHistoryState, null, nextHash);
