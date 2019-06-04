@@ -203,6 +203,14 @@ class Controller {
   goToDefaultAddress(address) {
     this.router.routeToAddress(address);
   }
+
+  resetGeocode() {
+    this.dataManager.resetGeocode();
+  }
+
+  routeToNoAddress() {
+    this.router.routeToNoAddress();
+  }
 }
 
 export default Controller;

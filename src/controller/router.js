@@ -157,7 +157,7 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    // console.log('Router.routeToAddress', nextAddress);
+    console.log('Router.routeToAddress', nextAddress);
     if (nextAddress) {
       // check against current address
       const prevAddress = this.getAddressFromState();
@@ -170,6 +170,12 @@ class Router {
                         // .then(this.didGeocode.bind(this));
       }
     }
+  }
+
+  routeToNoAddress() {
+    const nextHash = this.makeHash('noaddress', this.store.state.selectedServices);
+    const lastHistoryState = this.history.state;
+    this.history.replaceState(lastHistoryState, null, nextHash);
   }
 
   routeToOwner(nextOwner, searchCategory) {
