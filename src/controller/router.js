@@ -187,7 +187,7 @@ class Router {
   }
 
   routeToModal(selectedModal) {
-    // console.log('routeToModal is running, selectedModal:', selectedModal);
+    console.log('routeToModal is running, selectedModal:', selectedModal);
     this.store.commit('setDidToggleModal', selectedModal);
   }
 

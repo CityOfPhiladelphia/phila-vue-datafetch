@@ -22,6 +22,10 @@ const initialState = {
     input: null,
   },
   lastSearchMethod: 'geocode',
+  modals: {
+    keys: [],
+    open: '',
+  },
 };
 
 const pvdStore = {
@@ -226,6 +230,9 @@ const pvdStore = {
       },
       setShouldShowAddressCandidateList(state, payload) {
         state.shouldShowAddressCandidateList = payload;
+      },
+      setDidToggleModal(state, name) {
+        state.modals.open = name;
       },
     }
   }
