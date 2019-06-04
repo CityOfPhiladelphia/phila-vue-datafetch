@@ -21,6 +21,7 @@ const initialState = {
     data: null,
     input: null,
   },
+  searchType: 'address',
   lastSearchMethod: 'geocode',
   modals: {
     keys: [],
@@ -88,6 +89,9 @@ const pvdStore = {
   store: {
     state: initialState,
     mutations: {
+      setSearchType(state, payload) {
+        state.searchType = payload;
+      },
       setActiveParcelLayer(state, payload) {
         state.activeParcelLayer = payload;
       },

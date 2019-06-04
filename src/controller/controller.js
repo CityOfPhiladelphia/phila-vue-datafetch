@@ -64,7 +64,7 @@ class Controller {
 
   handleSearchFormSubmit(value, searchCategory) {
     const input = value
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
 
     this.store.commit('setGeocodeStatus', null);
     if (!searchCategory || searchCategory === 'address') {
@@ -117,6 +117,9 @@ class Controller {
     } else if (searchCategory === 'owner') {
       console.log('searchCategory is owner');
       this.router.routeToOwner(input, searchCategory);
+    } else if (searchCategory === 'keyword') {
+      console.log('searchCategory is keyword');
+      this.router.routeToKeyword(input, searchCategory);
     }
   }
 

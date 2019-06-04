@@ -40,15 +40,15 @@ class Router {
     }
   }
 
-  makeHash(address, topicOrServices) {
-    console.log('make hash, address:', address, 'topicOrServices:', topicOrServices);
+  makeHash(addressOrKeywords, topicOrServices) {
+    console.log('make hash, addressOrKeywords:', addressOrKeywords, 'topicOrServices:', topicOrServices);
 
-    // must have an address
-    if (!address || address.length === 0) {
+    // must have an addressOrKeywords
+    if (!addressOrKeywords || addressOrKeywords.length === 0) {
       return null;
     }
 
-    let hash = `#/${encodeURIComponent(address)}/`;
+    let hash = `#/${encodeURIComponent(addressOrKeywords)}/`;
     if (topicOrServices) {
       if (Array.isArray(topicOrServices)) {
         console.log('topicOrServices is an Array');
@@ -101,17 +101,17 @@ class Router {
 
     // parse path
     const pathComps = hash.split('/').splice(1);
-    const addressComp = pathComps[0];
-    console.log('hash:', hash, 'pathComps:', pathComps, 'addressComp:', addressComp);
+    const addressOrKeywordComp = pathComps[0];
+    console.log('hash:', hash, 'pathComps:', pathComps, 'addressOrKeywordComp:', addressOrKeywordComp);
 
     // if there's no address, erase it
-    if (!addressComp) {
+    if (!addressOrKeywordComp) {
       this.routeToModal('');
       this.dataManager.resetGeocode();
       return;
     }
 
-    const nextAddress = decodeURIComponent(addressComp);
+    const nextAddressOrKeyword = decodeURIComponent(addressOrKeywordComp);
     let nextTopicOrServices;
 
     const modalKeys = this.config.modals || [];
@@ -126,14 +126,35 @@ class Router {
       nextTopicOrServices = decodeURIComponent(pathComps[1]);
     }
 
-    console.log('nextTopicOrServices:', nextTopicOrServices);
+    console.log('in hashChanged, nextAddressOrKeyword:', nextAddressOrKeyword, 'nextTopicOrServices:', nextTopicOrServices);
+    let nextAddress;
+    let nextKeyword;
+    if (nextAddressOrKeyword.includes('addr ')) {
+      console.log('in hashChanged, includes addr')
+      // nextAddress = nextAddressOrKeyword.replace('addr ', '');
+      nextAddress = nextAddressOrKeyword;
+      this.store.commit('setSearchType', 'address');
+    } else if (nextAddressOrKeyword.includes('kw ')) {
+      console.log('in hashChanged, includes kw')
+      nextKeyword = nextAddressOrKeyword.replace('kw ', '');
+      // nextKeyword = nextAddressOrKeyword;
+      this.store.commit('setSearchType', 'keyword');
+    }
+
 
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
     }
 
-    if (addressComp !== 'noaddress') {
+    if (nextAddress && nextAddress !== 'addr noaddress') {
       this.routeToAddress(nextAddress);
+    }
+
+    if (nextKeyword) {
+      // let values = nextKeyword.split(',');
+      // console.log('hashChanged sending keyWords to store, values:', values);
+      // this.store.commit('setSelectedKeywords', values);
+      this.routeToKeyword(nextKeyword);
     }
 
     if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
@@ -157,40 +178,63 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    console.log('Router.routeToAddress', nextAddress);
+    console.log('Router.routeToAddress, nextAddress:', nextAddress);
     if (nextAddress) {
+      nextAddress = nextAddress.replace('addr ', '');
       // check against current address
       const prevAddress = this.getAddressFromState();
 
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
-        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
         this.dataManager.geocode(nextAddress, searchCategory);
-        // this.dataManager.geocode(nextAddress, 'address')
-                        // .then(this.didGeocode.bind(this));
       }
     }
   }
 
   routeToNoAddress() {
-    const nextHash = this.makeHash('noaddress', this.store.state.selectedServices);
+    const nextHash = this.makeHash('addr noaddress', this.store.state.selectedServices);
     const lastHistoryState = this.history.state;
     this.history.replaceState(lastHistoryState, null, nextHash);
   }
 
   routeToOwner(nextOwner, searchCategory) {
-    // console.log('Router.routeToAddress', nextAddress);
     if (nextOwner) {
-      // check against current address
-      // const prevOwner = this.getAddressFromState();
+      this.dataManager.geocode(nextOwner, searchCategory);
+    }
+  }
 
-      // if the hash address is different, geocode
-      // if (!prevAddress || nextAddress !== prevAddress) {
-        // console.log('routeToAddress is calling datamanager.geocode(nextAddress):', nextAddress);
-        this.dataManager.geocode(nextOwner, searchCategory);
-        // this.dataManager.geocode(nextOwner, 'owner')
-                        // .then(this.didGeocode.bind(this));
-      // }
+  routeToKeyword(nextKeywords, searchCategory) {
+    console.log('in router.js routeToKeyword, nextKeywords:', nextKeywords, 'searchCategory:', searchCategory);
+    if (!this.silent) {
+      let values = nextKeywords.split(',');
+      console.log('routeToKeyword values:', values);
+      this.store.commit('setSelectedKeywords', values);
+      nextKeywords = 'kw ' + nextKeywords
+      const nextHash = this.makeHash(nextKeywords, this.store.state.selectedServices);
+      const lastHistoryState = this.history.state;
+      this.history.replaceState(lastHistoryState, null, nextHash);
+    }
+  }
+
+  routeToServices(nextServices) {
+    const searchType = this.store.state.searchType;
+    console.log('routeToServices is running, nextServices:', nextServices, 'searchType:', searchType);
+    if (!this.silent) {
+      let address = this.getAddressFromState();
+      if (!address) {
+        address='noaddress'
+      }
+      let keywords = 'kw '+ this.store.state.selectedKeywords.join(', ');
+      console.log('in routeToServices, address:', address)
+      address = 'addr ' + address;
+      let nextHash;
+      if (searchType === 'address') {
+        nextHash = this.makeHash(address, nextServices);
+      } else if (searchType === 'keyword') {
+        nextHash = this.makeHash(keywords, nextServices);
+      }
+      const lastHistoryState = this.history.state;
+      this.history.replaceState(lastHistoryState, null, nextHash);
     }
   }
 
@@ -231,22 +275,9 @@ class Router {
     }
 
     if (!this.silent) {
-      const address = this.getAddressFromState();
-      const nextHash = this.makeHash(address, nextTopic);
-      const lastHistoryState = this.history.state;
-      this.history.replaceState(lastHistoryState, null, nextHash);
-    }
-  }
-
-  routeToServices(nextServices) {
-    console.log('routeToServices is running, nextServices:', nextServices);
-    if (!this.silent) {
       let address = this.getAddressFromState();
-      if (!address) {
-        address='noaddress'
-      }
-      console.log('in routeToServices, address:', address)
-      const nextHash = this.makeHash(address, nextServices);
+      address = 'addr ' + address;
+      const nextHash = this.makeHash(address, nextTopic);
       const lastHistoryState = this.history.state;
       this.history.replaceState(lastHistoryState, null, nextHash);
     }
@@ -281,6 +312,7 @@ class Router {
           geocode: geocodeData
         };
         let nextHash;
+        address = 'addr ' + address;
         if (selectedServices) {
           nextHash = this.makeHash(address, selectedServices);
         } else {
