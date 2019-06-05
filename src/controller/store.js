@@ -27,6 +27,9 @@ const initialState = {
     keys: [],
     open: '',
   },
+  selectedServices: [],
+  selectedKeywords: [],
+
 };
 
 const pvdStore = {
@@ -89,6 +92,12 @@ const pvdStore = {
   store: {
     state: initialState,
     mutations: {
+      setSelectedServices(state, payload) {
+        state.selectedServices = payload;
+      },
+      setSelectedKeywords(state, payload) {
+        state.selectedKeywords = payload;
+      },
       setSearchType(state, payload) {
         state.searchType = payload;
       },
