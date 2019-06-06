@@ -8,7 +8,7 @@ navigation events.
 import * as L from 'leaflet';
 import { query as Query } from 'esri-leaflet';
 // import * as turf from '@turf/turf';
-import { point, polygon } from '@turf/helpers';
+import { point, polygon, isNumber } from '@turf/helpers';
 import distance from '@turf/distance';
 import area from '@turf/area';
 import {
@@ -197,10 +197,11 @@ class DataManager {
   fetchData() {
     // console.log('\nFETCH DATA');
     // console.log('-----------');
-    if(typeof this.store.state.activeCondo != 'undefined' && this.store.state.activeCondo.featureId != null) {
+    if(this.store.state.geocode.data.condo === true) {
 
-      const geocodeObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      const geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
       const ownerSearchObj = geocodeObj;
+
       if(this.store.state.shapeSearch.data != null) {
         let result = this.store.state.shapeSearch.data.rows.filter(
           a => a._featureId === this.store.state.activeCondo.featureId
@@ -541,6 +542,12 @@ class DataManager {
     this.store.commit('setOwnerSearchInput', null);
   }
 
+  didCondoSearch(){
+    const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
+    const didGeocode = this.didGeocode.bind(this)
+    didGeocode(feature)
+  }
+
   checkForShapeSearch(input) {
     // console.log("Checking for shape search", input)
     if(this.store.state.drawShape !== null ) {
@@ -555,7 +562,10 @@ class DataManager {
       const input = this.store.state.parcels.pwd.properties.ADDRESS;
       // console.log("Not shape search, input: ", input)
       this.clearShapeSearch()
-      this.clients.condoSearch.fetch(input)}
+      const didCondoSearch = this.didCondoSearch.bind(this)
+      this.clients.condoSearch.fetch(input).then(didCondoSearch)
+
+    }
   }
 
   didShapeSearch() {
