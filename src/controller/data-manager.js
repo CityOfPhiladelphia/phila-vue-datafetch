@@ -8,7 +8,7 @@ navigation events.
 import * as L from 'leaflet';
 import { query as Query } from 'esri-leaflet';
 // import * as turf from '@turf/turf';
-import { point, polygon } from '@turf/helpers';
+import { point, polygon, isNumber } from '@turf/helpers';
 import distance from '@turf/distance';
 import area from '@turf/area';
 import {
@@ -197,10 +197,11 @@ class DataManager {
   fetchData() {
     // console.log('\nFETCH DATA');
     // console.log('-----------');
-    if(typeof this.store.state.activeCondo != 'undefined' && this.store.state.activeCondo.featureId != null) {
+    if(this.store.state.geocode.data.condo === true) {
 
-      const geocodeObj = this.store.state.condoUnits.units[this.store.state.activeCondo.featureId];
+      const geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
       const ownerSearchObj = geocodeObj;
+
       if(this.store.state.shapeSearch.data != null) {
         let result = this.store.state.shapeSearch.data.rows.filter(
           a => a._featureId === this.store.state.activeCondo.featureId
@@ -535,28 +536,52 @@ class DataManager {
     console.log()
   }
 
+  clearOwnerSearch(){
+    this.store.commit('setOwnerSearchStatus', null);
+    this.store.commit('setOwnerSearchData', null);
+    this.store.commit('setOwnerSearchInput', null);
+  }
+
+  didCondoSearch(){
+    const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
+    const didGeocode = this.didGeocode.bind(this)
+    didGeocode(feature)
+  }
+
   checkForShapeSearch(input) {
     // console.log("Checking for shape search", input)
     if(this.store.state.drawShape !== null ) {
+      this.clearShapeSearch()
       const input = this.store.state.parcels.pwd;
       this.store.commit('setLastSearchMethod', 'shape search');
       const didShapeSearch = this.didShapeSearch.bind(this);
-      this.store.commit('setOwnerSearchStatus', null);
-      this.store.commit('setOwnerSearchData', null);
-      this.store.commit('setOwnerSearchInput', null);
       this.resetGeocode();
       // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
     } else {
       const input = this.store.state.parcels.pwd.properties.ADDRESS;
       // console.log("Not shape search, input: ", input)
-      this.clients.condoSearch.fetch(input)}
+      this.clearShapeSearch()
+      const didCondoSearch = this.didCondoSearch.bind(this)
+      this.clients.condoSearch.fetch(input).then(didCondoSearch)
+
+    }
   }
 
   didShapeSearch() {
     // console.log("shape search fetchData")
     this.fetchData();
   }
+
+    clearShapeSearch() {
+      this.store.commit('setShapeSearchStatus', null);
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setUnits', null);
+      this.store.commit('setDrawShape', null);
+      if(this.store.state.editableLayers !== null ){
+        this.store.state.editableLayers.clearLayers();
+      }
+    }
 
   didTryGeocode(feature) {
     // console.log('didTryGeocode is running, feature:', feature);
@@ -575,27 +600,12 @@ class DataManager {
       this.resetData();
       this.didGeocode(feature);
       this.store.commit('setLastSearchMethod', 'geocode');
-      this.store.commit('setOwnerSearchStatus', null);
-      this.store.commit('setOwnerSearchData', null);
-      this.store.commit('setOwnerSearchInput', null);
-      this.store.commit('setShapeSearchStatus', null);
-      this.store.commit('setShapeSearchData', null);
-      this.store.commit('setUnits', null);
-      this.store.commit('setDrawShape', null);
-      if(this.store.state.editableLayers !== null ){
-        this.store.state.editableLayers.clearLayers();
-      }
+      this.clearOwnerSearch()
+      this.clearShapeSearch()
     } else if (this.store.state.geocode.status === null) {
       // console.log('didTryGeocode is running, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
-      if(this.store.state.editableLayers !== null ){
-        this.store.state.editableLayers.clearLayers();
-      }
-      this.store.commit('setUnits', null);
-      this.store.commit('setDrawShape', null);
-      this.store.commit('setShapeSearchStatus', null);
-      this.store.commit('setShapeSearchData', null);
-
+      this.clearShapeSearch()
       const input = this.store.state.geocode.input;
       this.resetGeocode();
       return this.clients.shapeSearch.fetch(input);
