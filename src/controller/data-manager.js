@@ -197,7 +197,7 @@ class DataManager {
   fetchData() {
     // console.log('\nFETCH DATA');
     // console.log('-----------');
-    if(this.store.state.geocode.data.condo === true) {
+    if( this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
 
       const geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
       const ownerSearchObj = geocodeObj;
