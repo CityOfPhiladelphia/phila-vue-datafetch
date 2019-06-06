@@ -40,34 +40,34 @@ class Router {
     }
   }
 
-  makeHash(addressOrKeywords, topicOrServices) {
-    console.log('make hash, addressOrKeywords:', addressOrKeywords, 'topicOrServices:', topicOrServices);
+  makeHash(firstRouteParameter, secondRouteParameter) {
+    console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
 
-    // must have an addressOrKeywords
-    if (!addressOrKeywords || addressOrKeywords.length === 0) {
+    // must have an firstRouteParameter
+    if (!firstRouteParameter || firstRouteParameter.length === 0) {
       return null;
     }
 
-    let hash = `#/${encodeURIComponent(addressOrKeywords)}/`;
-    if (topicOrServices) {
-      if (Array.isArray(topicOrServices)) {
-        console.log('topicOrServices is an Array');
-        if (topicOrServices.length > 1) {
-          console.log('topicOrServices is an Array and length is greater than 1')
-          for (let [index, topicOrService] of topicOrServices.entries()) {
+    let hash = `#/${encodeURIComponent(firstRouteParameter)}/`;
+    if (secondRouteParameter) {
+      if (Array.isArray(secondRouteParameter)) {
+        console.log('secondRouteParameter is an Array');
+        if (secondRouteParameter.length > 1) {
+          console.log('secondRouteParameter is an Array and length is greater than 1')
+          for (let [index, topicOrService] of secondRouteParameter.entries()) {
             console.log('topicOrService:', topicOrService, 'index:', index);
             hash += `${encodeURIComponent(topicOrService)}`
-            if (index < topicOrServices.length - 1) {
+            if (index < secondRouteParameter.length - 1) {
               hash += `${encodeURIComponent(',')}`
             }
           }
         } else {
-          console.log('topicOrServices is an Array and length is not greater than 1')
-          hash += `${encodeURIComponent(topicOrServices)}`
+          console.log('secondRouteParameter is an Array and length is not greater than 1')
+          hash += `${encodeURIComponent(secondRouteParameter)}`
         }
       } else {
-        console.log('topicOrServices is not an array')
-        hash += `${topicOrServices}`;
+        console.log('secondRouteParameter is not an array')
+        hash += `${secondRouteParameter}`;
       }
     }
 
@@ -101,18 +101,18 @@ class Router {
 
     // parse path
     const pathComps = hash.split('/').splice(1);
-    const addressOrKeywordComp = pathComps[0];
-    console.log('hash:', hash, 'pathComps:', pathComps, 'addressOrKeywordComp:', addressOrKeywordComp);
+    const encodedFirstRouteParameter = pathComps[0];
+    console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
 
     // if there's no address, erase it
-    if (!addressOrKeywordComp) {
+    if (!encodedFirstRouteParameter) {
       this.routeToModal('');
       this.dataManager.resetGeocode();
       return;
     }
 
-    const nextAddressOrKeyword = decodeURIComponent(addressOrKeywordComp);
-    let nextTopicOrServices;
+    const firstRouteParameter = decodeURIComponent(encodedFirstRouteParameter);
+    let secondRouteParameter;
 
     const modalKeys = this.config.modals || [];
     // console.log('pathComps:', pathComps, 'modalKeys:', modalKeys);
@@ -123,21 +123,19 @@ class Router {
     }
 
     if (pathComps.length > 1) {
-      nextTopicOrServices = decodeURIComponent(pathComps[1]);
+      secondRouteParameter = decodeURIComponent(pathComps[1]);
     }
 
-    console.log('in hashChanged, nextAddressOrKeyword:', nextAddressOrKeyword, 'nextTopicOrServices:', nextTopicOrServices);
+    console.log('in hashChanged, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
     let nextAddress;
     let nextKeyword;
-    if (nextAddressOrKeyword.includes('addr ')) {
+    if (firstRouteParameter.includes('addr ')) {
       console.log('in hashChanged, includes addr')
-      // nextAddress = nextAddressOrKeyword.replace('addr ', '');
-      nextAddress = nextAddressOrKeyword;
+      nextAddress = firstRouteParameter;
       this.store.commit('setSearchType', 'address');
-    } else if (nextAddressOrKeyword.includes('kw ')) {
+    } else if (firstRouteParameter.includes('kw ')) {
       console.log('in hashChanged, includes kw')
-      nextKeyword = nextAddressOrKeyword.replace('kw ', '');
-      // nextKeyword = nextAddressOrKeyword;
+      nextKeyword = firstRouteParameter.replace('kw ', '');
       this.store.commit('setSearchType', 'keyword');
     }
 
@@ -151,30 +149,36 @@ class Router {
     }
 
     if (nextKeyword) {
-      // let values = nextKeyword.split(',');
       // console.log('hashChanged sending keyWords to store, values:', values);
-      // this.store.commit('setSelectedKeywords', values);
       this.routeToKeyword(nextKeyword);
     }
 
     if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
       if (this.config.topics) {
         if (this.config.topics.length) {
-          this.routeToTopic(nextTopicOrServices);
+          this.routeToTopic(secondRouteParameter);
         }
       }
     }
 
     if (this.store.state.selectedServices) {
-      let nextTopicOrServicesArray;
-      if (nextTopicOrServices) {
-        nextTopicOrServicesArray = nextTopicOrServices.split(',');
+      let secondRouteParameterArray;
+      if (secondRouteParameter) {
+        secondRouteParameterArray = secondRouteParameter.split(',');
       } else {
-        nextTopicOrServicesArray = []
+        secondRouteParameterArray = []
       }
-      console.log('nextTopicOrServicesArray:', nextTopicOrServicesArray)
-      this.store.commit('setSelectedServices', nextTopicOrServicesArray);
+      console.log('secondRouteParameterArray:', secondRouteParameterArray)
+      this.store.commit('setSelectedServices', secondRouteParameterArray);
     }
+  }
+
+  routeToFirstParameter() {
+    console.log('routeToFirstParameter is running');
+  }
+
+  routeToSecondParameter() {
+    console.log('routeToSecondParameter is running');
   }
 
   routeToAddress(nextAddress, searchCategory) {
@@ -203,36 +207,51 @@ class Router {
     }
   }
 
-  routeToKeyword(nextKeywords, searchCategory) {
-    console.log('in router.js routeToKeyword, nextKeywords:', nextKeywords, 'searchCategory:', searchCategory);
+  // this is for routing to a first parameter OTHER than an address
+  // it inherits and passes the first parameter, it handles entering a string
+  // it is guaranteed that the second parameter is "selectedServices"
+  routeToKeyword(nextKeywords) {
+    console.log('in router.js routeToKeyword, nextKeywords:', nextKeywords);
     if (!this.silent) {
       let values = nextKeywords.split(',');
-      console.log('routeToKeyword values:', values);
+
+      console.log('in routeToKeyword values:', values);
       this.store.commit('setSelectedKeywords', values);
       nextKeywords = 'kw ' + nextKeywords
+
+      // creating next hash
       const nextHash = this.makeHash(nextKeywords, this.store.state.selectedServices);
+
       const lastHistoryState = this.history.state;
       this.history.replaceState(lastHistoryState, null, nextHash);
     }
   }
 
+  // this is for routing to a second parameter
+  // it is guaranteed that the first parameter is "address" or "keywords"
+  // it inherits and passes the second parameter
   routeToServices(nextServices) {
     const searchType = this.store.state.searchType;
     console.log('routeToServices is running, nextServices:', nextServices, 'searchType:', searchType);
     if (!this.silent) {
+      // getting potential first parameters
       let address = this.getAddressFromState();
       if (!address) {
         address='noaddress'
       }
-      let keywords = 'kw '+ this.store.state.selectedKeywords.join(', ');
-      console.log('in routeToServices, address:', address)
       address = 'addr ' + address;
+      console.log('in routeToServices, address:', address);
+
+      let keywords = 'kw '+ this.store.state.selectedKeywords.join(', ');
+
+      // creating next hash
       let nextHash;
       if (searchType === 'address') {
         nextHash = this.makeHash(address, nextServices);
       } else if (searchType === 'keyword') {
         nextHash = this.makeHash(keywords, nextServices);
       }
+
       const lastHistoryState = this.history.state;
       this.history.replaceState(lastHistoryState, null, nextHash);
     }
@@ -249,7 +268,7 @@ class Router {
 
   // this gets called when you click a topic header.
   routeToTopic(nextTopic, target) {
-    // console.log('router.js routeToTopic is running');
+    console.log('router.js routeToTopic is running, nextTopic:', nextTopic, 'target:', target);
     // check against active topic
     const prevTopic = this.store.state.activeTopic;
 
@@ -283,6 +302,7 @@ class Router {
     }
   }
 
+  // this is almost just the same thing as any of the routeTo... functions above
   didGeocode() {
     const geocodeData = this.store.state.geocode.data;
 
@@ -313,10 +333,10 @@ class Router {
         };
         let nextHash;
         address = 'addr ' + address;
-        if (selectedServices) {
-          nextHash = this.makeHash(address, selectedServices);
-        } else {
+        if (topic) {
           nextHash = this.makeHash(address, topic);
+        } else {
+          nextHash = this.makeHash(address, selectedServices);
         }
         // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
         this.history.pushState(nextHistoryState, null, nextHash);
