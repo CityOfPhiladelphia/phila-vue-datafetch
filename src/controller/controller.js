@@ -111,15 +111,17 @@ class Controller {
     }
 
     // tell router
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input, 'searchCategory.toLowerCase():', searchCategory.toLowerCase());
-    if (!searchCategory || searchCategory.toLowerCase() === 'address') {
-      this.router.routeToAddress(input, searchCategory.toLowerCase());
-    } else if (searchCategory.toLowerCase() === 'owner') {
-      console.log('searchCategory is owner');
-      this.router.routeToOwner(input, searchCategory.toLowerCase());
-    } else if (searchCategory.toLowerCase() === 'keyword') {
-      console.log('searchCategory is keyword');
-      this.router.routeToKeyword(input, searchCategory.toLowerCase());
+    if (this.config.router.enabled) {
+      console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input, 'searchCategory.toLowerCase():', searchCategory.toLowerCase());
+      if (!searchCategory || searchCategory.toLowerCase() === 'address') {
+        this.router.routeToAddress(input, searchCategory.toLowerCase());
+      } else if (searchCategory.toLowerCase() === 'owner') {
+        console.log('searchCategory is owner');
+        this.router.routeToOwner(input, searchCategory.toLowerCase());
+      } else if (searchCategory.toLowerCase() === 'keyword') {
+        console.log('searchCategory is keyword');
+        this.router.routeToKeyword(input, searchCategory.toLowerCase());
+      }
     }
   }
 
