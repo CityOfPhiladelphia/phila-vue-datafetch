@@ -112,15 +112,15 @@ class Controller {
 
     // tell router
     // if (this.config.router.enabled) {
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input, 'searchCategory.toLowerCase():', searchCategory.toLowerCase());
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
     if (!searchCategory || searchCategory.toLowerCase() === 'address') {
-      this.router.routeToAddress(input, searchCategory.toLowerCase());
+      this.router.routeToAddress(input, 'address');
     } else if (searchCategory.toLowerCase() === 'owner') {
       console.log('searchCategory is owner');
-      this.router.routeToOwner(input, searchCategory.toLowerCase());
+      this.router.routeToOwner(input, 'owner');
     } else if (searchCategory.toLowerCase() === 'keyword') {
       console.log('searchCategory is keyword');
-      this.router.routeToKeyword(input, searchCategory.toLowerCase());
+      this.router.routeToKeyword(input, 'keyword');
     }
     // }
   }
@@ -213,9 +213,9 @@ class Controller {
     this.dataManager.resetGeocode();
   }
 
-  routeToNoAddress() {
-    this.router.routeToNoAddress();
-  }
+  // routeToNoAddress() {
+  //   this.router.routeToNoAddress();
+  // }
 }
 
 export default Controller;

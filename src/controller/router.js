@@ -127,17 +127,17 @@ class Router {
     }
 
     console.log('in hashChanged, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
-    let nextAddress;
-    let nextKeyword;
-    if (firstRouteParameter.includes('addr ')) {
-      console.log('in hashChanged, includes addr')
-      nextAddress = firstRouteParameter;
-      this.store.commit('setSearchType', 'address');
-    } else if (firstRouteParameter.includes('kw ')) {
-      console.log('in hashChanged, includes kw')
-      nextKeyword = firstRouteParameter.replace('kw ', '');
-      this.store.commit('setSearchType', 'keyword');
-    }
+    let nextAddress = firstRouteParameter;
+    // let nextKeyword;
+    // if (firstRouteParameter.includes('addr ')) {
+    //   console.log('in hashChanged, includes addr')
+    //   nextAddress = firstRouteParameter;
+    //   this.store.commit('setSearchType', 'address');
+    // } else if (firstRouteParameter.includes('kw ')) {
+    //   console.log('in hashChanged, includes kw')
+    //   nextKeyword = firstRouteParameter.replace('kw ', '');
+    //   this.store.commit('setSearchType', 'keyword');
+    // }
 
 
     if (this.store.state.lastSearchMethod) {
@@ -148,10 +148,10 @@ class Router {
       this.routeToAddress(nextAddress);
     }
 
-    if (nextKeyword) {
-      // console.log('hashChanged sending keyWords to store, values:', values);
-      this.routeToKeyword(nextKeyword);
-    }
+    // if (nextKeyword) {
+    //   // console.log('hashChanged sending keyWords to store, values:', values);
+    //   this.routeToKeyword(nextKeyword);
+    // }
 
     if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
       if (this.config.topics) {
@@ -161,16 +161,16 @@ class Router {
       }
     }
 
-    if (this.store.state.selectedServices) {
-      let secondRouteParameterArray;
-      if (secondRouteParameter) {
-        secondRouteParameterArray = secondRouteParameter.split(',');
-      } else {
-        secondRouteParameterArray = []
-      }
-      console.log('secondRouteParameterArray:', secondRouteParameterArray)
-      this.store.commit('setSelectedServices', secondRouteParameterArray);
-    }
+    // if (this.store.state.selectedServices) {
+    //   let secondRouteParameterArray;
+    //   if (secondRouteParameter) {
+    //     secondRouteParameterArray = secondRouteParameter.split(',');
+    //   } else {
+    //     secondRouteParameterArray = []
+    //   }
+    //   console.log('secondRouteParameterArray:', secondRouteParameterArray)
+    //   this.store.commit('setSelectedServices', secondRouteParameterArray);
+    // }
   }
 
   routeToAddress(nextAddress, searchCategory) {
@@ -187,11 +187,12 @@ class Router {
     }
   }
 
-  routeToNoAddress() {
-    const nextHash = this.makeHash('addr noaddress', this.store.state.selectedServices);
-    const lastHistoryState = this.history.state;
-    this.history.replaceState(lastHistoryState, null, nextHash);
-  }
+  // routeToNoAddress() {
+  //   console.log('routeToNoAddress is running');
+  //   const nextHash = this.makeHash('noaddress', this.store.state.selectedServices);
+  //   const lastHistoryState = this.history.state;
+  //   this.history.replaceState(lastHistoryState, null, nextHash);
+  // }
 
   routeToOwner(nextOwner, searchCategory) {
     if (nextOwner) {
@@ -208,15 +209,15 @@ class Router {
     console.log('in routeToKeyword values:', values);
     this.store.commit('setSelectedKeywords', values);
 
-    if (!this.silent) {
-      nextKeywords = 'kw ' + nextKeywords
+    // if (!this.silent) {
+    //   nextKeywords = 'kw ' + nextKeywords
 
-      // creating next hash
-      const nextHash = this.makeHash(nextKeywords, this.store.state.selectedServices);
+    //   // creating next hash
+    //   const nextHash = this.makeHash(nextKeywords, this.store.state.selectedServices);
 
-      const lastHistoryState = this.history.state;
-      this.history.replaceState(lastHistoryState, null, nextHash);
-    }
+    //   const lastHistoryState = this.history.state;
+    //   this.history.replaceState(lastHistoryState, null, nextHash);
+    // }
   }
 
   // this is for routing to a second parameter
@@ -287,7 +288,7 @@ class Router {
 
     if (!this.silent) {
       let address = this.getAddressFromState();
-      address = 'addr ' + address;
+      // address = 'addr ' + address;
       const nextHash = this.makeHash(address, nextTopic);
       const lastHistoryState = this.history.state;
       this.history.replaceState(lastHistoryState, null, nextHash);
@@ -314,7 +315,7 @@ class Router {
       }
 
       const topic = this.store.state.activeTopic;
-      const selectedServices = this.store.state.selectedServices;
+      // const selectedServices = this.store.state.selectedServices;
 
       // REVIEW this is only pushing state when routing is turned on. but maybe we
       // want this to happen all the time, right?
@@ -324,12 +325,13 @@ class Router {
           geocode: geocodeData
         };
         let nextHash;
-        address = 'addr ' + address;
+        // address = 'addr ' + address;
         if (topic) {
           nextHash = this.makeHash(address, topic);
-        } else {
-          nextHash = this.makeHash(address, selectedServices);
         }
+        // else {
+        //   nextHash = this.makeHash(address, selectedServices);
+        // }
         // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
         this.history.pushState(nextHistoryState, null, nextHash);
       }

@@ -138,7 +138,7 @@ const pvdStore = {
         state.clickCoords = payload;
       },
       setSourceStatus(state, payload) {
-        console.log('setSourceStatus is running, payload:', payload, 'state', state);
+        // console.log('setSourceStatus is running, payload:', payload, 'state', state);
         const key = payload.key;
         const status = payload.status;
 

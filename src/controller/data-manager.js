@@ -215,7 +215,7 @@ class DataManager {
         targets = [geocodeObj];
       }
 
-      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
+      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
         // get id of target
@@ -290,7 +290,7 @@ class DataManager {
 
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
-    console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data);
+    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data);
     let rows;
     if (stateData) {
       rows = stateData.rows;
@@ -439,7 +439,7 @@ class DataManager {
   }
 
   checkDataSourceReady(key, options, targetId) {
-    console.log(`check data source ready: ${key} ${targetId || ''}`, options);
+    // console.log(`check data source ready: ${key} ${targetId || ''}`, options);
 
     const deps = options.deps;
     // console.log('deps', deps);
