@@ -173,14 +173,6 @@ class Router {
     }
   }
 
-  routeToFirstParameter() {
-    console.log('routeToFirstParameter is running');
-  }
-
-  routeToSecondParameter() {
-    console.log('routeToSecondParameter is running');
-  }
-
   routeToAddress(nextAddress, searchCategory) {
     console.log('Router.routeToAddress, nextAddress:', nextAddress);
     if (nextAddress) {
@@ -212,11 +204,11 @@ class Router {
   // it is guaranteed that the second parameter is "selectedServices"
   routeToKeyword(nextKeywords) {
     console.log('in router.js routeToKeyword, nextKeywords:', nextKeywords);
-    if (!this.silent) {
-      let values = nextKeywords.split(',');
+    let values = nextKeywords.split(',');
+    console.log('in routeToKeyword values:', values);
+    this.store.commit('setSelectedKeywords', values);
 
-      console.log('in routeToKeyword values:', values);
-      this.store.commit('setSelectedKeywords', values);
+    if (!this.silent) {
       nextKeywords = 'kw ' + nextKeywords
 
       // creating next hash
@@ -230,32 +222,32 @@ class Router {
   // this is for routing to a second parameter
   // it is guaranteed that the first parameter is "address" or "keywords"
   // it inherits and passes the second parameter
-  routeToServices(nextServices) {
-    const searchType = this.store.state.searchType;
-    console.log('routeToServices is running, nextServices:', nextServices, 'searchType:', searchType);
-    if (!this.silent) {
-      // getting potential first parameters
-      let address = this.getAddressFromState();
-      if (!address) {
-        address='noaddress'
-      }
-      address = 'addr ' + address;
-      console.log('in routeToServices, address:', address);
+  // routeToServices(nextServices) {
+  //   const searchType = this.store.state.searchType;
+  //   console.log('routeToServices is running, nextServices:', nextServices, 'searchType:', searchType);
+  //   if (!this.silent) {
+  //     // getting potential first parameters
+  //     let address = this.getAddressFromState();
+  //     if (!address) {
+  //       address='noaddress'
+  //     }
+  //     address = 'addr ' + address;
+  //     console.log('in routeToServices, address:', address);
 
-      let keywords = 'kw '+ this.store.state.selectedKeywords.join(', ');
+  //     let keywords = 'kw '+ this.store.state.selectedKeywords.join(', ');
 
-      // creating next hash
-      let nextHash;
-      if (searchType === 'address') {
-        nextHash = this.makeHash(address, nextServices);
-      } else if (searchType === 'keyword') {
-        nextHash = this.makeHash(keywords, nextServices);
-      }
+  //     // creating next hash
+  //     let nextHash;
+  //     if (searchType === 'address') {
+  //       nextHash = this.makeHash(address, nextServices);
+  //     } else if (searchType === 'keyword') {
+  //       nextHash = this.makeHash(keywords, nextServices);
+  //     }
 
-      const lastHistoryState = this.history.state;
-      this.history.replaceState(lastHistoryState, null, nextHash);
-    }
-  }
+  //     const lastHistoryState = this.history.state;
+  //     this.history.replaceState(lastHistoryState, null, nextHash);
+  //   }
+  // }
 
   configForBasemap(key) {
     return this.config.map.basemaps[key];

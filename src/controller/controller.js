@@ -200,10 +200,10 @@ class Controller {
     });
   }
 
-  handleRefinePanelClick(selectedServices) {
-    console.log('handleRefinePanelClick is running, selectedServices:', selectedServices);
-    this.router.routeToServices(selectedServices)
-  }
+  // handleRefinePanelClick(selectedServices) {
+  //   console.log('handleRefinePanelClick is running, selectedServices:', selectedServices);
+  //   this.router.routeToServices(selectedServices)
+  // }
 
   goToDefaultAddress(address) {
     this.router.routeToAddress(address);
