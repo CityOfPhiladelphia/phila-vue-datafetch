@@ -64,7 +64,7 @@ class Controller {
 
   handleSearchFormSubmit(value, searchCategory) {
     const input = value
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
 
     this.store.commit('setGeocodeStatus', null);
     if (!searchCategory || searchCategory === 'address') {
@@ -111,13 +111,18 @@ class Controller {
     }
 
     // tell router
+    // if (this.config.router.enabled) {
     console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is about to call routeToAddress, input:', input);
-    if (!searchCategory || searchCategory === 'address') {
-      this.router.routeToAddress(input, searchCategory);
-    } else if (searchCategory === 'owner') {
+    if (!searchCategory || searchCategory.toLowerCase() === 'address') {
+      this.router.routeToAddress(input, 'address');
+    } else if (searchCategory.toLowerCase() === 'owner') {
       console.log('searchCategory is owner');
-      this.router.routeToOwner(input, searchCategory);
+      this.router.routeToOwner(input, 'owner');
+    } else if (searchCategory.toLowerCase() === 'keyword') {
+      console.log('searchCategory is keyword');
+      this.router.routeToKeyword(input, 'keyword');
     }
+    // }
   }
 
   handleMapClick(e) {
@@ -195,9 +200,22 @@ class Controller {
     });
   }
 
+  // handleRefinePanelClick(selectedServices) {
+  //   console.log('handleRefinePanelClick is running, selectedServices:', selectedServices);
+  //   this.router.routeToServices(selectedServices)
+  // }
+
   goToDefaultAddress(address) {
     this.router.routeToAddress(address);
   }
+
+  resetGeocode() {
+    this.dataManager.resetGeocode();
+  }
+
+  // routeToNoAddress() {
+  //   this.router.routeToNoAddress();
+  // }
 }
 
 export default Controller;
