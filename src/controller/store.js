@@ -60,6 +60,33 @@ const pvdStore = {
     return sources;
   },
 
+  createPinSources(config) {
+    console.log('createSources is running, config:', config);
+    const sourceKeys = Object.keys(config.pinSources || {});
+    const sources = sourceKeys.reduce((o, key) => {
+      let val;
+      // if the source has targets, just set it to be an empty object
+      if (config.pinSources[key].targets) {
+        val = {
+          targets: {}
+        };
+      } else {
+        val = {
+         // we have to define these here, because vue can't observe properties that
+         // are added later.
+         status: null,
+         secondaryStatus: null,
+         data: null
+       };
+      }
+
+      o[key] = val;
+
+      return o;
+    }, {});
+    return sources;
+  },
+
   createParcels(config) {
     const parcelKeys = Object.keys(config.parcels || {});
     const parcels = parcelKeys.reduce((o, key) => {
@@ -111,6 +138,7 @@ const pvdStore = {
         state.clickCoords = payload;
       },
       setSourceStatus(state, payload) {
+        console.log('setSourceStatus is running, payload:', payload, 'state', state);
         const key = payload.key;
         const status = payload.status;
 
@@ -120,8 +148,10 @@ const pvdStore = {
         if (targetId) {
           // console.log('store.js setSourceStatus, key:', key, 'status:', status, 'targetId:', targetId);
           state.sources[key].targets[targetId].status = status;
-        } else {
+        } else if (Object.keys(state.sources).includes(payload.key)) {
           state.sources[key].status = status;
+        } else {
+          state.pinSources[key].status = status;
         }
       },
       setSecondarySourceStatus(state, payload) {
@@ -149,8 +179,10 @@ const pvdStore = {
           if (state.sources[key].targets[targetId]) {
             state.sources[key].targets[targetId].data = data;
           }
-        } else {
+        } else if (Object.keys(state.sources).includes(payload.key)) {
           state.sources[key].data = data;
+        } else {
+          state.pinSources[key].data = data;
         }
       },
       setSourceDataMore(state, payload) {

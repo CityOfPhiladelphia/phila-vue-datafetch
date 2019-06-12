@@ -124,7 +124,11 @@ class DataManager {
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
     // even if the property is not in OPA and AIS
+    let doPins = false;
     if (optionalFeature) {
+      if (optionalFeature === "pins") {
+        doPins = true;
+      }
       geocodeObj = optionalFeature;
     } else {
       geocodeObj = this.store.state.geocode.data;
@@ -136,8 +140,14 @@ class DataManager {
     //   // console.log('fetch data but no geocode yet, returning');
     //   return;
     // }
+    let dataSources = {};
+    if (doPins) {
+      console.log('fetchData is running on pins')
+      dataSources = this.config.pinSources || {};
+    } else {
+      dataSources = this.config.dataSources || {};
+    }
 
-    let dataSources = this.config.dataSources || {};
     let dataSourceKeys = Object.entries(dataSources);
     // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
@@ -205,7 +215,7 @@ class DataManager {
         targets = [geocodeObj];
       }
 
-      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets);
+      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
         // get id of target
@@ -231,7 +241,9 @@ class DataManager {
         if (targetId) {
           setSourceStatusOpts.targetId = targetId;
         }
+        
         this.store.commit('setSourceStatus', setSourceStatusOpts);
+        
 
         // TODO do this for all targets
         switch(type) {
@@ -278,7 +290,7 @@ class DataManager {
 
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
-    // console.log('data-manager DID FETCH DATA:', key, targetId || '', data);
+    console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data);
     let rows;
     if (stateData) {
       rows = stateData.rows;
@@ -318,6 +330,7 @@ class DataManager {
   }
 
   resetData() {
+    console.log('resetData is running')
       const dataSources = this.config.dataSources || {};
 
       for (let dataSourceKey of Object.keys(dataSources)) {
@@ -426,7 +439,7 @@ class DataManager {
   }
 
   checkDataSourceReady(key, options, targetId) {
-    // console.log(`check data source ready: ${key} ${targetId || ''}`, options);
+    console.log(`check data source ready: ${key} ${targetId || ''}`, options);
 
     const deps = options.deps;
     // console.log('deps', deps);
@@ -437,7 +450,7 @@ class DataManager {
     // if data deps have been met
     if (depsMet) {
       // get the target obj
-      let targetObj = this.store.state.sources[key];
+      let targetObj = this.store.state.sources[key] || this.store.state.pinSources[key];
       if (targetId) {
         targetObj = targetObj.targets[targetId];
       }
