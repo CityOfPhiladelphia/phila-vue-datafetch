@@ -91,6 +91,9 @@ class Router {
         // this.dataManager.geocode(nextAddress, 'address')
                         // .then(this.didGeocode.bind(this));
       }
+    } else {
+      this.dataManager.resetData()
+      this.dataManager.resetGeocode()
     }
   }
 
