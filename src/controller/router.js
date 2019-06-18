@@ -94,6 +94,7 @@ class Router {
     } else {
       this.dataManager.resetData()
       this.dataManager.resetGeocode()
+      this.store.commit('setLastSearchMethod', 'geocode');
     }
   }
 
