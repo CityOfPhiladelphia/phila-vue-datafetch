@@ -311,7 +311,7 @@ class DataManager {
 
   didFetchData(key, status, data, targetId, targetIdFn) {
 
-    // console.log("didFetchData: ", data)
+    // console.log('didFetchData is running, data:', data)
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
     let rows;
@@ -352,6 +352,7 @@ class DataManager {
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
+    // console.log('didFetchData is calling fetchData again');
     this.fetchData();
   }
 

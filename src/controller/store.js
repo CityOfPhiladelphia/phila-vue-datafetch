@@ -40,6 +40,7 @@ const pvdStore = {
       if (config.dataSources[key].targets) {
         // console.log('in config.dataSources[key].targets:', config.dataSources[key].targets);
         val = {
+          status:null,
           targets: {}
         };
       } else {

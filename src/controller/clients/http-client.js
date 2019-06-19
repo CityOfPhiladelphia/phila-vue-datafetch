@@ -58,7 +58,7 @@ class HttpClient extends BaseClient {
         targetId = targetIdFn(feature);
         // console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
       }
-
+      // console.log('http-client.js is calling didFetchData')
       this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
     }, response => {
       // console.log('fetch json error', response);
