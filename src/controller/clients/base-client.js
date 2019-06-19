@@ -48,7 +48,7 @@ class BaseClient {
       featuresWithIds.push(feature);
     }
 
-    // console.log(dataSourceKey, features, featuresWithIds);
+    console.log(dataSourceKey, features, featuresWithIds);
     return featuresWithIds;
   }
 
@@ -85,7 +85,7 @@ class BaseClient {
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    // console.log('171111 base-client js is calling fetchData()')
+    console.log('171111 base-client js is calling fetchData()')
     this.fetchData();
   }
 }

@@ -116,7 +116,7 @@ const pvdStore = {
         // }
       },
       setSourceData(state, payload) {
-        // console.log('store setSourceData payload:', payload);
+        console.log('store setSourceData payload:', payload);
         const key = payload.key;
         const data = payload.data;
 
@@ -190,6 +190,7 @@ const pvdStore = {
         state.geocode.status = payload;
       },
       setGeocodeData(state, payload) {
+        console.log("setGeocodeData: ", payload)
         state.geocode.data = payload;
       },
       setGeocodeRelated(state, payload) {

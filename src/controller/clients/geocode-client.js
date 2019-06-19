@@ -40,6 +40,7 @@ class GeocodeClient extends BaseClient {
     }
 
     let features = data.features;
+    console.log("About to assign featureId's: ", features)
     features = this.assignFeatureIds(features, 'geocode');
 
     // TODO do some checking here
@@ -54,6 +55,7 @@ class GeocodeClient extends BaseClient {
         relatedFeatures.push(relatedFeature);
       }
     }
+    console.log("About to setGeocodeData: ", feature)
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');
