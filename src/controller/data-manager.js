@@ -558,6 +558,7 @@ class DataManager {
       this.store.commit('setLastSearchMethod', 'shape search');
       const didShapeSearch = this.didShapeSearch.bind(this);
       this.resetGeocode();
+      this.clearOwnerSearch()
       // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
     } else {
@@ -575,15 +576,15 @@ class DataManager {
     this.fetchData();
   }
 
-    clearShapeSearch() {
-      this.store.commit('setShapeSearchStatus', null);
-      this.store.commit('setShapeSearchData', null);
-      this.store.commit('setUnits', null);
-      this.store.commit('setDrawShape', null);
-      if(this.store.state.editableLayers !== null ){
-        this.store.state.editableLayers.clearLayers();
-      }
+  clearShapeSearch() {
+    this.store.commit('setShapeSearchStatus', null);
+    this.store.commit('setShapeSearchData', null);
+    this.store.commit('setUnits', null);
+    this.store.commit('setDrawShape', null);
+    if(this.store.state.editableLayers !== null ){
+      this.store.state.editableLayers.clearLayers();
     }
+  }
 
   didTryGeocode(feature) {
     // console.log('didTryGeocode is running, feature:', feature);
