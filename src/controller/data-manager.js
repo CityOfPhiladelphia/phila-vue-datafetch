@@ -476,7 +476,7 @@ class DataManager {
   }
 
   assignFeatureIds(features, dataSourceKey, topicId) {
-    console.log("assign feature Id's starting")
+    // console.log("assign feature Id's starting")
     if (!features) {
       return;
     }
@@ -489,18 +489,18 @@ class DataManager {
       const suffix = (topicId ? topicId + '-' : '') + i;
       const id = `feat-${dataSourceKey}-${suffix}`;
       const feature = features[i];
-      console.log(dataSourceKey, feature);
+      // console.log(dataSourceKey, feature);
       try {
         feature._featureId = id;
       }
       catch (e) {
-        console.warn(e);
+        // console.warn(e);
       }
-      console.log("_featureId = ", feature._featureId)
+      // console.log("_featureId = ", feature._featureId)
       featuresWithIds.push(feature);
     }
 
-    console.log(dataSourceKey, features, featuresWithIds);
+    // console.log(dataSourceKey, features, featuresWithIds);
     return featuresWithIds;
   }
 
