@@ -43,7 +43,7 @@ class BaseClient {
         feature._featureId = id;
       }
       catch (e) {
-        console.warn(e);
+        // console.warn(e);
       }
       featuresWithIds.push(feature);
     }
