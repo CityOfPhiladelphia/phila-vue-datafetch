@@ -588,9 +588,11 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    // console.log('didTryGeocode is running, feature:', feature);
+    // console.log('didTryGeocode is running, feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
 
-    if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'undefined') {
+    // if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'null') {
+    if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'null') {
+      // console.log('didTryGeocode is calling checkForShapeSearch at the top');
       //TODO set up drawShape so that after running it removes the shape, resetting the field
       // and instead shows the polygons of the parcels selected on the map
       //probably need some way to clear that too though for owner, click and address searches.
@@ -599,21 +601,26 @@ class DataManager {
 
     } else if (this.store.state.geocode.status === 'success') {
 
-      // console.log('didTryGeocode is running, success');
+      // console.log('didTryGeocode is running, this.store.state.geocode.status === success');
 
       this.resetData();
       this.didGeocode(feature);
-      this.store.commit('setLastSearchMethod', 'geocode');
+      if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
+        this.store.commit('setLastSearchMethod', 'geocode');
+      }
       this.clearOwnerSearch()
       this.clearShapeSearch()
     } else if (this.store.state.geocode.status === null) {
-      // console.log('didTryGeocode is running, feature:', feature);
+      // console.log('didTryGeocode is running, else if this.store.state.geocode.state === null, feature:', feature);
       this.store.commit('setLastSearchMethod', 'owner search');
       this.clearShapeSearch()
       const input = this.store.state.geocode.input;
       this.resetGeocode();
       return this.clients.shapeSearch.fetch(input);
-    } else if (this.store.state.geocode.input != null) {
+
+    // this is where the error is
+    } else if (this.store.state.geocode.input !== null) {
+      // console.log('didTryGeocode is running, else if this.store.state.geocode.input !== null, this.store.state.geocode.input:', this.store.state.geocode.input)
       //Owner search
       this.store.commit('setLastSearchMethod', 'owner search');
 
@@ -631,10 +638,14 @@ class DataManager {
       // Fail on owner search here takes you to the condo search process with the input
       return this.clients.ownerSearch.fetch(input).then( didOwnerSearch, () => condoSearch(input));
 
+    // this is where it should be
     } else if (typeof feature === 'undefined') {
+      // console.log('else if feature undefined is running')
       // This should be the default failure for geocode and shapeSearches that may have a condo
       const input =  this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
+
+      // console.log('didTryGeocode at the bottom is calling checkForShapeSearch');
 
       this.checkForShapeSearch(input)
 
