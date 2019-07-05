@@ -65,6 +65,7 @@ class GeocodeClient extends BaseClient {
   error(error) {
     const store = this.store;
     store.commit('setGeocodeStatus', 'error');
+    this.store.commit('setGeocodeInput', null);
     store.commit('setGeocodeData', null);
     store.commit('setGeocodeRelated', null);
   }
