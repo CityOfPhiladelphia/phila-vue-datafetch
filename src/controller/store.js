@@ -211,7 +211,9 @@ const pvdStore = {
         state.shapeSearch.data = payload;
       },
       setShapeSearchDataPush(state, payload) {
-        state.shapeSearch.data.rows = state.shapeSearch.data.rows.concat(payload)
+        let objIndex = parseInt(payload.objIndex)
+        delete payload.objIndex
+        state.shapeSearch.data.rows.splice(objIndex + 1, 0, ...payload);
       },
       setUnits(state, payload) {
         // console.log("setShapeSearchUnits: ", payload)
