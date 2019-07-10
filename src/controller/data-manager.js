@@ -54,23 +54,24 @@ class DataManager {
     var state = this.store.state;
     let input = [];
     if (state.lastSearchMethod === 'owner search') {
-        input = state.ownerSearch.data.filter(object => {
-                     return object._featureId === state.activeFeature.featureId
-                    });
-      } else if (state.lastSearchMethod === 'shape search') {
-        input = state.shapeSearch.data.rows.filter(object => {
-                     return object._featureId === state.activeFeature.featureId
-                     });
+      input = state.ownerSearch.data.filter(object => {
+        return object._featureId === state.activeFeature.featureId
+      });
+    } else if (state.lastSearchMethod === 'shape search') {
+      input = state.shapeSearch.data.rows.filter(object => {
+       return object._featureId === state.activeFeature.featureId
+       });
+    } else {
+      let data;
+      if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
+        let result = state.geocode.related.filter(object => object._featureId === state.activeFeature.featureId);
+        data = result[0]
       } else {
-        let data;
-        if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
-          let result = state.geocode.related.filter(object => object._featureId === state.activeFeature.featureId);
-          data = result[0]
-        } else {
-          data = state.geocode.data;
-        }
-        input.push(data);
+        data = state.geocode.data;
       }
+      input.push(data);
+    }
+    console.log('fetchRowData is running, input:', input);
     this.clients.activeSearch.fetch(input[0]);
   }
 
@@ -528,7 +529,7 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input) {
-    // console.log('data-manager geocode is running, input:', input, "this", this);
+    console.log('data-manager geocode is running, input:', input, 'this', this);
     const didTryGeocode = this.didTryGeocode.bind(this);
     const test = this.clients.geocode.fetch(input).then(didTryGeocode);
   }
@@ -563,8 +564,11 @@ class DataManager {
       // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
     } else {
-      const input = this.store.state.parcels.pwd.properties.ADDRESS;
-      // console.log("Not shape search, input: ", input)
+      let input;
+      if (this.store.state.parcels.pwd) {
+        input = this.store.state.parcels.pwd.properties.ADDRESS;
+      }
+      console.log("Not shape search, input: ", input)
       this.clearShapeSearch()
       const didCondoSearch = this.didCondoSearch.bind(this)
       this.clients.condoSearch.fetch(input).then(didCondoSearch)
@@ -573,7 +577,7 @@ class DataManager {
   }
 
   didShapeSearch() {
-    // console.log("shape search fetchData")
+    console.log('didShapeSearch is running')
     this.fetchData();
   }
 
@@ -588,21 +592,14 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    // console.log('didTryGeocode is running, feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
+    console.log('didTryGeocode is running, feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
 
-    // if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'null') {
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'null') {
       // console.log('didTryGeocode is calling checkForShapeSearch at the top');
-      //TODO set up drawShape so that after running it removes the shape, resetting the field
-      // and instead shows the polygons of the parcels selected on the map
-      //probably need some way to clear that too though for owner, click and address searches.
-
       this.checkForShapeSearch()
 
     } else if (this.store.state.geocode.status === 'success') {
-
       // console.log('didTryGeocode is running, this.store.state.geocode.status === success');
-
       this.resetData();
       this.didGeocode(feature);
       if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
@@ -610,17 +607,10 @@ class DataManager {
       }
       this.clearOwnerSearch()
       this.clearShapeSearch()
-    } else if (this.store.state.geocode.status === null) {
-      // console.log('didTryGeocode is running, else if this.store.state.geocode.state === null, feature:', feature);
-      this.store.commit('setLastSearchMethod', 'owner search');
-      this.clearShapeSearch()
-      const input = this.store.state.geocode.input;
-      this.resetGeocode();
-      return this.clients.shapeSearch.fetch(input);
 
-    // this is where the error is
-    } else if (this.store.state.geocode.input !== null) {
-      // console.log('didTryGeocode is running, else if this.store.state.geocode.input !== null, this.store.state.geocode.input:', this.store.state.geocode.input)
+    // owner search
+    } else if (this.store.state.geocode.status === "error" && this.store.state.geocode.input !== null) {
+      console.log('didTryGeocode is running, else if this.store.state.geocode.input !== null, this.store.state.geocode.input:', this.store.state.geocode.input)
       //Owner search
       this.store.commit('setLastSearchMethod', 'owner search');
 
@@ -640,7 +630,7 @@ class DataManager {
 
     // this is where it should be
     } else if (typeof feature === 'undefined') {
-      // console.log('else if feature undefined is running')
+      console.log('else if feature undefined is running')
       // This should be the default failure for geocode and shapeSearches that may have a condo
       const input =  this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
@@ -650,11 +640,13 @@ class DataManager {
       this.checkForShapeSearch(input)
 
       //Run condoSearch to find and handle condo buildings and add to the results
-    } else { console.log("Unknown misc didTryGeocode failure") }
+    } else {
+      console.log('Unknown misc didTryGeocode failure')
+    }
   }
 
   didGeocode(feature) {
-    // console.log("did Geocode is running", this)
+    console.log("did Geocode is running", this)
     this.controller.router.didGeocode();
     if (this.store.state.map) {
       this.store.commit('setMapZoom', 19);
@@ -717,7 +709,7 @@ class DataManager {
 
   getParcelsByShape(latlng, parcelLayer) {
 
-    // console.log("Testing DrawnShape Geocoder", latlng._latlngs)
+    console.log('getParcelsByShape is running', latlng._latlngs)
 
     const latLng = L.polygon(latlng._latlngs, latlng.options);
     const url = this.config.map.featureLayers.pwdParcels.url;
@@ -826,7 +818,7 @@ class DataManager {
 
   didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {
 
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('didGetParcelsByShape is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
 
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -839,18 +831,23 @@ class DataManager {
     if (error) {
       if (configForParcelLayer.clearStateOnError) {
       }
-      return;}
-      if (!featureCollection) {return;}
+      return;
+    }
+    if (!featureCollection) {return;}
 
-      const features = featureCollection.features;
+    const features = featureCollection.features;
 
-      if (features.length === 0) { return;}
-      // at this point there is definitely a feature or features - put it in state
-      this.setParcelsInState(parcelLayer, features);
-      this.geocode(features);
-
-      // this.fetchData();
+    if (features.length === 0) {return;}
+    // at this point there is definitely a feature or features - put it in state
+    this.setParcelsInState(parcelLayer, features);
+    // this.geocode(features);
+    this.store.commit('setLastSearchMethod', 'shape search');
+    this.clearShapeSearch()
+    this.resetGeocode();
+    const fetchData = this.fetchData.bind(this);
+    this.clients.shapeSearch.fetch(features).then(fetchData);
   }
+
   didGetParcelsById(error, featureCollection, response, parcelLayer, fetch) {
 
     // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);

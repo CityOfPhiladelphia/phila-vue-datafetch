@@ -6,7 +6,7 @@ import BaseClient from './base-client';
 class GeocodeClient extends BaseClient {
   // fetch(input, category) {
   fetch(input) {
-    // console.log('geocode client fetch', input);
+    console.log('geocode client fetch', input);
 
     const store = this.store;
     let geocodeConfig;
@@ -65,7 +65,7 @@ class GeocodeClient extends BaseClient {
   error(error) {
     const store = this.store;
     store.commit('setGeocodeStatus', 'error');
-    this.store.commit('setGeocodeInput', null);
+    // store.commit('setGeocodeInput', null);
     store.commit('setGeocodeData', null);
     store.commit('setGeocodeRelated', null);
   }

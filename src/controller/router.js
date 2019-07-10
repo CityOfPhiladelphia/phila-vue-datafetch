@@ -79,7 +79,7 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    // console.log('Router.routeToAddress', nextAddress);
+    console.log('Router.routeToAddress', nextAddress, 'searchCategory:', searchCategory);
     if (nextAddress) {
       // check against current address
       const prevAddress = this.getAddressFromState();
@@ -128,7 +128,7 @@ class Router {
     const geocodeData = this.store.state.geocode.data;
 
     // make hash if there is geocode data
-    // console.log('Router.didGeocode running - geocodeData:', geocodeData);
+    console.log('Router.didGeocode running - geocodeData:', geocodeData);
     if (geocodeData) {
       let address;
 

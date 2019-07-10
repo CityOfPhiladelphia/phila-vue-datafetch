@@ -1,12 +1,12 @@
 import axios from 'axios';
 import BaseClient from './base-client';
-require('lodash');
+// require('lodash');
 
 
 class ShapeSearchClient extends BaseClient {
 
   evaluateParams(feature, dataSource) {
-    // console.log('http-client evaluateParams is running');
+    console.log('shape-search-client evaluateParams is running');
     const params = {};
     if (!dataSource.options.params) { return params };
     const paramEntries = Object.entries(dataSource.options.params);
@@ -27,7 +27,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   evaluateDataForUnits(data) {
-    // console.log("evaluateDataForUnits data: ", data);
+    console.log('shape-search-client evaluateDataForUnits data: ', data);
     // console.log("evaluateDataForUnits dataRows: ",dataRows);
     let groupedData = _.groupBy(data.rows, a => a.pwd_parcel_id);
     // console.log("evaluateDataForUnits groupedData: ", groupedData);
@@ -64,7 +64,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    // console.log('shapeSearch client fetch', input);
+    console.log('shape-search-client fetch is running, input:', input);
     const data =  input.map(a => a.properties.PARCELID)
     // console.log('shapeSearch DATA', data);
 

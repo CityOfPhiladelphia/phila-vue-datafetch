@@ -26,7 +26,7 @@ class ActiveSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    // console.log("fetch() input: ", input)
+    console.log('active-search-client fetch is running, input:', input);
 
     let activeSearches = this.config.activeSearch || {};
     let activeSearchKeys = Object.entries(activeSearches);
