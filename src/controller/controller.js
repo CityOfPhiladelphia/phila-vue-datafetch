@@ -40,7 +40,7 @@ class Controller {
   }
 
   test() {
-    console.log('controller test is firing');
+    //console.log('controller test is firing');
   }
 
   getMoreRecords(dataSource, highestPageRetrieved) {
@@ -58,7 +58,7 @@ class Controller {
 
   handleSearchFormSubmit(value, searchCategory) {
     const input = value
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    //console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
@@ -105,7 +105,7 @@ class Controller {
     // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
     this.dataManager.getParcelsByLatLng(latLng, parcels);
   }
-  geocodeDrawnShape(state) {
+  getParcelsByDrawnShape(state) {
     const shape = this.store.state.drawShape;
     const parcels = [];
     this.dataManager.getParcelsByShape(shape, parcels);
