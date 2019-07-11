@@ -71,7 +71,7 @@ class DataManager {
       }
       input.push(data);
     }
-    console.log('fetchRowData is running, input:', input);
+    //console.log('fetchRowData is running, input:', input);
     this.clients.activeSearch.fetch(input[0]);
   }
 
@@ -101,7 +101,7 @@ class DataManager {
   }
 
   didFetchMoreData(key, secondaryStatus, data) {
-    console.log('INCREMENT - DID FETCH More DATA:', key, secondaryStatus, data);
+    //console.log('INCREMENT - DID FETCH More DATA:', key, secondaryStatus, data);
 
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
@@ -124,7 +124,7 @@ class DataManager {
       secondaryStatus
     };
 
-    console.log('nextPage', nextPage, 'setSourceDataOpts', setSourceDataOpts);
+    //console.log('nextPage', nextPage, 'setSourceDataOpts', setSourceDataOpts);
     // commit
     this.store.commit('setSourceDataMore', setSourceDataOpts);
     this.store.commit('setSecondarySourceStatus', setSecondarySourceStatusOpts);
