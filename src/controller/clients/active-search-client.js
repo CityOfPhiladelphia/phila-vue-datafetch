@@ -35,12 +35,14 @@ class ActiveSearchClient extends BaseClient {
       const state = this.store.state;
       let data = [];
 
-      if(input.properties) {
-        data = input.properties.opa_account_num;
-      } else if (input.parcel_number) {
-        data = input.parcel_number
-      } else {
+      if (input) {
+        if(input.properties) {
+          data = input.properties.opa_account_num;
+        } else if (input.parcel_number) {
+          data = input.parcel_number
+        } else {
           data = input.map(a => a.parcel_number)
+        }
       }
 
       const store = this.store;
