@@ -79,7 +79,7 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    console.log('Router.routeToAddress', nextAddress, 'searchCategory:', searchCategory);
+    //console.log('Router.routeToAddress', nextAddress, 'searchCategory:', searchCategory);
     if (nextAddress) {
       // check against current address
       const prevAddress = this.getAddressFromState();
