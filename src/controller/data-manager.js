@@ -762,7 +762,7 @@ class DataManager {
       let distances = [];
       let areas = [];
       for (let coordsSet of coords) {
-        console.log('coordsSet:', coordsSet);
+        //console.log('coordsSet:', coordsSet);
         const turfPolygon = polygon(coordsSet);
         distances.push(this.getDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
         areas.push(area(turfPolygon) * 10.7639);
