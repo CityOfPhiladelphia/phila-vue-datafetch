@@ -529,7 +529,7 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input) {
-    console.log('data-manager geocode is running, input:', input, 'this', this);
+    //console.log('data-manager geocode is running, input:', input, 'this', this);
     const didTryGeocode = this.didTryGeocode.bind(this);
     const test = this.clients.geocode.fetch(input).then(didTryGeocode);
   }
@@ -568,7 +568,7 @@ class DataManager {
       if (this.store.state.parcels.pwd) {
         input = this.store.state.parcels.pwd.properties.ADDRESS;
       }
-      console.log("Not shape search, input: ", input)
+      //console.log("Not shape search, input: ", input)
       this.clearShapeSearch()
       const didCondoSearch = this.didCondoSearch.bind(this)
       this.clients.condoSearch.fetch(input).then(didCondoSearch)
@@ -577,7 +577,7 @@ class DataManager {
   }
 
   didShapeSearch() {
-    console.log('didShapeSearch is running')
+    //console.log('didShapeSearch is running')
     this.fetchData();
   }
 
@@ -592,7 +592,7 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    console.log('didTryGeocode is running, feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
+    //console.log('didTryGeocode is running, feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
 
     if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'null') {
       // console.log('didTryGeocode is calling checkForShapeSearch at the top');
@@ -610,7 +610,7 @@ class DataManager {
 
     // owner search
     } else if (this.store.state.geocode.status === "error" && this.store.state.geocode.input !== null) {
-      console.log('didTryGeocode is running, else if this.store.state.geocode.input !== null, this.store.state.geocode.input:', this.store.state.geocode.input)
+      //console.log('didTryGeocode is running, else if this.store.state.geocode.input !== null, this.store.state.geocode.input:', this.store.state.geocode.input)
       //Owner search
       this.store.commit('setLastSearchMethod', 'owner search');
 
@@ -630,7 +630,7 @@ class DataManager {
 
     // this is where it should be
     } else if (typeof feature === 'undefined') {
-      console.log('else if feature undefined is running')
+      //console.log('else if feature undefined is running')
       // This should be the default failure for geocode and shapeSearches that may have a condo
       const input =  this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
@@ -641,12 +641,12 @@ class DataManager {
 
       //Run condoSearch to find and handle condo buildings and add to the results
     } else {
-      console.log('Unknown misc didTryGeocode failure')
+      //console.log('Unknown misc didTryGeocode failure')
     }
   }
 
   didGeocode(feature) {
-    console.log("did Geocode is running", this)
+    //console.log("did Geocode is running", this)
     this.controller.router.didGeocode();
     if (this.store.state.map) {
       this.store.commit('setMapZoom', 19);
@@ -709,7 +709,7 @@ class DataManager {
 
   getParcelsByShape(latlng, parcelLayer) {
 
-    console.log('getParcelsByShape is running', latlng._latlngs)
+    //console.log('getParcelsByShape is running', latlng._latlngs)
 
     const latLng = L.polygon(latlng._latlngs, latlng.options);
     const url = this.config.map.featureLayers.pwdParcels.url;
@@ -818,7 +818,7 @@ class DataManager {
 
   didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {
 
-    console.log('didGetParcelsByShape is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    //console.log('didGetParcelsByShape is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
 
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
