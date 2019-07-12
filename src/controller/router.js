@@ -176,7 +176,7 @@ class Router {
   routeToAddress(nextAddress, searchCategory) {
     console.log('Router.routeToAddress, nextAddress:', nextAddress);
     if (nextAddress) {
-      nextAddress = nextAddress.replace('addr ', '');
+      // nextAddress = nextAddress.replace('addr ', '');
       // check against current address
       const prevAddress = this.getAddressFromState();
 
