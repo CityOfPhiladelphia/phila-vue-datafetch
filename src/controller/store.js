@@ -204,9 +204,15 @@ const pvdStore = {
       setOwnerSearchData(state, payload) {
         state.ownerSearch.data = payload;
       },
+      setOwnerSearchInput(state, payload) {
+        state.ownerSearch.input = payload;
+      },
       setShapeSearchStatus(state, payload) {
         //console.log('setShapeSearchStatus is running, payload:', payload);
         state.shapeSearch.status = payload;
+      },
+      setShapeSearchInput(state, payload) {
+        state.shapeSearch.input = payload;
       },
       setShapeSearchData(state, payload) {
         state.shapeSearch.data = payload;

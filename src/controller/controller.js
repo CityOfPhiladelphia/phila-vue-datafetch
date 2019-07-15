@@ -12,6 +12,7 @@ class Controller {
   constructor(opts) {
     const store = this.store = opts.store;
     const config = this.config = opts.config;
+    const vueRouter = this.vueRouter = opts.router;
     // const eventBus = this.eventBus = opts.eventBus;
     this.history = window.history;
 
@@ -36,11 +37,8 @@ class Controller {
 
   appDidLoad() {
     // route once on load
+    console.log('controller appDidLoad is running')
     this.router.hashChanged();
-  }
-
-  test() {
-    //console.log('controller test is firing');
   }
 
   getMoreRecords(dataSource, highestPageRetrieved) {
@@ -109,6 +107,9 @@ class Controller {
     const shape = this.store.state.drawShape;
     const parcels = [];
     this.dataManager.getParcelsByShape(shape, parcels);
+  }
+  getParcelsByPoints(points) {
+    this.dataManager.getParcelsByShape(points);
   }
   geocodeOwnerSearch(state) {
     // console.log("ownerSearch data:", this.store.state.ownerSearch.data);

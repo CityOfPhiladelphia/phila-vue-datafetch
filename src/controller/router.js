@@ -7,6 +7,7 @@ class Router {
     this.controller = opts.controller;
     this.dataManager = opts.dataManager;
     this.history = window.history;
+    this.vueRouter = opts.router;
 
     // check if the router should be silent (i.e. not update the url or listen
     // for hash changes)
@@ -44,6 +45,8 @@ class Router {
     const location = window.location;
     const hash = location.hash;
 
+    console.log('hashChanged is running, hash:', hash);
+
     // parse url
     const comps = parseUrl(location.href);
     const query = comps.query;
@@ -79,7 +82,7 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    //console.log('Router.routeToAddress', nextAddress, 'searchCategory:', searchCategory);
+    console.log('Router.routeToAddress, this.vueRouter:', this.vueRouter, 'nextAddress:', nextAddress, 'searchCategory:', searchCategory);
     if (nextAddress) {
       // check against current address
       const prevAddress = this.getAddressFromState();
@@ -124,11 +127,35 @@ class Router {
     this.store.commit('setDidToggleModal', selectedModal);
   }
 
+  didOwnerSearch() {
+    console.log('Router.didOwnerSearch is running, this.vueRouter:', this.vueRouter);
+    const ownerInput = this.store.state.ownerSearch.input;
+    this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': ownerInput } }});
+  }
+
+  didShapeSearch() {
+    const shapeInput = this.store.state.shapeSearch.input;
+    console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
+    // only run this if the shape is in the store (which it will not be if it is created from the route)
+    if (shapeInput) {
+      let shape = '[[';
+      var i;
+      for (i=0; i < shapeInput.length - 1; i++) {
+        shape += shapeInput[i].lat.toFixed(5) + ',' + shapeInput[i].lng.toFixed(5) + '],[';
+      }
+      shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]'
+
+      console.log('shape:', shape)
+
+      this.vueRouter.push({ query: {shape} });
+    }
+  }
+
   didGeocode() {
     const geocodeData = this.store.state.geocode.data;
 
     // make hash if there is geocode data
-    //console.log('Router.didGeocode running - geocodeData:', geocodeData);
+    console.log('Router.didGeocode, this.vueRouter:', this.vueRouter, 'geocodeData:', geocodeData, 'this.$route:', this.$route);
     if (geocodeData) {
       let address;
 
@@ -142,17 +169,18 @@ class Router {
       // want this to happen all the time, right?
       if (!this.silent) {
         // push state
-        const nextHistoryState = {
-          geocode: geocodeData
-        };
-        const nextHash = this.makeHash(address);
-        // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
-        this.history.pushState(nextHistoryState, null, nextHash);
+        this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address } }});
+        // const nextHistoryState = {
+        //   geocode: geocodeData
+        // };
+        // const nextHash = this.makeHash(address);
+        // // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
+        // this.history.pushState(nextHistoryState, null, nextHash);
       }
     } else {
       // wipe out hash if a geocode fails
       if (!this.silent) {
-        this.history.pushState(null, null, '#');
+        // this.history.pushState(null, null, '#');
       }
     }
   }

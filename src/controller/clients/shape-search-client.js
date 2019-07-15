@@ -73,6 +73,7 @@ class ShapeSearchClient extends BaseClient {
     const url = shapeSearchConfig.url;
 
     let params = this.evaluateParams(data, shapeSearchConfig);
+    console.log('shape-search-client fetch params:', params);
 
     const success = this.success.bind(this);
     const error = this.error.bind(this);
@@ -83,7 +84,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   success(response) {
-    // console.log("success respose: ", response.data);
+    console.log('shapeSearch success response.data: ', response.data);
 
     const store = this.store;
     let data = response.data;
@@ -102,7 +103,7 @@ class ShapeSearchClient extends BaseClient {
     // store.commit('setShapeSearchUnits', units);
     store.commit('setShapeSearchData', data);
     store.commit('setShapeSearchStatus', 'success');
-    store.commit('setDrawShape', null)
+    store.commit('setDrawShape', null);
 
     return features;
   }

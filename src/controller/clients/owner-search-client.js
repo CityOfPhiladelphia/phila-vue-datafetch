@@ -27,11 +27,12 @@ class OwnerSearchClient extends BaseClient {
   }
 
   success(response) {
-    // console.log('owner search success', response.data);
+    console.log('owner search success', response.data);
 
     const store = this.store;
     const data = response.data;
     const url = response.config.url;
+    const query = response.data.normalized[0];
     // console.log(url)
 
     // TODO handle multiple results
@@ -60,6 +61,7 @@ class OwnerSearchClient extends BaseClient {
     store.commit('setShapeSearchStatus', null);
     store.commit('setShapeSearchData', null);
     store.commit('setOwnerSearchData', features);
+    store.commit('setOwnerSearchInput', query);
 
     // store.commit('setOwnerSearchData', data.features);
     // store.commit('setOwnerSearchRelated', relatedFeatures);
