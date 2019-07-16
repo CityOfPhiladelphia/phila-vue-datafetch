@@ -169,7 +169,11 @@ class Router {
       // want this to happen all the time, right?
       if (!this.silent) {
         // push state
-        this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address } }});
+        if (this.store.state.bufferMode) {
+          this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address } }});
+        } else {
+          this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address } }});
+        }
         // const nextHistoryState = {
         //   geocode: geocodeData
         // };

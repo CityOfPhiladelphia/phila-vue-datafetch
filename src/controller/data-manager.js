@@ -5,6 +5,13 @@ and storing them in state.
 The router should own an instance of DataManager and make calls to it based on
 navigation events.
 */
+
+import proj4 from 'proj4';
+import axios from 'axios';
+import explode from '@turf/explode';
+import nearest from '@turf/nearest-point';
+
+
 import * as L from 'leaflet';
 import { query as Query } from 'esri-leaflet';
 // import * as turf from '@turf/turf';
@@ -15,6 +22,7 @@ import {
   GeocodeClient,
   OwnerSearchClient,
   ShapeSearchClient,
+  BufferSearchClient,
   ActiveSearchClient,
   CondoSearchClient,
   HttpClient,
@@ -39,6 +47,7 @@ class DataManager {
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
+    this.clients.bufferSearch = new BufferSearchClient(clientOpts);
     this.clients.activeSearch = new ActiveSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
@@ -58,7 +67,7 @@ class DataManager {
       input = state.ownerSearch.data.filter(object => {
         return object._featureId === state.activeFeature.featureId
       });
-    } else if (state.lastSearchMethod === 'shape search') {
+    } else if (state.lastSearchMethod === 'shape search' || state.lastSearchMethod === 'buffer search') {
       input = state.shapeSearch.data.rows.filter(object => {
        return object._featureId === state.activeFeature.featureId
        });
@@ -199,9 +208,10 @@ class DataManager {
   fetchData() {
     // console.log('\nFETCH DATA');
     // console.log('-----------');
+    let geocodeObj;
     if( this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
 
-      const geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
+      geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
       const ownerSearchObj = geocodeObj;
 
       if(this.store.state.shapeSearch.data != null) {
@@ -211,7 +221,7 @@ class DataManager {
         const shapeSearchObj = this.store.state.condoUnits.units[result[0].pwd_parcel_id];
       }
     } else {
-        const geocodeObj = this.store.state.geocode.data;
+        geocodeObj = this.store.state.geocode.data;
         const ownerSearchObj = this.store.state.ownerSearch.data;
         if(this.store.state.shapeSearch.data) {const shapeSearchObj = this.store.state.shapeSearch.data.rows;}
     }
@@ -532,7 +542,11 @@ class DataManager {
   geocode(input) {
     //console.log('data-manager geocode is running, input:', input, 'this', this);
     const didTryGeocode = this.didTryGeocode.bind(this);
-    const test = this.clients.geocode.fetch(input).then(didTryGeocode);
+    // if (this.store.state.bufferMode) {
+    //   const test = this.clients.bufferSearch.fetch(input).then(didTryGeocode);
+    // } else {
+      const test = this.clients.geocode.fetch(input).then(didTryGeocode);
+    // }
   }
 
   didOwnerSearch() {
@@ -657,18 +671,26 @@ class DataManager {
       this.store.commit('setMapCenter', feature.geometry.coordinates);
     }
 
-    if (feature) {
-      if (feature.street_address) {
-        return;
-      } else if (feature.properties.street_address) {
+    if (this.store.state.bufferMode) {
+      const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
+      this.getParcelsByBuffer(latLng, []);
+    } else {
+      if (feature) {
+        if (feature.street_address) {
+          return;
+        } else if (feature.properties.street_address) {
+          console.log('didGeocode calling fetchData');
+          this.fetchData();
+        }
+        if(feature.geometry.coordinates) {
+          this.store.commit('setMapCenter', feature.geometry.coordinates);
+        }
+      } else {
+        console.log('didGeocode calling fetchData');
         this.fetchData();
       }
-      if(feature.geometry.coordinates) {
-        this.store.commit('setMapCenter', feature.geometry.coordinates);
-      }
-    } else {
-      this.fetchData();
     }
+
 
     if (this.store.state.lastSearchMethod === 'geocode') {
       const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
@@ -683,12 +705,6 @@ class DataManager {
     const parcelQuery = Query({ url });
     parcelQuery.where(geocodeField + " IN (" + id + ")");
     let reponse = [];
-    // parcelQuery.run((function(error, featureCollection, response) {
-    //     console.log('171111 getParcelsById parcelQuery ran, response:', response);
-    //     this.didGetParcels(error, featureCollection, response, parcelLayer);
-    //   }).bind(this)
-    // )
-
     return parcelQuery.run((function(error, featureCollection, response) {
         this.didGetParcelsById(error, featureCollection, response, parcelLayer, fetch);
       }).bind(this)
@@ -724,6 +740,150 @@ class DataManager {
       }).bind(this)
     );
 
+  }
+
+  getParcelsByBuffer(latlng, parcelLayer) {
+    console.log('getParcelsByBuffer is running, latlng:', latlng);
+    const projection4326 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+    const projection2272 = "+proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs";
+
+    const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
+    const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
+    const calculateDistance = true;
+    const distances = 320;
+
+    // params.geometries = `[${feature.geometry.coordinates.join(', ')}]`
+    // TODO get some of these values from map, etc.
+    const coords = [latlng.lng, latlng.lat];
+    const coords2272 = proj4(projection4326, projection2272, [coords[0], coords[1]]);
+    // console.log('coords:', coords, 'coords2272:', coords2272);
+    const params = {
+      // geometries: feature => '[' + feature.geometry.coordinates[0] + ', ' + feature.geometry.coordinates[1] + ']',
+      geometries: `[${coords2272.join(', ')}]`,
+      inSR: 2272,
+      outSR: 4326,
+      bufferSR: 2272,
+      distances: distances, //|| 0.0028,
+      // inSR: 4326,
+      // outSR: 4326,
+      // bufferSR: 4326,
+      // distances: distances, //|| 0.0028,
+      unionResults: true,
+      geodesic: false,
+      f: 'json',
+    };
+    // console.log('esri nearby params', params);
+
+    // get buffer polygon
+    const bufferUrl = geometryServerUrl.replace(/\/$/, '') + '/buffer';
+    // console.log('bufferUrl:', bufferUrl);
+
+    axios.get(bufferUrl, { params }).then(response => {
+      const data = response.data;
+      // console.log('axios in esri fetchNearby is running, data:', data);
+
+      // console.log('did get esri nearby buffer', data);
+
+      const geoms = data.geometries || [];
+      const geom = geoms[0] || {};
+      const rings = geom.rings || [];
+      const xyCoords = rings[0];
+
+      // check for xy coords
+      if (!xyCoords) {
+        // we can't do anything without coords, so bail out
+        // this.dataManager.didFetchData(dataSourceKey, 'error');
+        return;
+      }
+
+      const latLngCoords = xyCoords.map(xyCoord => [...xyCoord].reverse());
+
+      // get nearby features using buffer
+      const buffer = L.polygon(latLngCoords);
+      const map = this.store.state.map.map;
+
+      // DEBUG
+      // buffer.addTo(map);
+
+      //this is a space holder
+      const parameters = {};
+      this.fetchBySpatialQuery(parcelUrl,
+                               'within',
+                               buffer,
+                               parameters,
+                               calculateDistance ? coords : null,
+                               // options,
+                              );
+    }, response => {
+        console.log('getParcelsByBuffer error:', response);
+
+        // this.dataManager.didFetchData(dataSourceKey, 'error');
+    });
+  }
+
+  fetchBySpatialQuery(url, relationship, targetGeom, parameters = {}, calculateDistancePt, options = {}) {
+    console.log('fetch esri spatial query, url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    const parcelLayer = []
+
+    let query;
+    if (relationship === 'where') {
+      query = Query({ url })[relationship](parameters.targetField + "='" + parameters.sourceValue + "'");
+    } else {
+      query = Query({ url })[relationship](targetGeom);
+    }
+
+    // apply options by chaining esri leaflet option methods
+    const optionsKeys = Object.keys(options) || [];
+    query = optionsKeys.reduce((acc, optionsKey) => {
+      const optionsVal = options[optionsKey];
+      let optionsMethod;
+
+      try {
+        acc = acc[optionsKey](optionsVal);
+      } catch (e) {
+        throw new Error(`esri-leaflet query task does not support option:
+                         ${optionsKey}`);
+      }
+
+      return acc;
+    }, query);
+
+    query.run((error, featureCollection, response) => {
+      // console.log('did get esri spatial query', response, error);
+
+      let features = (featureCollection || {}).features;
+      const status = error ? 'error' : 'success';
+
+      // calculate distance
+      if (calculateDistancePt) {
+        const from = point(calculateDistancePt);
+
+        features = features.map(feature => {
+          const featureCoords = feature.geometry.coordinates;
+          // console.log('featureCoords:', featureCoords);
+          let dist;
+          if (Array.isArray(featureCoords[0])) {
+            let polygonInstance = polygon([featureCoords[0]]);
+            const vertices = explode(polygonInstance)
+            const closestVertex = nearest(from, vertices);
+            dist = distance(from, closestVertex, { units: 'miles' })
+          } else {
+            const to = point(featureCoords);
+            dist = distance(from, to, { units: 'miles' });
+          }
+
+          // TODO make distance units an option. for now, just hard code to ft.
+          const distFeet = parseInt(dist * 5280);
+          // console.log('distFeet:', distFeet);
+
+          feature._distance = distFeet;
+
+          return feature;
+        })
+      }
+      this.didGetParcelsByBuffer(error, featureCollection, response, parcelLayer, fetch);
+      // this.dataManager.didFetchData(dataSourceKey, status, features);
+    });
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
@@ -810,12 +970,42 @@ class DataManager {
       // console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
-      if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt') {
+      if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt' && this.store.state.bufferMode === false) {
         // console.log('180405 data-manager.js - didGetParcels - is calling fetchData() on feature w address', feature.properties.street_address);
         this.fetchData();
       }
     }
     callback()
+  }
+
+  didGetParcelsByBuffer(error, featureCollection, response, parcelLayer, fetch) {
+    console.log('didGetParcelsByBuffer, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer:', parcelLayer, 'fetch:', fetch)
+
+    const configForParcelLayer = this.config.parcels.pwd;
+    const geocodeField = configForParcelLayer.geocodeField;
+    const otherParcelLayers = Object.keys(this.config.parcels || {});
+    otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
+
+    // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+
+    if (error) {
+      if (configForParcelLayer.clearStateOnError) {
+      }
+      return;
+    }
+    if (!featureCollection) {return;}
+
+    const features = featureCollection.features;
+
+    if (features.length === 0) {return;}
+    // at this point there is definitely a feature or features - put it in state
+    this.setParcelsInState(parcelLayer, features);
+    // this.geocode(features);
+    this.store.commit('setLastSearchMethod', 'buffer search');
+    this.resetGeocode();
+    this.store.state.bufferMode = false;
+    const didShapeSearch = this.didShapeSearch.bind(this);
+    this.clients.shapeSearch.fetch(features).then(didShapeSearch);
   }
 
   didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {
