@@ -601,6 +601,7 @@ class DataManager {
   clearShapeSearch() {
     console.log('clearShapeSearch is running');
     this.store.commit('setShapeSearchStatus', null);
+    this.store.commit('setShapeSearchInput', null);
     this.store.commit('setShapeSearchData', null);
     this.store.commit('setUnits', null);
     // this.store.commit('setDrawShape', null);
