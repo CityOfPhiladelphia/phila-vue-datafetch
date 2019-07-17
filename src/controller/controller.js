@@ -95,7 +95,7 @@ class Controller {
       if (e.originalEvent.keyCode === 13) {
         return;
       }
-      this.store.commit('setLastSearchMethod', 'reverseGeocode');
+      // this.store.commit('setLastSearchMethod', 'reverseGeocode');
       this.store.commit('setClickCoords', null);
 
       // get parcels that intersect map click xy

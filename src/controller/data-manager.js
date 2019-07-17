@@ -141,7 +141,7 @@ class DataManager {
   }
 
   defineTargets(dataSourceKey, targetsDef) {
-    // console.log("defineTargets: ", dataSourceKey, targetsDef)
+    console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef)
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -621,6 +621,8 @@ class DataManager {
       console.log('didTryGeocode is running, this.store.state.geocode.status === success');
       this.resetData();
       this.didGeocode(feature);
+
+      // geocode status can be success even on reverseGeocode
       if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
         this.store.commit('setLastSearchMethod', 'geocode');
       }
@@ -713,7 +715,7 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch, callback = () => {}) {
-    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const parcelQuery = Query({ url });
@@ -721,6 +723,7 @@ class DataManager {
     parcelQuery.contains(latLng);
 
     parcelQuery.run((function(error, featureCollection, response) {
+      console.log('in getParcelsByLatLng, featureCollection:', featureCollection);
       this.didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback);
     }).bind(this))
 
@@ -888,12 +891,12 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
     otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
-    const lastSearchMethod = this.store.state.lastSearchMethod;
+    // const lastSearchMethod = this.store.state.lastSearchMethod;
 
     // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
 
@@ -916,6 +919,8 @@ class DataManager {
       return;
     }
 
+    this.store.commit('setLastSearchMethod', 'reverseGeocode');
+    const lastSearchMethod = 'reverseGeocode';
     let feature = features[0];
     let coords = feature.geometry.coordinates;
     // use turf to get area and perimeter of all parcels returned
