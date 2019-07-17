@@ -19,6 +19,11 @@ const initialState = {
   },
   activeSearch: {
   },
+  bufferSearch: {
+    status: null,
+    data: null,
+    input: null
+  },
   shapeSearch: {
     status: null,
     data: null,
@@ -216,6 +221,16 @@ const pvdStore = {
       },
       setShapeSearchData(state, payload) {
         state.shapeSearch.data = payload;
+      },
+      setBufferSearchStatus(state, payload) {
+        //console.log('setBufferSearchStatus is running, payload:', payload);
+        state.bufferSearch.status = payload;
+      },
+      setBufferSearchInput(state, payload) {
+        state.bufferSearch.input = payload;
+      },
+      setBufferSearchData(state, payload) {
+        state.bufferSearch.data = payload;
       },
       setShapeSearchDataPush(state, payload) {
         let objIndex = parseInt(payload.objIndex)

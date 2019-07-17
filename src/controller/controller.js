@@ -85,23 +85,28 @@ class Controller {
 
   handleMapClick(e) {
     // console.log('handle map click', e, this);
+    // if (this.store.state.bufferMode) {
+    //   console.log('handleMapClick')
+    //   // this.store.commit('setBufferMode', false);
+    //   // this.dataManager
+    // } else {
+      // TODO figure out why form submits via enter key are generating a map
+      // click event and remove this
+      if (e.originalEvent.keyCode === 13) {
+        return;
+      }
+      // this.store.commit('setLastSearchMethod', 'reverseGeocode');
+      this.store.commit('setClickCoords', null);
 
-    // TODO figure out why form submits via enter key are generating a map
-    // click event and remove this
-    if (e.originalEvent.keyCode === 13) {
-      return;
-    }
-    this.store.commit('setLastSearchMethod', 'reverseGeocode');
-    this.store.commit('setClickCoords', null);
+      // get parcels that intersect map click xy
+      const latLng = e.latlng;
+      this.store.commit('setClickCoords', latLng);
+      this.store.commit('setGeocodeInput', null);
 
-    // get parcels that intersect map click xy
-    const latLng = e.latlng;
-    this.store.commit('setClickCoords', latLng);
-    this.store.commit('setGeocodeInput', null);
-
-    const parcels = this.store.state.parcels;
-    // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
-    this.dataManager.getParcelsByLatLng(latLng, parcels);
+      const parcels = this.store.state.parcels;
+      // console.log('in handleMapClick, latlng:', latLng, 'parcels:', parcels);
+      this.dataManager.getParcelsByLatLng(latLng, parcels);
+    // }
   }
   getParcelsByDrawnShape(state) {
     const shape = this.store.state.drawShape;
