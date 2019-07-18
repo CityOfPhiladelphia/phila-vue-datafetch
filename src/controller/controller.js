@@ -95,6 +95,7 @@ class Controller {
       if (e.originalEvent.keyCode === 13) {
         return;
       }
+      // commented this out so that it does not delete table on street click
       // this.store.commit('setLastSearchMethod', 'reverseGeocode');
       this.store.commit('setClickCoords', null);
 
