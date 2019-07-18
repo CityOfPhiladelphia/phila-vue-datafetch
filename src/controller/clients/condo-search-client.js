@@ -58,6 +58,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   success(response) {
+    console.log('condo success is running');
     const store = this.store;
     const data = response.data
     let features = data.features;
@@ -98,17 +99,25 @@ class CondoSearchClient extends BaseClient {
       if(this.store.state.parcels.pwd === null) {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
         const callback = () => {
+          console.log('callback is running');
 
           this.setFeatureProperties(feature, totalUnits)
 
           store.commit('setGeocodeData', feature);
           store.commit('setGeocodeStatus', 'success');
-          this.store.commit('setLastSearchMethod', 'geocode');
+          if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
+            this.store.commit('setLastSearchMethod', 'geocode');
+            this.dataManager.fetchData();
+          }
 
           return feature;
         }
 
-        this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
+        // if (this.store.state.lastSearchMethod === 'reverseGeocode') {
+          this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
+        // } else {
+          // this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'fetch', callback);
+        // }
 
       } else {
 
@@ -116,7 +125,9 @@ class CondoSearchClient extends BaseClient {
 
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
-        this.store.commit('setLastSearchMethod', 'geocode');
+        if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
+          this.store.commit('setLastSearchMethod', 'geocode');
+        }
 
         return feature;
       }
