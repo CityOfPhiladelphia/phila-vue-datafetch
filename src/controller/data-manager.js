@@ -382,7 +382,7 @@ class DataManager {
   }
 
   resetData() {
-    console.log('resetData is running');
+    // console.log('resetData is running');
     const dataSources = this.config.dataSources || {};
 
     for (let dataSourceKey of Object.keys(dataSources)) {
@@ -416,7 +416,7 @@ class DataManager {
   // this gets called when the current geocoded address is wiped out, such as
   // when you click on the "Atlas" title and it navigates to an empty hash
   resetGeocode() {
-    console.log('resetGeocode is running');
+    // console.log('resetGeocode is running');
     // reset geocode
     this.store.commit('setUnits', null);
     this.store.commit('setGeocodeStatus', null);
@@ -602,7 +602,7 @@ class DataManager {
   }
 
   didShapeSearch() {
-    console.log('didShapeSearch is running')
+    // console.log('didShapeSearch is running')
     this.controller.router.didShapeSearch();
     this.fetchData();
   }
@@ -614,7 +614,7 @@ class DataManager {
   }
 
   clearShapeSearch() {
-    console.log('clearShapeSearch is running');
+    // console.log('clearShapeSearch is running');
     this.store.commit('setShapeSearchStatus', null);
     this.store.commit('setShapeSearchInput', null);
     this.store.commit('setShapeSearchData', null);
@@ -626,16 +626,16 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    console.log('didTryGeocode is running, this.vueRouter:', this.vueRouter, 'feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
+    // console.log('didTryGeocode is running, this.vueRouter:', this.vueRouter, 'feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
 
     // if (this.store.state.geocode.status === 'error') {
     if (this.store.state.geocode.status === 'error' && this.store.state.geocode.input === 'null') {
     // if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'null') {
-      console.log('didTryGeocode is calling checkForShapeSearch at the top');
+      // console.log('didTryGeocode is calling checkForShapeSearch at the top');
       this.checkForShapeSearch()
 
     } else if (this.store.state.geocode.status === 'success') {
-      console.log('didTryGeocode is running, this.store.state.geocode.status === success');
+      // console.log('didTryGeocode is running, this.store.state.geocode.status === success');
       this.resetData();
       this.didGeocode(feature);
 
@@ -648,7 +648,7 @@ class DataManager {
 
     // owner search
     } else if (this.store.state.geocode.status === "error" && this.store.state.geocode.input !== null) {
-      console.log('didTryGeocode is running, else if geocode.status = "error" && geocode.input !== null, geocode.input:', this.store.state.geocode.input)
+      // console.log('didTryGeocode is running, else if geocode.status = "error" && geocode.input !== null, geocode.input:', this.store.state.geocode.input)
       //Owner search
       // this.store.commit('setLastSearchMethod', 'owner search');
 
@@ -668,7 +668,7 @@ class DataManager {
 
     // this is where it should be
     } else if (typeof feature === 'undefined') {
-      console.log('else if feature undefined is running')
+      // console.log('else if feature undefined is running')
       // This should be the default failure for geocode and shapeSearches that may have a condo
       const input =  this.store.state.parcels.pwd != null ? this.store.state.parcels.pwd : this.store.state.geocode.input
       //Check if this was a shapeSearch that may have other non-condo parcels to handle and add
@@ -684,7 +684,7 @@ class DataManager {
   }
 
   didGeocode(feature) {
-    console.log('didGeocode is running, feature:', feature, 'this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
+    // console.log('didGeocode is running, feature:', feature, 'this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
     this.controller.router.didGeocode();
     if (this.store.state.map) {
       this.store.commit('setMapZoom', 19);
@@ -699,14 +699,14 @@ class DataManager {
         if (feature.street_address) {
           return;
         } else if (feature.properties.street_address) {
-          console.log('didGeocode calling fetchData');
+          // console.log('didGeocode calling fetchData');
           this.fetchData();
         }
         if(feature.geometry.coordinates) {
           this.store.commit('setMapCenter', feature.geometry.coordinates);
         }
       } else {
-        console.log('didGeocode calling fetchData');
+        // console.log('didGeocode calling fetchData');
         this.fetchData();
       }
     }
@@ -732,7 +732,7 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch, callback = () => {}) {
-    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const parcelQuery = Query({ url });
@@ -740,7 +740,7 @@ class DataManager {
     parcelQuery.contains(latLng);
 
     parcelQuery.run((function(error, featureCollection, response) {
-      console.log('in getParcelsByLatLng, featureCollection:', featureCollection);
+      // console.log('in getParcelsByLatLng, featureCollection:', featureCollection);
       this.didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback);
     }).bind(this))
 
@@ -748,7 +748,7 @@ class DataManager {
 
   getParcelsByShape(latlng, parcelLayer) {
 
-    console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer)
+    // console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer)
 
     const latLng = L.polygon(latlng._latlngs, latlng.options);
     const url = this.config.map.featureLayers.pwdParcels.url;
@@ -764,7 +764,7 @@ class DataManager {
   }
 
   getParcelsByBuffer(latlng, parcelLayer) {
-    console.log('getParcelsByBuffer is running, latlng:', latlng);
+    // console.log('getParcelsByBuffer is running, latlng:', latlng);
     const projection4326 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
     const projection2272 = "+proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs";
 
@@ -836,14 +836,14 @@ class DataManager {
                                // options,
                               );
     }, response => {
-        console.log('getParcelsByBuffer error:', response);
+        // console.log('getParcelsByBuffer error:', response);
 
         // this.dataManager.didFetchData(dataSourceKey, 'error');
     });
   }
 
   fetchBySpatialQuery(url, relationship, targetGeom, parameters = {}, calculateDistancePt, options = {}) {
-    console.log('fetch esri spatial query, url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    // console.log('fetch esri spatial query, url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
     const parcelLayer = []
 
     let query;
@@ -908,7 +908,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
-    console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -979,7 +979,7 @@ class DataManager {
       lastSearchMethod === 'reverseGeocode'
     );
 
-    console.log('didGetParcels - shouldGeocode is', shouldGeocode);
+    // console.log('didGetParcels - shouldGeocode is', shouldGeocode);
     if (shouldGeocode) {
       // since we definitely have a new parcel, and will attempt to geocode it:
       // 1. wipe out state data on other parcels
@@ -995,7 +995,7 @@ class DataManager {
       // console.log('Line 701 data-manager.js didGetParcels - if shouldGeocode is running through router');
       if (id) this.controller.router.routeToAddress(id);
     } else {
-      console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
+      // console.log('180405 data-manager.js didGetParcels - if shouldGeocode is NOT running');
       // if (lastSearchMethod != 'reverseGeocode-secondAttempt') {
       // if (fetch !== 'noFetch') {
       if (fetch !== 'noFetch' && lastSearchMethod != 'reverseGeocode-secondAttempt' && this.store.state.bufferMode === false) {
@@ -1007,7 +1007,7 @@ class DataManager {
   }
 
   didGetParcelsByBuffer(error, featureCollection, response, parcelLayer, fetch) {
-    console.log('didGetParcelsByBuffer, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer:', parcelLayer, 'fetch:', fetch)
+    // console.log('didGetParcelsByBuffer, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer:', parcelLayer, 'fetch:', fetch)
 
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -1037,7 +1037,7 @@ class DataManager {
   }
 
   didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {
-    console.log('didGetParcelsByShape is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('didGetParcelsByShape is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
 
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
