@@ -45,7 +45,7 @@ class Router {
     const location = window.location;
     const hash = location.hash;
 
-    console.log('hashChanged is running, hash:', hash);
+    // console.log('hashChanged is running, hash:', hash);
 
     // parse url
     const comps = parseUrl(location.href);
@@ -82,7 +82,7 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    console.log('Router.routeToAddress, this.vueRouter:', this.vueRouter, 'nextAddress:', nextAddress, 'searchCategory:', searchCategory);
+    // console.log('Router.routeToAddress, this.vueRouter:', this.vueRouter, 'nextAddress:', nextAddress, 'searchCategory:', searchCategory);
     if (nextAddress) {
       // check against current address
       const prevAddress = this.getAddressFromState();
@@ -102,7 +102,7 @@ class Router {
   }
 
   routeToOwner(nextOwner, searchCategory) {
-    console.log('Router.routeToOwner', nextOwner);
+    // console.log('Router.routeToOwner', nextOwner);
     if (nextOwner) {
       // check against current address
       // const prevOwner = this.getAddressFromState();
@@ -135,7 +135,7 @@ class Router {
 
   didShapeSearch() {
     const shapeInput = this.store.state.shapeSearch.input;
-    console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
+    // console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
     // only run this if the shape is in the store (which it will not be if it is created from the route)
     if (shapeInput) {
       let shape = '[[';
@@ -155,7 +155,7 @@ class Router {
     const geocodeData = this.store.state.geocode.data;
 
     // make hash if there is geocode data
-    console.log('Router.didGeocode, this.vueRouter:', this.vueRouter, 'geocodeData:', geocodeData, 'this.$route:', this.$route);
+    // console.log('Router.didGeocode, this.vueRouter:', this.vueRouter, 'geocodeData:', geocodeData, 'this.$route:', this.$route);
     if (geocodeData) {
       let address;
 
