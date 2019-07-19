@@ -58,7 +58,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   success(response) {
-    console.log('condo success is running');
+    // console.log('condo success is running');
     const store = this.store;
     const data = response.data
     let features = data.features;

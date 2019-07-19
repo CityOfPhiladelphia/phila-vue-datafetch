@@ -145,7 +145,7 @@ class Router {
       }
       shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]'
 
-      console.log('didShapeSearch is running, shape:', shape);
+      // console.log('didShapeSearch is running, shape:', shape);
 
       this.vueRouter.push({ query: {shape} });
     }
