@@ -177,6 +177,7 @@ const pvdStore = {
       },
       // this is the map center as an xy coordinate array (not latlng)
       setMapCenter(state, payload) {
+        // console.log('pvd store.js setMapCenter is running, payload:', payload);
         state.map.center = payload;
       },
       setMapZoom(state, payload) {

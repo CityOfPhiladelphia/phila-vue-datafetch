@@ -686,10 +686,11 @@ class DataManager {
   didGeocode(feature) {
     // console.log('didGeocode is running, feature:', feature, 'this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
     this.controller.router.didGeocode();
-    if (this.store.state.map) {
-      this.store.commit('setMapZoom', 19);
-      this.store.commit('setMapCenter', feature.geometry.coordinates);
-    }
+    // if (this.store.state.map) {
+    //   // console.log('didGeocode is setting map stuff, feature:', feature)
+    //   this.store.commit('setMapZoom', 19);
+    //   this.store.commit('setMapCenter', feature.geometry.coordinates);
+    // }
 
     if (this.store.state.bufferMode) {
       const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
@@ -703,6 +704,8 @@ class DataManager {
           this.fetchData();
         }
         if(feature.geometry.coordinates) {
+          // console.log('if feature.geometry.coordinates is running');
+          this.store.commit('setMapZoom', 19);
           this.store.commit('setMapCenter', feature.geometry.coordinates);
         }
       } else {
