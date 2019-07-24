@@ -739,7 +739,7 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch, callback = () => {}) {
-    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const parcelQuery = Query({ url });
@@ -915,7 +915,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
-    console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});

@@ -36,7 +36,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    console.log('condosearch fetch is running, input', input)
+    // console.log('condosearch fetch is running, input', input)
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder))
     condoConfig.url = this.config.geocoder.url
