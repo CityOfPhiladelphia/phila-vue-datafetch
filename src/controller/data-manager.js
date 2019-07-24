@@ -568,9 +568,12 @@ class DataManager {
   }
 
   didCondoSearch(){
-    const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
-    const didGeocode = this.didGeocode.bind(this)
-    didGeocode(feature)
+    if (Object.keys(this.store.state.condoUnits.units).length) {
+      console.log('didCondoSearch if is running')
+      const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
+      const didGeocode = this.didGeocode.bind(this)
+      didGeocode(feature)
+    }
   }
 
   checkForShapeSearch(input) {
@@ -628,6 +631,7 @@ class DataManager {
   didTryGeocode(feature) {
     // console.log('didTryGeocode is running, this.vueRouter:', this.vueRouter, 'feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
 
+    this.resetData();
     // if (this.store.state.geocode.status === 'error') {
     if (this.store.state.geocode.status === 'error' && this.store.state.geocode.input === 'null') {
     // if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'null') {
@@ -636,7 +640,7 @@ class DataManager {
 
     } else if (this.store.state.geocode.status === 'success') {
       // console.log('didTryGeocode is running, this.store.state.geocode.status === success');
-      this.resetData();
+      // this.resetData();
       this.didGeocode(feature);
 
       // geocode status can be success even on reverseGeocode
@@ -735,7 +739,7 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch, callback = () => {}) {
-    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', this.config.map.featureLayers, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers.pwdParcels.url;
     const parcelQuery = Query({ url });
@@ -911,7 +915,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
-    // console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
