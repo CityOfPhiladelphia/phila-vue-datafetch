@@ -568,9 +568,12 @@ class DataManager {
   }
 
   didCondoSearch(){
-    const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
-    const didGeocode = this.didGeocode.bind(this)
-    didGeocode(feature)
+    if (Object.keys(this.store.state.condoUnits.units).length) {
+      console.log('didCondoSearch if is running')
+      const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
+      const didGeocode = this.didGeocode.bind(this)
+      didGeocode(feature)
+    }
   }
 
   checkForShapeSearch(input) {
@@ -628,6 +631,7 @@ class DataManager {
   didTryGeocode(feature) {
     // console.log('didTryGeocode is running, this.vueRouter:', this.vueRouter, 'feature:', feature, 'this.store.state.geocode.status:', this.store.state.geocode.status, 'this.store.state.geocode.input:', this.store.state.geocode.input);
 
+    this.resetData();
     // if (this.store.state.geocode.status === 'error') {
     if (this.store.state.geocode.status === 'error' && this.store.state.geocode.input === 'null') {
     // if (this.store.state.geocode.status === 'error' && typeof this.store.state.geocode.input === 'null') {
@@ -636,7 +640,7 @@ class DataManager {
 
     } else if (this.store.state.geocode.status === 'success') {
       // console.log('didTryGeocode is running, this.store.state.geocode.status === success');
-      this.resetData();
+      // this.resetData();
       this.didGeocode(feature);
 
       // geocode status can be success even on reverseGeocode

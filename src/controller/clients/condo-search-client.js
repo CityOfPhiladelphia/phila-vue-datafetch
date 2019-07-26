@@ -12,8 +12,9 @@ class CondoSearchClient extends BaseClient {
     let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
 
     for (let item in groupedData){
-      groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) :
-      dataList.push(groupedData[item][0])
+      units.push.apply(units,groupedData[item])
+      // groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) :
+      // dataList.push(groupedData[item][0])
     }
     let mObj = JSON.parse(JSON.stringify(data[0]))
 
@@ -35,7 +36,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   fetch(input) {
-
+    // console.log('condosearch fetch is running, input', input)
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder))
     condoConfig.url = this.config.geocoder.url
