@@ -698,6 +698,7 @@ class DataManager {
 
     if (this.store.state.bufferMode) {
       const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
+      this.store.commit('setMapCenter', feature.geometry.coordinates);
       this.getParcelsByBuffer(latLng, []);
     } else {
       if (feature) {
