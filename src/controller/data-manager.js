@@ -550,7 +550,7 @@ class DataManager {
   }
 
   didOwnerSearch() {
-    console.log('didOwnerSearch is running, this.store.state.ownerSearch.status:', this.store.state.ownerSearch.status);
+    // console.log('didOwnerSearch is running, this.store.state.ownerSearch.status:', this.store.state.ownerSearch.status);
     if (this.store.state.ownerSearch.status === 'success') {
       this.store.commit('setLastSearchMethod', 'owner search');
       this.controller.router.didOwnerSearch();
@@ -569,7 +569,7 @@ class DataManager {
 
   didCondoSearch(){
     if (Object.keys(this.store.state.condoUnits.units).length) {
-      console.log('didCondoSearch if is running')
+      // console.log('didCondoSearch if is running')
       const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
       const didGeocode = this.didGeocode.bind(this)
       didGeocode(feature)
@@ -577,9 +577,9 @@ class DataManager {
   }
 
   checkForShapeSearch(input) {
-    console.log('checkForShapeSearch is running, input:', input)
+    // console.log('checkForShapeSearch is running, input:', input)
     if(this.store.state.drawShape !== null ) {
-      console.log('checkForShapeSearch - drawShape is not null');
+      // console.log('checkForShapeSearch - drawShape is not null');
       this.clearShapeSearch()
       const input = this.store.state.parcels.pwd;
       this.store.commit('setLastSearchMethod', 'shape search');
@@ -589,7 +589,7 @@ class DataManager {
       // console.log("Shape search input: ", input)
       return this.clients.shapeSearch.fetch(input).then(didShapeSearch);
     } else {
-      console.log('checkForShapeSearch else is running - starting condo process');
+      // console.log('checkForShapeSearch else is running - starting condo process');
       let input;
       if (this.store.state.parcels.pwd) {
         input = this.store.state.parcels.pwd.properties.ADDRESS;

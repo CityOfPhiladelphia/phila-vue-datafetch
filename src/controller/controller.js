@@ -37,7 +37,7 @@ class Controller {
 
   appDidLoad() {
     // route once on load
-    console.log('controller appDidLoad is running')
+    // console.log('controller appDidLoad is running')
     this.router.hashChanged();
   }
 
@@ -56,7 +56,7 @@ class Controller {
 
   handleSearchFormSubmit(value, searchCategory) {
     const input = value
-    //console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
