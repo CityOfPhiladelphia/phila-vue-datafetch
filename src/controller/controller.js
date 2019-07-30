@@ -58,6 +58,9 @@ class Controller {
     const input = value
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running', value, this);
 
+    this.dataManager.clearOwnerSearch();
+    this.dataManager.clearShapeSearch();
+
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
 
