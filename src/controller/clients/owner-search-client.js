@@ -27,7 +27,7 @@ class OwnerSearchClient extends BaseClient {
   }
 
   success(response) {
-    console.log('owner search success', response.data);
+    // console.log('owner search success', response.data);
 
     const store = this.store;
     const data = response.data;
@@ -71,9 +71,9 @@ class OwnerSearchClient extends BaseClient {
   }
 
   error(error) {
-    console.log('new owner search error', error);
+    // console.log('new owner search error', error);
     const store = this.store;
-    console.log('store:', store)
+    // console.log('store:', store)
     store.commit('setOwnerSearchStatus', 'error');
     store.commit('setOwnerSearchData', null);
     // store.commit('setOwnerSearchRelated', null);
