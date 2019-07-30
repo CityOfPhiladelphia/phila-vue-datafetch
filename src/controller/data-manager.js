@@ -917,10 +917,8 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
-    // console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
-    if (this.store.state.lastSearchMethod !== 'buffer search') {
-      this.store.commit('setBufferShape', null);
-    }
+    // console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response, 'this.store.state.lastSearchMethod', this.store.state.lastSearchMethod);
+
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -955,6 +953,11 @@ class DataManager {
     } else {
       lastSearchMethod = this.store.state.lastSearchMethod;
     }
+
+    if (this.store.state.lastSearchMethod !== 'buffer search') {
+      this.store.commit('setBufferShape', null);
+    }
+
     let feature = features[0];
     let coords = feature.geometry.coordinates;
     // use turf to get area and perimeter of all parcels returned
