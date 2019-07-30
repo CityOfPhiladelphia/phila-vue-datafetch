@@ -779,7 +779,7 @@ class DataManager {
     const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
     const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
     const calculateDistance = true;
-    const distances = 320;
+    const distances = 300;
 
     // params.geometries = `[${feature.geometry.coordinates.join(', ')}]`
     // TODO get some of these values from map, etc.
@@ -832,12 +832,13 @@ class DataManager {
       const map = this.store.state.map.map;
 
       // DEBUG
+      this.store.commit('setBufferShape', latLngCoords);
       // buffer.addTo(map);
 
       //this is a space holder
       const parameters = {};
       this.fetchBySpatialQuery(parcelUrl,
-                               'within',
+                               'intersects',
                                buffer,
                                parameters,
                                calculateDistance ? coords : null,
@@ -917,6 +918,9 @@ class DataManager {
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch, callback = () => {}) {
     // console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    if (this.store.state.lastSearchMethod !== 'buffer search') {
+      this.store.commit('setBufferShape', null);
+    }
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});

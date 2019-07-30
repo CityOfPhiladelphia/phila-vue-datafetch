@@ -87,6 +87,11 @@ class ShapeSearchClient extends BaseClient {
     // console.log('shapeSearch success response.data: ', response.data);
 
     const store = this.store;
+
+    if (store.state.lastSearchMethod !== 'buffer search') {
+      store.commit('setBufferShape', null);
+    }
+
     let data = response.data;
     const url = response.config.url;
 
