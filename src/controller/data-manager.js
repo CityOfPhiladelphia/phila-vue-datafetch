@@ -214,12 +214,12 @@ class DataManager {
       geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
       const ownerSearchObj = geocodeObj;
 
-      if(this.store.state.shapeSearch.data != null) {
-        let result = this.store.state.shapeSearch.data.rows.filter(
-          a => a._featureId === this.store.state.activeCondo.featureId
-        )
-        const shapeSearchObj = this.store.state.condoUnits.units[result[0].pwd_parcel_id];
-      }
+      // if(this.store.state.shapeSearch.data != null) {
+      //   let result = this.store.state.shapeSearch.data.rows.filter(
+      //     a => a._featureId === this.store.state.activeCondo.featureId
+      //   )
+      //   const shapeSearchObj = this.store.state.condoUnits.units[result[0].pwd_parcel_id];
+      // }
     } else {
         geocodeObj = this.store.state.geocode.data;
         const ownerSearchObj = this.store.state.ownerSearch.data;
