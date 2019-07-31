@@ -710,7 +710,7 @@ class DataManager {
         }
         if(feature.geometry.coordinates) {
           // console.log('if feature.geometry.coordinates is running');
-          this.store.commit('setMapZoom', 19);
+          this.store.commit('setMapZoom', 18);
           this.store.commit('setMapCenter', feature.geometry.coordinates);
         }
       } else {
