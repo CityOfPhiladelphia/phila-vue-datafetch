@@ -1071,7 +1071,20 @@ class DataManager {
 
     const features = featureCollection.features;
 
-    if (features.length === 0) {return;}
+    if (features.length === 0) {
+      return;
+    } else if (features.length > 200) {
+      console.log('there are greater than 200 parcels');
+      this.store.commit('setShapeSearchStatus', 'too many');
+      this.resetData();
+      this.resetGeocode();
+      this.clearOwnerSearch();
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setParcelData', {});
+      this.store.commit('setLastSearchMethod', 'geocode');
+      this.store.commit('setBufferShape', null);
+      return;
+    }
     // at this point there is definitely a feature or features - put it in state
     this.setParcelsInState(parcelLayer, features);
     // this.geocode(features);
