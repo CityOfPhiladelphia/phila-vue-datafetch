@@ -933,13 +933,19 @@ class DataManager {
 
         features = features.map(feature => {
           const featureCoords = feature.geometry.coordinates;
-          // console.log('featureCoords:', featureCoords);
           let dist;
           if (Array.isArray(featureCoords[0])) {
-            let polygonInstance = polygon([featureCoords[0]]);
-            const vertices = explode(polygonInstance)
-            const closestVertex = nearest(from, vertices);
-            dist = distance(from, closestVertex, { units: 'miles' })
+            let polygonInstance;
+            try {
+              polygonInstance = polygon([featureCoords[0]]);
+              const vertices = explode(polygonInstance)
+              const closestVertex = nearest(from, vertices);
+              dist = distance(from, closestVertex, { units: 'miles' })
+            }
+            catch (e) {
+              console.log('error in distance to polygon:', e);
+            }
+
           } else {
             const to = point(featureCoords);
             dist = distance(from, to, { units: 'miles' });
