@@ -100,22 +100,32 @@ class CondoSearchClient extends BaseClient {
       if(this.store.state.parcels.pwd === null) {
         const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
         const callback = () => {
-          console.log('callback is running');
+          // console.log('callback is running');
 
           this.setFeatureProperties(feature, totalUnits)
 
           store.commit('setGeocodeData', feature);
           store.commit('setGeocodeStatus', 'success');
+          if (this.store.state.lastSearchMethod === 'buffer search') {
+            console.log('in callback, in buffer search mode');
+            this.dataManager.didGeocode(feature);
+          }
           if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
             this.store.commit('setLastSearchMethod', 'geocode');
             this.dataManager.fetchData();
+          }
+
+          if(feature.geometry.coordinates) {
+            // console.log('if feature.geometry.coordinates is running');
+            this.store.commit('setMapZoom', 18);
+            this.store.commit('setMapCenter', feature.geometry.coordinates);
           }
 
           return feature;
         }
 
         // if (this.store.state.lastSearchMethod === 'reverseGeocode') {
-          this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
+        this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
         // } else {
           // this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'fetch', callback);
         // }

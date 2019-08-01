@@ -36,6 +36,7 @@ class DataManager {
     const vueRouter = this.vueRouter = opts.router;
     // this.eventBus = opts.eventBus;
     this.controller = opts.controller;
+    // console.log('this.controller:', this.controller)
 
     // create clients
     this.clients = {};
@@ -43,6 +44,7 @@ class DataManager {
     // REVIEW do these need the store any more? or can they just pass the
     // response back to this?
     const clientOpts = { config, store, dataManager: this };
+    // console.log('clientOpts:', clientOpts);
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
@@ -568,6 +570,7 @@ class DataManager {
   }
 
   didCondoSearch(){
+    // console.log('didCondoSearch is running');
     if (Object.keys(this.store.state.condoUnits.units).length) {
       // console.log('didCondoSearch if is running')
       const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
@@ -578,7 +581,7 @@ class DataManager {
 
   checkForShapeSearch(input) {
     // console.log('checkForShapeSearch is running, input:', input)
-    if(this.store.state.drawShape !== null ) {
+    if(this.store.state.drawShape !== null && this.store.state.shapeSearch.status !== 'too many') {
       // console.log('checkForShapeSearch - drawShape is not null');
       this.clearShapeSearch()
       const input = this.store.state.parcels.pwd;
@@ -697,6 +700,7 @@ class DataManager {
     // }
 
     if (this.store.state.bufferMode) {
+      // console.log('didGeocode ran in bufferMode');
       const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
       this.store.commit('setMapCenter', feature.geometry.coordinates);
       this.getParcelsByBuffer(latLng, []);
@@ -1018,7 +1022,9 @@ class DataManager {
         this.fetchData();
       }
     }
+    // console.log('about to call callback')
     callback()
+    this.controller.router.didGeocode();
   }
 
   didGetParcelsByBuffer(error, featureCollection, response, parcelLayer, fetch) {
