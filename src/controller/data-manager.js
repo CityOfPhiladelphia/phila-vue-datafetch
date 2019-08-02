@@ -36,6 +36,7 @@ class DataManager {
     const vueRouter = this.vueRouter = opts.router;
     // this.eventBus = opts.eventBus;
     this.controller = opts.controller;
+    // console.log('this.controller:', this.controller)
 
     // create clients
     this.clients = {};
@@ -43,6 +44,7 @@ class DataManager {
     // REVIEW do these need the store any more? or can they just pass the
     // response back to this?
     const clientOpts = { config, store, dataManager: this };
+    // console.log('clientOpts:', clientOpts);
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
@@ -568,6 +570,7 @@ class DataManager {
   }
 
   didCondoSearch(){
+    // console.log('didCondoSearch is running');
     if (Object.keys(this.store.state.condoUnits.units).length) {
       // console.log('didCondoSearch if is running')
       const feature = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0]
@@ -578,7 +581,7 @@ class DataManager {
 
   checkForShapeSearch(input) {
     // console.log('checkForShapeSearch is running, input:', input)
-    if(this.store.state.drawShape !== null ) {
+    if(this.store.state.drawShape !== null && this.store.state.shapeSearch.status !== 'too many') {
       // console.log('checkForShapeSearch - drawShape is not null');
       this.clearShapeSearch()
       const input = this.store.state.parcels.pwd;
@@ -697,6 +700,7 @@ class DataManager {
     // }
 
     if (this.store.state.bufferMode) {
+      // console.log('didGeocode ran in bufferMode, feature.geometry.coordinates:', feature.geometry.coordinates);
       const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
       this.store.commit('setMapCenter', feature.geometry.coordinates);
       this.getParcelsByBuffer(latLng, []);
@@ -772,23 +776,62 @@ class DataManager {
   }
 
   getParcelsByBuffer(latlng, parcelLayer) {
-    // console.log('getParcelsByBuffer is running, latlng:', latlng);
+    console.log('getParcelsByBuffer is running, latlng:', latlng);
+
+    if (this.store.state.parcels.pwd === null) {
+      const latLng = L.latLng(latlng.lat, latlng.lng);
+      const url = this.config.map.featureLayers.pwdParcels.url;
+      const parcelQuery = Query({ url });
+      // console.log(parcelQuery);
+      parcelQuery.contains(latLng);
+
+      parcelQuery.run((function(error, featureCollection, response) {
+        // console.log('in getParcelsByLatLng, featureCollection:', featureCollection);
+        this.finishParcelsByBuffer(error, featureCollection, response, parcelLayer, latlng);
+      }).bind(this))
+    } else {
+      this.finishParcelsByBuffer(null, null, latlng, parcelLayer, latlng);
+    }
+  }
+
+  finishParcelsByBuffer(error = [], featureCollection = [], response = {}, parcelLayer, latlng) {
+    console.log('finishParcelsByBuffer is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
+
     const projection4326 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
     const projection2272 = "+proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs";
 
     const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
     const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
     const calculateDistance = true;
-    const distances = 300;
+    const distances = 250;
 
-    // params.geometries = `[${feature.geometry.coordinates.join(', ')}]`
-    // TODO get some of these values from map, etc.
+    // if you do it by point
     const coords = [latlng.lng, latlng.lat];
     const coords2272 = proj4(projection4326, projection2272, [coords[0], coords[1]]);
-    // console.log('coords:', coords, 'coords2272:', coords2272);
+    console.log('coords:', coords, 'coords2272:', coords2272);
+
+    // if you do it by parcel
+    let parcelGeom
+    if (this.store.state.parcels.pwd !== null) {
+      parcelGeom = this.store.state.parcels.pwd.geometry;
+    } else {
+      parcelGeom = response.features[0].geometry
+    }
+
+    let polyCoords2272 = []
+    for (let polyCoord of parcelGeom.coordinates[0]) {
+      let polyCoord2272 = proj4(projection4326, projection2272, [polyCoord[0], polyCoord[1]])
+      polyCoords2272.push(polyCoord2272);
+    }
+
+    let newGeometries = {
+      "geometryType": "esriGeometryPolygon",
+      "geometries": [{ "rings": [polyCoords2272] }]
+    }
+
     const params = {
-      // geometries: feature => '[' + feature.geometry.coordinates[0] + ', ' + feature.geometry.coordinates[1] + ']',
-      geometries: `[${coords2272.join(', ')}]`,
+      // geometries: `[${coords2272.join(', ')}]`,
+      geometries: newGeometries,
       inSR: 2272,
       outSR: 4326,
       bufferSR: 2272,
@@ -809,7 +852,7 @@ class DataManager {
 
     axios.get(bufferUrl, { params }).then(response => {
       const data = response.data;
-      // console.log('axios in esri fetchNearby is running, data:', data);
+      console.log('axios in finishParcelsByBuffer is running, response:', response);//, 'data:', data);
 
       // console.log('did get esri nearby buffer', data);
 
@@ -845,9 +888,9 @@ class DataManager {
                                // options,
                               );
     }, response => {
-        // console.log('getParcelsByBuffer error:', response);
+      // console.log('getParcelsByBuffer error:', response);
 
-        // this.dataManager.didFetchData(dataSourceKey, 'error');
+      // this.dataManager.didFetchData(dataSourceKey, 'error');
     });
   }
 
@@ -890,13 +933,19 @@ class DataManager {
 
         features = features.map(feature => {
           const featureCoords = feature.geometry.coordinates;
-          // console.log('featureCoords:', featureCoords);
           let dist;
           if (Array.isArray(featureCoords[0])) {
-            let polygonInstance = polygon([featureCoords[0]]);
-            const vertices = explode(polygonInstance)
-            const closestVertex = nearest(from, vertices);
-            dist = distance(from, closestVertex, { units: 'miles' })
+            let polygonInstance;
+            try {
+              polygonInstance = polygon([featureCoords[0]]);
+              const vertices = explode(polygonInstance)
+              const closestVertex = nearest(from, vertices);
+              dist = distance(from, closestVertex, { units: 'miles' })
+            }
+            catch (e) {
+              console.log('error in distance to polygon:', e);
+            }
+
           } else {
             const to = point(featureCoords);
             dist = distance(from, to, { units: 'miles' });
@@ -1018,7 +1067,9 @@ class DataManager {
         this.fetchData();
       }
     }
+    // console.log('about to call callback')
     callback()
+    this.controller.router.didGeocode();
   }
 
   didGetParcelsByBuffer(error, featureCollection, response, parcelLayer, fetch) {
@@ -1071,7 +1122,20 @@ class DataManager {
 
     const features = featureCollection.features;
 
-    if (features.length === 0) {return;}
+    if (features.length === 0) {
+      return;
+    } else if (features.length > 200) {
+      console.log('there are greater than 200 parcels');
+      this.store.commit('setShapeSearchStatus', 'too many');
+      this.resetData();
+      this.resetGeocode();
+      this.clearOwnerSearch();
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setParcelData', {});
+      this.store.commit('setLastSearchMethod', 'geocode');
+      this.store.commit('setBufferShape', null);
+      return;
+    }
     // at this point there is definitely a feature or features - put it in state
     this.setParcelsInState(parcelLayer, features);
     // this.geocode(features);
