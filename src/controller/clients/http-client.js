@@ -3,32 +3,10 @@ import moment from 'moment';
 import BaseClient from './base-client';
 
 class HttpClient extends BaseClient {
-  // evaluateParams(feature, dataSource) {
-  //   console.log('http-client evaluateParams is running');
-  //   const params = {};
-  //   if (!dataSource.options.params) { return params };
-  //   const paramEntries = Object.entries(dataSource.options.params);
-  //   const state = this.store.state;
-  //
-  //   for (let [key, valOrGetter] of paramEntries) {
-  //     let val;
-  //
-  //     if (typeof valOrGetter === 'function') {
-  //       val = valOrGetter(feature, state);
-  //     } else {
-  //       val = valOrGetter;
-  //     }
-  //
-  //     params[key] = val;
-  //   }
-  //
-  //   return params;
-  // }
+
 
   fetchDataInSegments(feature, dataSource, dataSourceKey, targetIdFn, params){
     // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
-
-
 
     let featureArr = feature.split(',')
     // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length)
@@ -45,8 +23,8 @@ class HttpClient extends BaseClient {
         featuresObj.push(subset)
     }
 
-    console.log("subset: ", subset)
-    console.log("featuresObj: ", featuresObj)
+    // console.log("subset: ", subset)
+    // console.log("featuresObj: ", featuresObj)
 
     let data = [], targetId =[];
     let url = dataSource.url;
@@ -57,72 +35,38 @@ class HttpClient extends BaseClient {
       url += encodeURIComponent(urlAddition);
       // url += encodeURIComponent(urlAddition.properties.street_address);
     }
-    console.log('url', url);
+    // console.log('url', url);
     const successFn = options.success;
 
     let responseResult = [];
 
+    async function getDataBySegments() {
+      for (let features of featuresObj) {
+        // if the data is not dependent on other data
 
-    for (let features of featuresObj) {
-      // if the data is not dependent on other data
+        let params = this.evaluateParams(features, dataSource);
+        let featureResponse = await axios.get(url, { params })
+        data = await data.concat(successFn(featureResponse.data))
 
-      console.log("features loop: ", features.join(","))
-
-      let params = this.evaluateParams(features, dataSource);
-      console.log("params: ", params)
-
-      axios.get(url, { params }).then(response => {
-        // call success fn
-        let newData = response.data;
-
-        if (successFn) {
-          newData = successFn(newData);
-          data = data.concat(newData)
-        }
-
-        let targetId;
         if (targetIdFn) {
           targetId = targetIdFn(feature);
+          // console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
         }
-
-        // console.log('http-client.js is calling didFetchData')
-        // this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
-        responseResult = 'success'
-        console.log("data: ", data)
-
-      }, response => {
-        // console.log('fetch json error', response);
-        // this.dataManager.didFetchData(dataSourceKey, 'error');
-        responseResult = 'error'
-      })
-
+      }
+      this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
     }
 
-    // THIS LAST PART BELOW NEEDS TO WAIT FOR THE LOOP TO FINISH
-
-    // console.log("responseResult: ", responseResult, data)
-
-    // if(responseResult === 'success') {
-    //   console.log("response was a SUCCESS, data: ", data)
-    //   // this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
-    // } else {
-    //   console.log("response was an ERROR")
-    //   // this.dataManager.didFetchData(dataSourceKey, 'error');
-    // }
-
-    // // console.log("Pushing is probably wrong, prob need to concat", data)
-
-
-
+    getDataBySegments = getDataBySegments.bind(this);
+    return getDataBySegments()
 
   }
 
   fetch(feature, dataSource, dataSourceKey, targetIdFn) {
     let params = this.evaluateParams(feature, dataSource);
-    console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
 
     let featureArr = feature.split(',')
-    console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length)
+    // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length)
 
 
     if (featureArr.length < 210) {
@@ -134,7 +78,7 @@ class HttpClient extends BaseClient {
         url += encodeURIComponent(urlAddition);
         // url += encodeURIComponent(urlAddition.properties.street_address);
       }
-      console.log('url', url);
+      // console.log('url', url);
       // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
       // console.log('http-client fetch, feature:', feature);
       const successFn = options.success;
@@ -161,7 +105,7 @@ class HttpClient extends BaseClient {
         }
 
         // console.log('http-client.js is calling didFetchData')
-        console.log('in http-client, data:', data, 'targetId:', targetId);
+        // console.log('in http-client, data:', data, 'targetId:', targetId);
         this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
       }, response => {
         // console.log('fetch json error', response);
@@ -169,13 +113,9 @@ class HttpClient extends BaseClient {
       });
 
     } else {
-
-      console.log("The feature array is too long (current limit is 210)", this)
+      // console.log("The feature array is too long (current limit is 210)", this)
       this.fetchDataInSegments(feature, dataSource, dataSourceKey, targetIdFn, params)
-
     }
-
-
   }
 
   fetchMore(feature, dataSource, dataSourceKey, highestPageRetrieved) {
