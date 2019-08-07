@@ -40,8 +40,25 @@ class HttpClient extends BaseClient {
 
     let responseResult = [];
 
+    // async function getDataBySegments() {
+    //   for (let features of featuresObj) {
+    //     // if the data is not dependent on other data
+
+    //     let params = this.evaluateParams(features, dataSource);
+    //     let featureResponse = await axios.get(url, { params })
+    //     data = await data.concat(successFn(featureResponse.data))
+
+    //     if (targetIdFn) {
+    //       targetId = targetIdFn(feature);
+    //       // console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
+    //     }
+    //   }
+    //   this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
+    // }
+
+
     async function getDataBySegments() {
-      for (let features of featuresObj) {
+      const allFeaturesReturned = await featuresObj.map( async features => {
         // if the data is not dependent on other data
 
         let params = this.evaluateParams(features, dataSource);
@@ -52,7 +69,10 @@ class HttpClient extends BaseClient {
           targetId = targetIdFn(feature);
           // console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
         }
-      }
+      })
+
+      let promisesFinished = await Promise.all(allFeaturesReturned )
+
       this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
     }
 
