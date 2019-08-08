@@ -776,7 +776,7 @@ class DataManager {
   }
 
   getParcelsByBuffer(latlng, parcelLayer) {
-    console.log('getParcelsByBuffer is running, latlng:', latlng);
+    // console.log('getParcelsByBuffer is running, latlng:', latlng);
 
     if (this.store.state.parcels.pwd === null) {
       const latLng = L.latLng(latlng.lat, latlng.lng);
@@ -795,7 +795,7 @@ class DataManager {
   }
 
   finishParcelsByBuffer(error = [], featureCollection = [], response = {}, parcelLayer, latlng) {
-    console.log('finishParcelsByBuffer is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
+    // console.log('finishParcelsByBuffer is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
 
     const projection4326 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
     const projection2272 = "+proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs";
@@ -852,7 +852,7 @@ class DataManager {
 
     axios.get(bufferUrl, { params }).then(response => {
       const data = response.data;
-      console.log('axios in finishParcelsByBuffer is running, response:', response);//, 'data:', data);
+      // console.log('axios in finishParcelsByBuffer is running, response:', response);//, 'data:', data);
 
       // console.log('did get esri nearby buffer', data);
 
