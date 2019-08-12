@@ -557,6 +557,7 @@ class DataManager {
       this.store.commit('setLastSearchMethod', 'owner search');
       this.controller.router.didOwnerSearch();
       this.fetchData();
+      this.controller.geocodeOwnerSearch(this.store.state)
     } else {
       // this.store.commit('setOwnerSearchStatus', 'error');
     }
