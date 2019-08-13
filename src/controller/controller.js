@@ -122,7 +122,13 @@ class Controller {
   }
   geocodeOwnerSearch(state) {
     // console.log("ownerSearch data:", this.store.state.ownerSearch.data);
-    const ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id);
+    let ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id );
+    ids = ids.filter( id => id != "" )
+
+    // console.log("geocodeOwnerSearch ids: ", ids)
+    //The next two lines would help debug the parcels that are not displayed
+    // let missingId = this.store.state.ownerSearch.data.filter( item => item.properties.pwd_parcel_id === "" )
+    // console.log("record with missing id: ", missingId)
 
     let feature = this.dataManager.getParcelsById(ids, 'pwd');
 
