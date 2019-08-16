@@ -724,10 +724,11 @@ class DataManager {
       }
     }
 
-
-    if (this.store.state.lastSearchMethod === 'geocode') {
-      const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
-      this.getParcelsByLatLng(latLng, 'pwd', null)
+    if (!this.store.state.bufferMode) {
+      if (this.store.state.lastSearchMethod === 'geocode') {
+        const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
+        this.getParcelsByLatLng(latLng, 'pwd', null)
+      }
     }
   }
 
@@ -809,7 +810,7 @@ class DataManager {
     // if you do it by point
     const coords = [latlng.lng, latlng.lat];
     const coords2272 = proj4(projection4326, projection2272, [coords[0], coords[1]]);
-    console.log('coords:', coords, 'coords2272:', coords2272);
+    // console.log('coords:', coords, 'coords2272:', coords2272);
 
     // if you do it by parcel
     let parcelGeom
@@ -1005,6 +1006,7 @@ class DataManager {
     }
 
     if (this.store.state.lastSearchMethod !== 'buffer search') {
+      // console.log('in didGetParcels, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
       this.store.commit('setBufferShape', null);
     }
 
