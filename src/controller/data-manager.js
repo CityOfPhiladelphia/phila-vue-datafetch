@@ -672,7 +672,7 @@ class DataManager {
       this.resetGeocode();
 
       // Fail on owner search here takes you to the condo search process with the input
-      return this.clients.ownerSearch.fetch(input).then( didOwnerSearch, () => condoSearch(input));
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch, () => condoSearch(input));
 
     // this is where it should be
     } else if (typeof feature === 'undefined') {
@@ -1106,7 +1106,7 @@ class DataManager {
   }
 
   didGetParcelsByShape(error, featureCollection, response, parcelLayer, fetch) {
-    // console.log('didGetParcelsByShape is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('didGetParcelsByShape is running parcelLayer', parcelLayer, 'response', response);
 
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -1151,9 +1151,7 @@ class DataManager {
   }
 
   didGetParcelsById(error, featureCollection, response, parcelLayer, fetch) {
-
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
-
+    // console.log('didGetParcelsById is running parcelLayer', parcelLayer, 'response', response);
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -1161,6 +1159,11 @@ class DataManager {
     const lastSearchMethod = this.store.state.lastSearchMethod;
 
     // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+
+    if (this.store.state.lastSearchMethod !== 'buffer search') {
+      // console.log('in didGetParcels, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
+      this.store.commit('setBufferShape', null);
+    }
 
     if (error) {
       if (configForParcelLayer.clearStateOnError) {

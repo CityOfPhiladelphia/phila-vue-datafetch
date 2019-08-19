@@ -76,6 +76,7 @@ class OwnerSearchClient extends BaseClient {
     // console.log('store:', store)
     store.commit('setOwnerSearchStatus', 'error');
     store.commit('setOwnerSearchData', null);
+    store.commit('setBufferShape', null);
     // store.commit('setOwnerSearchRelated', null);
     throw error
   }
