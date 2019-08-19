@@ -672,7 +672,7 @@ class DataManager {
       this.resetGeocode();
 
       // Fail on owner search here takes you to the condo search process with the input
-      return this.clients.ownerSearch.fetch(input).then( didOwnerSearch, () => condoSearch(input));
+      return this.clients.ownerSearch.fetch(input).then(didOwnerSearch, () => condoSearch(input));
 
     // this is where it should be
     } else if (typeof feature === 'undefined') {
