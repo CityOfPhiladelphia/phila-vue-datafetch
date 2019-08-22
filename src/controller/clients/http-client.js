@@ -1,5 +1,5 @@
 import axios from 'axios';
-import moment from 'moment';
+import { format, subHours, addHours, subDays, addDays, subWeeks, addWeeks, subMonths, addMonths, subYears, addYears, isWithinRange } from 'date-fns';
 import BaseClient from './base-client';
 
 class HttpClient extends BaseClient {
@@ -196,7 +196,26 @@ class HttpClient extends BaseClient {
     params['q'] = "select" + select + " from " + table + " where " + distQuery + " < " + distances;
 
     if (dateMinNum) {
-      params['q'] = params['q'] + " and " + dateField + " > '" + moment().subtract(dateMinNum, dateMinType).format('YYYY-MM-DD') + "'"
+      switch (dateMinType) {
+        case 'hour':
+          subFn = subHours;
+          break;
+        case 'day':
+          subFn = subDays;
+          break;
+        case 'week':
+          subFn = subWeeks;
+          break;
+        case 'month':
+          subFn = subMonths;
+          break;
+        case 'year':
+          subFn = subYears;
+          break;
+      }
+
+      // let test = format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD');
+      params['q'] = params['q'] + " and " + dateField + " > '" + format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD') + "'"
     }
 
     // if the data is not dependent on other data
