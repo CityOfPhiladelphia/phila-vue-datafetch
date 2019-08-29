@@ -241,9 +241,9 @@ class DataManager {
         if (targetId) {
           setSourceStatusOpts.targetId = targetId;
         }
-        
+
         this.store.commit('setSourceStatus', setSourceStatusOpts);
-        
+
 
         // TODO do this for all targets
         switch(type) {
@@ -293,7 +293,11 @@ class DataManager {
     // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data);
     let rows;
     if (stateData) {
-      rows = stateData.rows;
+      if (stateData.rows) {
+        rows = stateData.rows;
+      } else {
+        rows = stateData.features;
+      }
     }
 
     // if this is an array, assign feature ids
