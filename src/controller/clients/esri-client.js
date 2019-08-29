@@ -146,8 +146,8 @@ class EsriClient extends BaseClient {
   }
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
-    console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
-    console.log('Object.keys(parameters):', Object.keys(parameters).length);
+    // console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    // console.log('Object.keys(parameters):', Object.keys(parameters).length);
     let query;
     if (relationship === 'where') {
       query = Query({ url })[relationship](parameters.targetField + "='" + parameters.sourceValue + "'");
