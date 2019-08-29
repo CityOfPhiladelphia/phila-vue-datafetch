@@ -146,11 +146,18 @@ class EsriClient extends BaseClient {
   }
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
-    // console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
-
+    console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    console.log('Object.keys(parameters):', Object.keys(parameters).length);
     let query;
     if (relationship === 'where') {
       query = Query({ url })[relationship](parameters.targetField + "='" + parameters.sourceValue + "'");
+      // if (Object.keys(parameters).length === 0) {
+      //   console.log('relationship === where and parameters === {}');
+      //   query = Query({ url })[relationship]("1=1");
+      // } else {
+      //   console.log('else is running');
+      //   query = Query({ url })[relationship](parameters.targetField + "='" + parameters.sourceValue + "'");
+      // }
     } else {
       query = Query({ url })[relationship](targetGeom);
     }
