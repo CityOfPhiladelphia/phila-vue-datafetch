@@ -19,9 +19,29 @@ Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/w
 
 ## Release Notes
 
-### 0.0.19
+### 0.0.24 - 9/6/2019
 
-* In 2 places where data-manager.js didGeocode() calls `setMapZoom`, it attempts to use `this.config.map.geocodeZoom`. The default is set to 19. 
+* Monthly package upgrades
+
+### 0.0.23 - 8/29/2019
+
+* Changes for allowing esri-sources in Pinboard
+
+### 0.0.22 - 8/9/2019
+
+* Monthly package upgrades
+
+### 0.0.21 - 7/12/2019
+
+* Bugfix for routing in Pinboard
+
+### 0.0.20 - 7/11/2019
+
+* Monthly package upgrades
+
+### 0.0.19 - 6/20/2019
+
+* In 2 places where data-manager.js didGeocode() calls `setMapZoom`, it attempts to use `this.config.map.geocodeZoom`. The default is set to 19.
 
 ### 0.0.18 - 6/2/2019
 
