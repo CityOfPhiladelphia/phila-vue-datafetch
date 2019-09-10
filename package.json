@@ -27,6 +27,7 @@
     "babel-jest": "^24.9.0",
     "https-proxy-agent": "^2.2.2",
     "jest": "^24.9.0",
+    "tunnel": "0.0.6",
     "vue-template-compiler": "^2.6.9",
     "webpack-visualizer-plugin": "^0.1.11"
   },

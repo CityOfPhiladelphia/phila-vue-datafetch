@@ -17,16 +17,12 @@ const config = {
     url: function (input) {
       var inputEncoded = encodeURIComponent(input);
       // return 'http://api.phila.gov/ais/v1/search/943%20sigel?gatekeeperKey=82fe014b6575b8c38b44235580bc8b11&include_units=true%27';
-      return 'http://api.phila.gov/ais/v1/search/' + inputEncoded;
+      return 'https://api.phila.gov/ais/v1/search/' + inputEncoded;
     },
     params: {
       gatekeeperKey: '82fe014b6575b8c38b44235580bc8b11',
       include_units: true,
     },
-    // proxy: {
-    //   host: 'proxy.phila.gov',
-    //   port: 8080,
-    // },
   },
   parcels: {
     pwd: {
