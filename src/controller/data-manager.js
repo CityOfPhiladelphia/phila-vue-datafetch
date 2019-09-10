@@ -705,6 +705,9 @@ class DataManager {
       const latLng = {lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0]}
       this.store.commit('setMapCenter', feature.geometry.coordinates);
       this.getParcelsByBuffer(latLng, []);
+    } else if (feature.ais_feature_type === 'intersection') {
+      this.store.commit('setMapZoom', 18);
+      this.store.commit('setMapCenter', feature.geometry.coordinates);
     } else {
       if (feature) {
         if (feature.street_address) {
@@ -714,7 +717,7 @@ class DataManager {
           this.fetchData();
         }
         if(feature.geometry.coordinates) {
-          // console.log('if feature.geometry.coordinates is running');
+          console.log('if feature.geometry.coordinates is running');
           this.store.commit('setMapZoom', 18);
           this.store.commit('setMapCenter', feature.geometry.coordinates);
         }
