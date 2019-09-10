@@ -27,7 +27,7 @@ class HttpClient extends BaseClient {
 
   fetch(feature, dataSource, dataSourceKey, targetIdFn) {
     let params = this.evaluateParams(feature, dataSource);
-    // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
     let url = dataSource.url;
     const options = dataSource.options;
     const urlAddition = params.urlAddition;
@@ -35,7 +35,7 @@ class HttpClient extends BaseClient {
       url += encodeURIComponent(urlAddition);
       // url += encodeURIComponent(urlAddition.properties.street_address);
     }
-    // console.log('url', url);
+    console.log('http-client.js url', url, 'params:', params);
     // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
     const successFn = options.success;
 
@@ -45,6 +45,7 @@ class HttpClient extends BaseClient {
 
     // if the data is not dependent on other data
     axios.get(url, { params }).then(response => {
+    // axios.get('http://data.phila.gov/resource/w7rb-qrn8.json?parcel_number=012099800%27').then(response => {
       // call success fn
       let data = response.data;
 
@@ -66,6 +67,7 @@ class HttpClient extends BaseClient {
   }
 
   fetchMore(feature, dataSource, dataSourceKey, highestPageRetrieved) {
+    console.log('http-client.js fetchMore is running');
     let params = this.evaluateParams(feature, dataSource);
     params.page = highestPageRetrieved + 1;
     let url = dataSource.url;

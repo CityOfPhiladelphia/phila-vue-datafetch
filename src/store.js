@@ -34,7 +34,7 @@ const initialState = {
 
 const pvdStore = {
   createSources(config) {
-    console.log('createSources is running, config:', config);
+    // console.log('createSources is running, config:', config);
     const sourceKeys = Object.keys(config.dataSources || {});
     const sources = sourceKeys.reduce((o, key) => {
       let val;
@@ -61,7 +61,7 @@ const pvdStore = {
   },
 
   createPinSources(config) {
-    console.log('createSources is running, config:', config);
+    // console.log('createSources is running, config:', config);
     const sourceKeys = Object.keys(config.pinSources || {});
     const sources = sourceKeys.reduce((o, key) => {
       let val;
@@ -168,7 +168,7 @@ const pvdStore = {
         // }
       },
       setSourceData(state, payload) {
-        // console.log('store setSourceData payload:', payload);
+        // console.log('store setSourceData payload:', state);
         const key = payload.key;
         const data = payload.data;
 
@@ -220,12 +220,6 @@ const pvdStore = {
         state.sources[key].targets = {};
       },
       // this is the map center as an xy coordinate array (not latlng)
-      setMapCenter(state, payload) {
-        state.map.center = payload;
-      },
-      setMapZoom(state, payload) {
-        state.map.zoom = payload;
-      },
       setParcelData(state, payload) {
         // console.log('store setParcelData payload:', payload);
         const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg } = payload || {};

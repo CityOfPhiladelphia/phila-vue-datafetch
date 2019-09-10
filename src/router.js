@@ -145,7 +145,9 @@ class Router {
     }
 
     if (nextAddress && nextAddress !== 'addr noaddress') {
-      this.routeToAddress(nextAddress);
+      console.log('router hashChanged calling controller.handleSearchFormSubmit')
+      // this.routeToAddress(nextAddress);
+      this.controller.handleSearchFormSubmit(nextAddress);
     }
 
     // if (nextKeyword) {
@@ -184,6 +186,8 @@ class Router {
       if (!prevAddress || nextAddress !== prevAddress) {
         this.dataManager.geocode(nextAddress, searchCategory);
       }
+
+      return prevAddress;
     }
   }
 
@@ -296,7 +300,9 @@ class Router {
   }
 
   // this is almost just the same thing as any of the routeTo... functions above
-  didGeocode() {
+  // TODO this could have a name that is more declarative like "changeURL"
+
+  setRouteByGeocode() {
     const geocodeData = this.store.state.geocode.data;
 
     // make hash if there is geocode data
@@ -310,6 +316,7 @@ class Router {
         address = geocodeData.properties.street_address;
       }
 
+      // TODO - datafetch should not know topics are a thing
       if (this.config.router.returnToDefaultTopicOnGeocode) {
         this.store.commit('setActiveTopic', this.config.defaultTopic);
       }
