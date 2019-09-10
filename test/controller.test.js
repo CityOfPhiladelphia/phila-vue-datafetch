@@ -32,10 +32,10 @@ const opts = { store, config }
 const controller = new Controller(opts);
 
 test('first test', async () => {
-  jest.setTimeout(15000); // Set global Jest Timeout
+  // jest.setTimeout(15000); // Set global Jest Timeout
   await Promise.all([
     controller.handleSearchFormSubmit('720 tasker'),
-    timeout(10000) // Add a timeout to allow fetchData to complete
+    timeout(4000) // Add a timeout to allow fetchData to complete
   ]);
   console.log('store.state.geocode.data.properties.street_address', store.state.geocode.data.properties.street_address);
   expect(store.state.geocode.data.properties.street_address).toEqual('720 TASKER ST');
