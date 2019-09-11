@@ -1,5 +1,4 @@
 import axios from 'axios';
-// import httpsProxyAgent from 'https-proxy-agent';
 import BaseClient from './base-client';
 
 // the high-level purpose of this is: take an address, geocode it, and put
@@ -14,10 +13,8 @@ class GeocodeClient extends BaseClient {
 
     geocodeConfig = this.config.geocoder;
     const url = geocodeConfig.url(input);
-    // const agent = new httpsProxyAgent('http://proxy.phila.gov:8080');
 
     const params = geocodeConfig.params;
-    // const proxy = geocodeConfig.proxy;
 
     console.log('url:', url, 'typeof url:', typeof url, 'params:', params);
 
@@ -26,11 +23,6 @@ class GeocodeClient extends BaseClient {
 
     const success = this.success.bind(this);
     const error = this.error.bind(this);
-    // const config = { params, proxy };
-    // console.log('config:', config);
-
-    // return a promise that can accept further chaining
-    // return await axios.request({ url: url, httpsAgent: agent }, { params })
     return await axios.get(url, { params })
       .then(success)
       .catch(error);
