@@ -40,4 +40,5 @@ test('first test', async () => {
   console.log('store.state.geocode.data.properties.street_address', store.state.geocode.data.properties.street_address);
   expect(store.state.geocode.data.properties.street_address).toEqual('720 TASKER ST');
   expect(store.state.sources.opa.data.depth).toEqual('64');
+  expect(store.state.source.owner_1).toEqual('Andy Rothwell');
 });
