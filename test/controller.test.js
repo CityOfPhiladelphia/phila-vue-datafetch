@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import mergeDeep from './util/merge-deep';
-import timeout from './util/sleep';
+import timeout from './util/timeout';
 import { Controller } from '../src/controller';
 import pvdStore from '../src/store';
 import config from './config.js';
