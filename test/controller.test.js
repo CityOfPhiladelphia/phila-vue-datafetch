@@ -40,5 +40,16 @@ test('first test', async () => {
   console.log('store.state.geocode.data.properties.street_address', store.state.geocode.data.properties.street_address);
   expect(store.state.geocode.data.properties.street_address).toEqual('720 TASKER ST');
   expect(store.state.sources.opa.data.depth).toEqual('64');
-  expect(store.state.sources.opa.data.zoning).toEqual('RSA5');
+  expect(store.state.sources.opa.data.zoning).toEqual('RSA5 ');
+});
+
+test('second test', async () => {
+  await Promise.all([
+    controller.handleSearchFormSubmit('1234 mkt'),
+    timeout(4000)
+  ]);
+  console.log('store.state.geocode.data.properties.street_address', store.state.geocode.data.properties.street_address);
+  expect(store.state.geocode.data.properties.street_address).toEqual('1234 MARKET ST');
+  expect(store.state.sources.opa.data.depth).toEqual('190');
+  expect(store.state.sources.opa.data.zoning).toEqual('CMX5 ');
 });
