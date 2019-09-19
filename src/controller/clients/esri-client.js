@@ -3,7 +3,7 @@ import axios from 'axios';
 // import * as turf from '@turf/turf';
 // import { point, polygon, distance, explode, nearest-point } from '@turf/turf';
 // import distance from '@turf/turf';
-import { point, polygon } from '@turf/helpers';
+import { point, polygon, lineString } from '@turf/helpers';
 import distance from '@turf/distance';
 import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
@@ -193,10 +193,16 @@ class EsriClient extends BaseClient {
           // console.log('featureCoords:', featureCoords);
           let dist;
           if (Array.isArray(featureCoords[0])) {
-            let polygonInstance = polygon([featureCoords[0]]);
-            const vertices = explode(polygonInstance)
-            const closestVertex = nearest(from, vertices);
-            dist = distance(from, closestVertex, { units: 'miles' })
+            console.log('feature:', feature, 'featureCoords[0]:', featureCoords[0]);
+            let instance;
+            if (feature.geometry.type === 'LineString') {
+              instance = lineString([featureCoords[0], featureCoords[1]], {name: 'line 1'});
+            } else {
+              instance = polygon([featureCoords[0]]);
+            }
+              const vertices = explode(instance)
+              const closestVertex = nearest(from, vertices);
+              dist = distance(from, closestVertex, { units: 'miles' })
           } else {
             const to = point(featureCoords);
             dist = distance(from, to, { units: 'miles' });
