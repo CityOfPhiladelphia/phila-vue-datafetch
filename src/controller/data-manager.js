@@ -8,7 +8,7 @@ navigation events.
 import * as L from 'leaflet';
 import { query as Query } from 'esri-leaflet';
 // import * as turf from '@turf/turf';
-import { point, polygon } from '@turf/helpers';
+import { point, polygon, multiPolygon } from '@turf/helpers';
 import distance from '@turf/distance';
 import area from '@turf/area';
 import {
@@ -722,16 +722,29 @@ class DataManager {
   } // end didGeocode
 
   getParcelsById(id, parcelLayer) {
-    // console.log('getParcelsById', parcelLayer);
+    // console.log('getParcelsById', parcelLayer, 'id:', id);
 
     const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
     const parcelQuery = Query({ url });
-    parcelQuery.where(geocodeField + " = '" + id + "'");
+    if (id.includes('|')){
+      const idSplit = id.split('|');
+      let queryString = geocodeField + " = '";
+      let i;
+      for (i=0; i<idSplit.length; i++) {
+        queryString = queryString + idSplit[i] + "'";
+        if (i < idSplit.length - 1) {
+          queryString = queryString + " or " + geocodeField + " = '";
+        }
+      }
+      parcelQuery.where(queryString);
+    } else {
+      parcelQuery.where(geocodeField + " = '" + id + "'");
+    }
     // console.log('parcelQuery:', parcelQuery);
     parcelQuery.run((function(error, featureCollection, response) {
-        // console.log('171111 getParcelsById parcelQuery ran, response:', response);
+        // console.log('getParcelsById parcelQuery ran, parcelLayer:', parcelLayer, 'response:', response);
         this.didGetParcels(error, featureCollection, response, parcelLayer);
       }).bind(this)
     )
@@ -751,7 +764,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    // console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response, 'featureCollection:', featureCollection);
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const multipleAllowed = configForParcelLayer.multipleAllowed;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -800,10 +813,18 @@ class DataManager {
         let distances = [];
         let areas = [];
         for (let coordsSet of coords) {
-          // console.log('coordsSet:', coordsSet);
-          const turfPolygon = polygon(coordsSet);
-          distances.push(this.getDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
-          areas.push(area(turfPolygon) * 10.7639);
+          // console.log('coordsSet:', coordsSet, 'coordsSet.length:', coordsSet.length);
+          if (coordsSet.length > 2) {
+            // console.log('in multiPolygon loop');
+            const turfPolygon = multiPolygon(coordsSet);
+            distances.push(this.getMultiPolyDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
+            areas.push(area(turfPolygon) * 10.7639);
+          } else {
+            // console.log('in polygon loop');
+            const turfPolygon = polygon(coordsSet);
+            distances.push(this.getDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
+            areas.push(area(turfPolygon) * 10.7639);
+          }
         }
         featureSorted.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
         featureSorted.properties.TURF_AREA = areas.reduce(function(acc, val) { return acc + val; });
@@ -864,8 +885,24 @@ class DataManager {
   }
 
   getDistances(coords) {
+    // console.log('getDistances, coords:', coords)
     let turfCoordinates = []
     for (let coordinate of coords[0]) {
+      // console.log('in getDistances, coordinate:', coordinate);
+      turfCoordinates.push(point(coordinate));
+    }
+    let distances = [];
+    for (let i=0; i<turfCoordinates.length - 1; i++) {
+      distances[i] = distance(turfCoordinates[i], turfCoordinates[i+1], {units: 'feet'});
+    }
+    return distances;
+  }
+
+  getMultiPolyDistances(coords) {
+    // console.log('getMultiPolyDistances, coords:', coords)
+    let turfCoordinates = []
+    for (let coordinate of coords) {
+      console.log('in getMultiPolyDistances, coordinate:', coordinate);
       turfCoordinates.push(point(coordinate));
     }
     let distances = [];
