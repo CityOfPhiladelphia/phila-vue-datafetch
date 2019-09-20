@@ -738,20 +738,23 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
-    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
     const parcelQuery = Query({ url });
+    console.log('latLng', latLng, 'url', url);
+
     parcelQuery.contains(latLng);
     const test = 5;
-    parcelQuery.run((function(error, featureCollection, response) {
+  parcelQuery.run((function(error, featureCollection, response) {
+        console.log('171111 getParcelsByLatLng parcelQuery ran, response:', response);
         this.didGetParcels(error, featureCollection, response, parcelLayer, fetch);
       }).bind(this)
     )
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    // console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response);
+    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response, 'featureCollection', featureCollection);
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const multipleAllowed = configForParcelLayer.multipleAllowed;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -759,9 +762,10 @@ class DataManager {
     otherParcelLayers.splice(otherParcelLayers.indexOf(parcelLayer), 1);
     const lastSearchMethod = this.store.state.lastSearchMethod;
     const activeParcelLayer = this.store.state.activeParcelLayer;
-    // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+    console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
 
     if (error) {
+      console.log('error');
       // update state
       if (configForParcelLayer.clearStateOnError) {
       // this.store.commit('setParcelData', { parcelLayer, [] });
@@ -775,7 +779,7 @@ class DataManager {
     }
 
     const features = featureCollection.features;
-
+    console.log('features: ', features);
     if (features.length === 0) {
       return;
     }
@@ -828,7 +832,7 @@ class DataManager {
       lastSearchMethod === 'reverseGeocode'
     );
 
-    // console.log('didGetParcels - shouldGeocode is', shouldGeocode);
+    console.log('didGetParcels - shouldGeocode is', shouldGeocode);
     if (shouldGeocode) {
       // since we definitely have a new parcel, and will attempt to geocode it:
       // 1. wipe out state data on other parcels
@@ -839,7 +843,7 @@ class DataManager {
       const [lng, lat] = coords;
       const latlng = L.latLng(lat, lng);
 
-      // console.log('didGetParcels is wiping out the', otherParcelLayers, 'parcels in state');
+      console.log('didGetParcels is wiping out the', otherParcelLayers, 'parcels in state');
       for (let otherParcelLayer of otherParcelLayers) {
         // console.log('for let otherParcelLayer of otherParcelLayers is running');
         const configForOtherParcelLayer = this.config.parcels[otherParcelLayer];
