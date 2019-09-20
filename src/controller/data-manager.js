@@ -722,7 +722,7 @@ class DataManager {
   } // end didGeocode
 
   getParcelsById(id, parcelLayer) {
-    console.log('getParcelsById', parcelLayer, 'id:', id);
+    // console.log('getParcelsById', parcelLayer, 'id:', id);
 
     const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
     const configForParcelLayer = this.config.parcels[parcelLayer];
@@ -738,15 +738,13 @@ class DataManager {
           queryString = queryString + " or " + geocodeField + " = '";
         }
       }
-      console.log('there is a pipe, queryString:', queryString);
       parcelQuery.where(queryString);
     } else {
-      console.log('there is not a pipe');
       parcelQuery.where(geocodeField + " = '" + id + "'");
     }
     // console.log('parcelQuery:', parcelQuery);
     parcelQuery.run((function(error, featureCollection, response) {
-        console.log('getParcelsById parcelQuery ran, parcelLayer:', parcelLayer, 'response:', response);
+        // console.log('getParcelsById parcelQuery ran, parcelLayer:', parcelLayer, 'response:', response);
         this.didGetParcels(error, featureCollection, response, parcelLayer);
       }).bind(this)
     )
@@ -766,7 +764,7 @@ class DataManager {
   }
 
   didGetParcels(error, featureCollection, response, parcelLayer, fetch) {
-    console.log('180405 didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response, 'featureCollection:', featureCollection);
+    // console.log('didGetParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'response', response, 'featureCollection:', featureCollection);
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const multipleAllowed = configForParcelLayer.multipleAllowed;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -810,20 +808,19 @@ class DataManager {
 
       let coords = featureSorted.geometry.coordinates;
 
-      console.log('featureSorted:', featureSorted, 'coords.length:', coords.length);
+      // console.log('featureSorted:', featureSorted, 'coords.length:', coords.length);
       if (coords.length > 1) {
         let distances = [];
         let areas = [];
         for (let coordsSet of coords) {
-          console.log('coordsSet:', coordsSet, 'coordsSet.length:', coordsSet.length);
+          // console.log('coordsSet:', coordsSet, 'coordsSet.length:', coordsSet.length);
           if (coordsSet.length > 2) {
-            console.log('in multiPolygon loop');
+            // console.log('in multiPolygon loop');
             const turfPolygon = multiPolygon(coordsSet);
             distances.push(this.getMultiPolyDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
             areas.push(area(turfPolygon) * 10.7639);
-            console.log('areas:', areas);
           } else {
-            console.log('in polygon loop');
+            // console.log('in polygon loop');
             const turfPolygon = polygon(coordsSet);
             distances.push(this.getDistances(coordsSet).reduce(function(acc, val) { return acc + val; }));
             areas.push(area(turfPolygon) * 10.7639);

@@ -193,7 +193,7 @@ class EsriClient extends BaseClient {
           // console.log('featureCoords:', featureCoords);
           let dist;
           if (Array.isArray(featureCoords[0])) {
-            console.log('feature:', feature, 'featureCoords[0]:', featureCoords[0]);
+            // console.log('feature:', feature, 'featureCoords[0]:', featureCoords[0]);
             let instance;
             if (feature.geometry.type === 'LineString') {
               instance = lineString([featureCoords[0], featureCoords[1]], {name: 'line 1'});
