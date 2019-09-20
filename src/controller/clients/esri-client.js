@@ -15,7 +15,7 @@ import BaseClient from './base-client';
 
 class EsriClient extends BaseClient {
   fetch(feature, dataSource, dataSourceKey) {
-    // console.log('esriclient fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
+    console.log('esriclient fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
 
     const url = dataSource.url;
     const { relationship, targetGeometry, ...options } = dataSource.options;
@@ -146,7 +146,7 @@ class EsriClient extends BaseClient {
   }
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
-    // console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
     // console.log('Object.keys(parameters):', Object.keys(parameters).length);
     let query;
     if (relationship === 'where') {
@@ -217,8 +217,12 @@ class EsriClient extends BaseClient {
           return feature;
         })
       }
-
-      this.dataManager.didFetchData(dataSourceKey, status, features);
+      if (dataSourceKey === 'regmaps' && features.length > 100) {
+        console.log('too many regmaps');
+        this.dataManager.didFetchData(dataSourceKey, 'error', []);
+      } else {
+        this.dataManager.didFetchData(dataSourceKey, status, features);
+      }
     });
   }
 
