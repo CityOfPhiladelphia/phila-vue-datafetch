@@ -61,8 +61,10 @@ class Controller {
     this.dataManager.clearOwnerSearch();
     this.dataManager.clearShapeSearch();
 
+
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeInput', input);
+    this.store.commit('setBufferShape', null);
 
     this.store.commit('setShouldShowAddressCandidateList', false);
     if (this.store.state.lastSearchMethod) {
