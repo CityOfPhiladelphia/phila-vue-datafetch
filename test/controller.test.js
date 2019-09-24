@@ -105,69 +105,79 @@ const controller = new Controller(opts);
 // });
 
 describe('handleMapClick', () => {
-  // describe('pwd activeParcel', () => {
-  //   beforeEach(() => {
-  //     // store.commit('setActiveParcelLayer', 'pwd');
-  //   });
-    
-  //   test('Click on random house', async () => {
-  //     store.commit('setActiveParcelLayer', 'pwd');
-  //     store.commit('setLastSearchMethod', 'reverseGeocode');
-  //     // jest.setTimeout(15000);
-  //     await Promise.all([
-  //       controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.168225, lat: 39.942696 }}),
-  //       timeout(3000) // Add a timeout to allow fetchData to complete
-  //     ]);
-      
-  //     expect(store.state.geocode.data.properties.street_address).toEqual('707 S MOLE ST');
-  //   });
-    
-  //   test('Click on 3100 Penrose Ferry Rd', async () => {
-  //     store.commit('setActiveParcelLayer', 'pwd');
-  //     store.commit('setLastSearchMethod', 'reverseGeocode');
-  //     // jest.setTimeout(15000);
-  //     await Promise.all([
-  //       controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.1878948516403, lat: 39.913635291857084 }}),
-  //       timeout(3000) // Add a timeout to allow fetchData to complete
-  //     ]);
-      
-  //     expect(store.state.geocode.data.properties.street_address).toEqual('3100 PENROSE FERRY RD');
-  //   });
-    
-  // });
-  
-  describe('dor activeParcel', () => {
-    beforeEach(() => {
-      // store.commit('setActiveParcelLayer', 'dor');
-    });
-    
+  describe('pwd activeParcel', () => {
     test('Click on random house', async () => {
-      store.commit('setActiveParcelLayer', 'dor');
+      store.commit('setActiveParcelLayer', 'pwd');
       store.commit('setLastSearchMethod', 'reverseGeocode');
-      // jest.setTimeout(15000);
       await Promise.all([
         controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.168225, lat: 39.942696 }}),
         timeout(3000) // Add a timeout to allow fetchData to complete
       ]);
-      
+      // check geocode
       expect(store.state.geocode.data.properties.street_address).toEqual('707 S MOLE ST');
+      // check parcels
+      expect(store.state.parcels.pwd.properties.BRT_ID).toEqual('301286300');
       expect(store.state.parcels.dor.data.length).toEqual(1);
+      expect(store.state.parcels.dor.data[0].properties.BASEREG).toEqual('005S050119');
+      // check sources
+      expect(store.state.sources.opa.data.parcel_number).toEqual('301286300');
+    });
+    
+    test('Click on 3100 Penrose Ferry Rd', async () => {
+      store.commit('setActiveParcelLayer', 'pwd');
+      store.commit('setLastSearchMethod', 'reverseGeocode');
+      await Promise.all([
+        controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.1878948516403, lat: 39.913635291857084 }}),
+        timeout(3000) // Add a timeout to allow fetchData to complete
+      ]);
+      
+      // check geocode
+      expect(store.state.geocode.data.properties.street_address).toEqual('3100 PENROSE FERRY RD');
+      // check parcels
+      expect(store.state.parcels.pwd.properties.BRT_ID).toEqual('782427415');
+      expect(store.state.parcels.dor.data[0].properties.BASEREG).toEqual('033S040106');
+      // check sources
+      expect(store.state.sources.opa.data.parcel_number).toEqual('782427415');
+      expect(store.state.sources.liPermits.data.rows[0]._featureId).toEqual('feat-liPermits-0');
+    });
+  });
+  
+  describe('dor activeParcel', () => {
+    test('Click on random house', async () => {
+      store.commit('setActiveParcelLayer', 'dor');
+      store.commit('setLastSearchMethod', 'reverseGeocode');
+      await Promise.all([
+        controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.168225, lat: 39.942696 }}),
+        timeout(3000) // Add a timeout to allow fetchData to complete
+      ]);
+      // check geocode
+      expect(store.state.geocode.data.properties.street_address).toEqual('707 S MOLE ST');
+      // check parcels
+      expect(store.state.parcels.pwd.properties.BRT_ID).toEqual('301286300');
+      expect(store.state.parcels.dor.data.length).toEqual(1);
+      expect(store.state.parcels.dor.data[0].properties.BASEREG).toEqual('005S050119');
+      // check sources
+      expect(store.state.sources.opa.data.parcel_number).toEqual('301286300');
     });
     
     test('Click on dor parcel 2306 HARTRANFT ST # 102', async () => {
       store.commit('setActiveParcelLayer', 'dor');
       store.commit('setLastSearchMethod', 'reverseGeocode');
-      // jest.setTimeout(15000);
       await Promise.all([
         controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.188762, lat: 39.910988 }}),
         timeout(3000) // Add a timeout to allow fetchData to complete
       ]);
-      
+      // check geocode
       expect(store.state.geocode.data.properties.street_address).toEqual('2306 HARTRANFT ST # 102');
+      // check parcels
+      expect(store.state.parcels.pwd.properties.BRT_ID).toEqual('262405300');
       expect(store.state.parcels.dor.data.length).toEqual(3);
+      expect(store.state.parcels.dor.data[0].properties.BASEREG).toEqual('033S050381');
+      expect(store.state.parcels.dor.data[1].properties.BASEREG).toEqual('033S050256');
+      expect(store.state.parcels.dor.data[2].properties.BASEREG).toEqual('033S090022');
+      // check sources
+      expect(store.state.sources.opa.data.parcel_number).toEqual('262405300');
+      expect(store.state.sources.liPermits.data.rows[0]._featureId).toEqual('feat-liPermits-0');
     });
-    
   });
-  
-  
 });
