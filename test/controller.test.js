@@ -105,44 +105,44 @@ const controller = new Controller(opts);
 // });
 
 describe('handleMapClick', () => {
-  describe('pwd activeParcel', () => {
-    beforeEach(() => {
-      // store.commit('setActiveParcelLayer', 'pwd');
-    });
+  // describe('pwd activeParcel', () => {
+  //   beforeEach(() => {
+  //     // store.commit('setActiveParcelLayer', 'pwd');
+  //   });
     
-    test('Click on random house', async () => {
-      store.commit('setActiveParcelLayer', 'pwd');
-      store.commit('setLastSearchMethod', 'reverseGeocode');
-      // jest.setTimeout(15000);
-      await Promise.all([
-        controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.168225, lat: 39.942696 }}),
-        timeout(3000) // Add a timeout to allow fetchData to complete
-      ]);
+  //   test('Click on random house', async () => {
+  //     store.commit('setActiveParcelLayer', 'pwd');
+  //     store.commit('setLastSearchMethod', 'reverseGeocode');
+  //     // jest.setTimeout(15000);
+  //     await Promise.all([
+  //       controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.168225, lat: 39.942696 }}),
+  //       timeout(3000) // Add a timeout to allow fetchData to complete
+  //     ]);
       
-      expect(store.state.geocode.data.properties.street_address).toEqual('707 S MOLE ST');
-    });
+  //     expect(store.state.geocode.data.properties.street_address).toEqual('707 S MOLE ST');
+  //   });
     
-    test('Click on 3100 Penrose Ferry Rd', async () => {
-      store.commit('setActiveParcelLayer', 'pwd');
-      store.commit('setLastSearchMethod', 'reverseGeocode');
-      // jest.setTimeout(15000);
-      await Promise.all([
-        controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.1878948516403, lat: 39.913635291857084 }}),
-        timeout(3000) // Add a timeout to allow fetchData to complete
-      ]);
+  //   test('Click on 3100 Penrose Ferry Rd', async () => {
+  //     store.commit('setActiveParcelLayer', 'pwd');
+  //     store.commit('setLastSearchMethod', 'reverseGeocode');
+  //     // jest.setTimeout(15000);
+  //     await Promise.all([
+  //       controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.1878948516403, lat: 39.913635291857084 }}),
+  //       timeout(3000) // Add a timeout to allow fetchData to complete
+  //     ]);
       
-      expect(store.state.geocode.data.properties.street_address).toEqual('3100 PENROSE FERRY RD');
-    });
+  //     expect(store.state.geocode.data.properties.street_address).toEqual('3100 PENROSE FERRY RD');
+  //   });
     
-  });
+  // });
   
   describe('dor activeParcel', () => {
     beforeEach(() => {
-      store.commit('setActiveParcelLayer', 'dor');
+      // store.commit('setActiveParcelLayer', 'dor');
     });
     
     test('Click on random house', async () => {
-      store.commit('setActiveParcelLayer', 'pwd');
+      store.commit('setActiveParcelLayer', 'dor');
       store.commit('setLastSearchMethod', 'reverseGeocode');
       // jest.setTimeout(15000);
       await Promise.all([
@@ -151,18 +151,20 @@ describe('handleMapClick', () => {
       ]);
       
       expect(store.state.geocode.data.properties.street_address).toEqual('707 S MOLE ST');
+      expect(store.state.parcels.dor.data.length).toEqual(1);
     });
     
-    test('Click on 3100 Penrose Ferry Rd', async () => {
-      store.commit('setActiveParcelLayer', 'pwd');
+    test('Click on dor parcel 2306 HARTRANFT ST # 102', async () => {
+      store.commit('setActiveParcelLayer', 'dor');
       store.commit('setLastSearchMethod', 'reverseGeocode');
       // jest.setTimeout(15000);
       await Promise.all([
-        controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.1878948516403, lat: 39.913635291857084 }}),
+        controller.handleMapClick({ originalEvent: { keycode: 0 },  latlng: { lng: -75.188762, lat: 39.910988 }}),
         timeout(3000) // Add a timeout to allow fetchData to complete
       ]);
       
-      expect(store.state.geocode.data.properties.street_address).toEqual('3100 PENROSE FERRY RD');
+      expect(store.state.geocode.data.properties.street_address).toEqual('2306 HARTRANFT ST # 102');
+      expect(store.state.parcels.dor.data.length).toEqual(3);
     });
     
   });
