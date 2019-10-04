@@ -61,7 +61,7 @@ describe('handleSearchFormSubmit', () => {
       ]);
     
     expect(store.state.geocode.data.properties.street_address).toEqual('6117 NASSAU RD');
-    expect(store.state.parcels.dor.activeParcel).toEqual(462122);
+    expect(store.state.parcels.dor.activeMapreg).toEqual("068N220217");
     expect(store.state.parcels.pwd.properties.BRT_ID).toEqual("342085700");
     expect(store.state.sources.opa.data.depth).toEqual("93.25");
   });
@@ -73,7 +73,7 @@ describe('handleSearchFormSubmit', () => {
       ]);
     
     expect(store.state.geocode.data.properties.street_address).toEqual('5945 LAWNDALE ST');
-    expect(store.state.parcels.dor.activeParcel).toEqual(120811);
+    expect(store.state.parcels.dor.activeMapreg).toEqual("137N230256");
     expect(store.state.parcels.pwd.properties.BRT_ID).toEqual("352322900");
     expect(store.state.sources.opa.data.depth).toEqual("65");
   });
@@ -84,7 +84,7 @@ describe('handleSearchFormSubmit', () => {
       timeout(3000) // Add a timeout to allow fetchData to complete
     ]);
     expect(store.state.geocode.data.properties.street_address).toEqual('5208 WAYNE AVE');
-    expect(store.state.parcels.dor.activeParcel).toEqual(388525);
+    expect(store.state.parcels.dor.activeMapreg).toEqual("047N170090");
     expect(store.state.parcels.pwd.properties.BRT_ID).toEqual("776732000");
     expect(store.state.sources.opa.data.depth).toEqual('198.5');
     expect(store.state.sources.opa.data.zoning).toEqual('RTA1 ');
@@ -96,7 +96,7 @@ describe('handleSearchFormSubmit', () => {
       timeout(3000) // Add a timeout to allow fetchData to complete
     ]);
     expect(store.state.geocode.data.properties.street_address).toEqual('3674 RICHMOND ST');
-    expect(store.state.parcels.dor.activeParcel).toEqual(572173);
+    expect(store.state.parcels.dor.activeMapreg).toEqual("027N060009");
     expect(store.state.parcels.pwd.properties.BRT_ID).toEqual("882733200");
     expect(store.state.sources.opa.data.depth).toEqual('223.75');
     expect(store.state.sources.opa.data.zoning).toEqual('ICMX ');
