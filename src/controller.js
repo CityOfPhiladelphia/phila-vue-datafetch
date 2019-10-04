@@ -63,6 +63,10 @@ class Controller {
     this.dataManager.fetchMoreData(dataSource, highestPageRetrieved);
   }
 
+  resetGeocode() {
+    this.dataManager.resetGeocode();
+  }
+
   // filterInputSubmit(value, process, searchCategory) {
   //   console.log('controller filterInputSubmit is running, value:', value, 'process:', process);
   //   if (process === 'mapboard') {
