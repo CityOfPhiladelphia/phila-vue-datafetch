@@ -73,8 +73,7 @@ describe('handleSearchFormSubmit', () => {
       ]);
 
     expect(store.state.geocode.data.properties.street_address).toEqual('5945 LAWNDALE ST');
-    expect(store.state.parcels.dor.activeMapreg).toEqual("jjj");
-    // expect(store.state.parcels.dor.activeMapreg).toEqual("137N230256");
+    expect(store.state.parcels.dor.activeMapreg).toEqual("137N230256");
     expect(store.state.parcels.pwd.properties.BRT_ID).toEqual("352322900");
     expect(store.state.sources.opa.data.depth).toEqual("65");
   });
