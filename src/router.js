@@ -33,11 +33,7 @@ class Router {
   }
 
   activeParcelLayer() {
-    if (this.config.map) {
-      return this.activeTopicConfig().parcels || this.config.map.defaultBasemap;
-    } else {
-      return this.activeTopicConfig().parcels;
-    }
+    return this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
@@ -145,7 +141,9 @@ class Router {
     }
 
     if (nextAddress && nextAddress !== 'addr noaddress') {
-      this.routeToAddress(nextAddress);
+      console.log('router hashChanged calling controller.handleSearchFormSubmit')
+      // this.routeToAddress(nextAddress);
+      this.controller.handleSearchFormSubmit(nextAddress);
     }
 
     // if (nextKeyword) {
@@ -182,8 +180,11 @@ class Router {
 
       // if the hash address is different, geocode
       if (!prevAddress || nextAddress !== prevAddress) {
+        // should this call the geocode client directly?
         this.dataManager.geocode(nextAddress, searchCategory);
       }
+
+      return prevAddress;
     }
   }
 
@@ -196,6 +197,7 @@ class Router {
 
   routeToOwner(nextOwner, searchCategory) {
     if (nextOwner) {
+      // should this call the geocode client directly?
       this.dataManager.geocode(nextOwner, searchCategory);
     }
   }
@@ -250,10 +252,6 @@ class Router {
   //   }
   // }
 
-  configForBasemap(key) {
-    return this.config.map.basemaps[key];
-  }
-
   routeToModal(selectedModal) {
     console.log('routeToModal is running, selectedModal:', selectedModal);
     this.store.commit('setDidToggleModal', selectedModal);
@@ -268,22 +266,6 @@ class Router {
     if (!prevTopic || prevTopic !== nextTopic) {
       this.store.commit('setActiveTopic', nextTopic);
       this.store.commit('setActiveParcelLayer', this.activeParcelLayer());
-
-      if (this.store.state.map) {
-        const prevBasemap = this.store.state.map.basemap || null;
-        const nextTopicConfig = this.config.topics.filter(topic => {
-          return topic.key === nextTopic;
-        })[0] || {};
-        const nextBasemap = nextTopicConfig.parcels;
-        const nextImagery = nextTopicConfig.imagery;
-        if (prevBasemap !== nextBasemap) {
-          this.store.commit('setBasemap', nextTopicConfig.parcels);
-        }
-        if (nextImagery) {
-          this.store.commit('setShouldShowImagery', true);
-          this.store.commit('setImagery', nextImagery);
-        }
-      }
     }
 
     if (!this.silent) {
@@ -296,11 +278,13 @@ class Router {
   }
 
   // this is almost just the same thing as any of the routeTo... functions above
-  didGeocode() {
+  // TODO this could have a name that is more declarative like "changeURL" (used to be called "didGeocode")
+
+  setRouteByGeocode() {
     const geocodeData = this.store.state.geocode.data;
 
     // make hash if there is geocode data
-    // console.log('Router.didGeocode running - geocodeData:', geocodeData);
+    console.log('router setRouteByGeocode is running - geocodeData:', geocodeData);
     if (geocodeData) {
       let address;
 
@@ -310,6 +294,7 @@ class Router {
         address = geocodeData.properties.street_address;
       }
 
+      // TODO - datafetch should not know topics are a thing
       if (this.config.router.returnToDefaultTopicOnGeocode) {
         this.store.commit('setActiveTopic', this.config.defaultTopic);
       }
@@ -328,10 +313,9 @@ class Router {
         // address = 'addr ' + address;
         if (topic) {
           nextHash = this.makeHash(address, topic);
+        } else {
+          nextHash = this.makeHash(address, '');
         }
-        // else {
-        //   nextHash = this.makeHash(address, selectedServices);
-        // }
         // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
         this.history.pushState(nextHistoryState, null, nextHash);
       }

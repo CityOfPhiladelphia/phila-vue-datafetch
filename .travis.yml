@@ -1,8 +1,10 @@
 language: node_js
 node_js:
   - node
-script: npm run build
+script:
+  - npm run test
 before_deploy:
+  - npm run build
   - rm -rf node_modules
   # - source ./.travis/s3_utils.sh
   # - S3_BUCKET=$(get_s3_bucket)
