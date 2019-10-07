@@ -1,7 +1,7 @@
 {
-  "name": "@philly/pvd",
+  "name": "@philly/vue-datafetch",
   "description": "the infrastructure needed for fetching data for a vue app",
-  "version": "0.0.22",
+  "version": "0.0.25",
   "author": "City of Philadelphia <maps@phila.gov>",
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -17,8 +17,8 @@
     "https-proxy-agent": "^2.2.2",
     "leaflet": "^1.4.0",
     "proj4": "^2.5.0",
-    "vue": "^2.6.9",
-    "vuex": "^3.0.1"
+    "vue": "^2.6.10",
+    "vuex": "^3.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.6.0",
