@@ -92,6 +92,9 @@ class Controller {
       this.store.commit('setGeocodeInput', input);
     } else if (searchCategory === 'owner') {
       this.store.commit('setOwnerSearchInput', input);
+    } else if (searchCategory === 'keyword') {
+      // console.log('initializeStatuses with searchCategory keyword');
+      this.router.routeToKeyword(input);
     }
     if (this.store.state.lastSearchMethod) {
       this.store.commit('setLastSearchMethod', 'geocode');
@@ -138,6 +141,9 @@ class Controller {
     this.dataManager.resetData();
 
     this.initializeStatuses(value, searchCategory);
+    if(searchCategory === "keyword") {
+      return;
+    }
     // console.log('after await initializeStatuses is running');
 
     // TODO rename to aisResponse

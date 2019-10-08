@@ -202,9 +202,6 @@ class Router {
     }
   }
 
-  // this is for routing to a first parameter OTHER than an address
-  // it inherits and passes the first parameter, it handles entering a string
-  // it is guaranteed that the second parameter is "selectedServices"
   routeToKeyword(nextKeywords) {
     console.log('in router.js routeToKeyword, nextKeywords:', nextKeywords);
     let values = nextKeywords.split(',');
