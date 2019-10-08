@@ -33,7 +33,11 @@ class Router {
   }
 
   activeParcelLayer() {
-    return this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
+    if (this.config.parcels) {
+      return this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
+    } else {
+      return null;
+    }
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
