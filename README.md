@@ -19,6 +19,10 @@ Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/w
 
 ## Release Notes
 
+### 0.0.27 - 10/8/2019
+
+* small bug fixes, including working with keywords from a ComboSearch and handling topics when there are no parcels layers in state
+
 ### 0.0.26 - 10/7/2019
 
 * Monthly package upgrades, merges in changes made for restructuring
