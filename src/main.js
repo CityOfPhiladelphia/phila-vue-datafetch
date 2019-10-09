@@ -7,7 +7,7 @@ function controllerMixin(Vue, opts) {
   Vue.mixin({
     created() {
       this.$controller = controller;
-    }
+    },
   });
 }
 

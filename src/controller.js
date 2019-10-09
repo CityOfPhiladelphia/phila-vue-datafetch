@@ -8,13 +8,14 @@ import Vue from 'vue';
 import Router from './router';
 import DataManager from './data-manager';
 
+import * as L from 'leaflet';
 import { query as Query } from 'esri-leaflet';
 
 import {
   GeocodeClient,
   OwnerSearchClient,
   HttpClient,
-  EsriClient
+  EsriClient,
 } from './clients';
 
 // console.log('controller.js is being read')
@@ -115,8 +116,8 @@ class Controller {
         payload = {
           parcelLayer: parcelLayer,
           multipleAllowed,
-          data: null
-        }
+          data: null,
+        };
       // dor
       } else {
         payload = {
@@ -126,8 +127,8 @@ class Controller {
           status: null,
           activeParcel: null,
           activeAddress: null,
-          activeMapreg: null
-        }
+          activeMapreg: null,
+        };
       }
       // update state
       this.store.commit('setParcelData', payload);
@@ -147,13 +148,13 @@ class Controller {
     // console.log('after await initializeStatuses is running');
 
     // TODO rename to aisResponse
-    let aisResponse = await this.clients.geocode.fetch(value)
-    console.log('after await aisResponse:', aisResponse)//, 'this.clients:', this.clients);
+    let aisResponse = await this.clients.geocode.fetch(value);
+    console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
 
     this.router.setRouteByGeocode();
 
     // TODO
-    const {activeParcelLayer, lastSearchMethod} = this.store.state;
+    const { activeParcelLayer, lastSearchMethod } = this.store.state;
     const parcelLayers = Object.keys(this.config.parcels || {});
 
     // if it is a dor parcel query, and the geocode fails, coordinates can still be used
@@ -165,7 +166,9 @@ class Controller {
     // (unless it fails and you are allowed to get them by LatLng on failure)
     let theParcels = [];
     let response;
-    if (!aisResponse) { return }
+    if (!aisResponse) {
+      return;
+    }
 
     console.log('right before loop');
 
@@ -173,7 +176,7 @@ class Controller {
     for (let parcelLayer of parcelLayers) {
       console.log('in loop, parcelLayer:', parcelLayer);
       const configForParcelLayer = this.config.parcels[parcelLayer];
-      const parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder
+      const parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder;
       const parcelId = aisResponse.properties[parcelIdInGeocoder];
       if (parcelId && parcelId.length > 0) {
         response = await this.dataManager.getParcelsById(parcelId, parcelLayer);
@@ -185,7 +188,7 @@ class Controller {
           console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
           // TODO update getParcelByLAtLng to return parcels
           const coords = aisResponse.geometry.coordinates;
-          let [lng, lat] = coords;
+          let [ lng, lat ] = coords;
           const latlng = L.latLng(lat, lng);
           response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
           theParcels.push(response);
@@ -240,7 +243,7 @@ class Controller {
     // 1. wipe out state data on other parcels
     // 2. attempt to replace
 
-    let aisResponse = await this.clients.geocode.fetch(id)
+    let aisResponse = await this.clients.geocode.fetch(id);
     console.log('after await aisResponse:', aisResponse);
 
     this.router.setRouteByGeocode();
@@ -286,7 +289,9 @@ class Controller {
     const el = els.length === 1 && els[0];
 
     // handle null el - this shouldn't happen, but just in case
-    if (!el) return;
+    if (!el) {
+      return;
+    }
 
     Vue.nextTick(() => {
       // REVIEW this check is returning true even when the header el isn't
@@ -295,7 +300,7 @@ class Controller {
       // const visible = this.isElementInViewport(el);
 
       // if (!visible) {
-        el.scrollIntoView();
+      el.scrollIntoView();
       // }
     });
   }
@@ -312,10 +317,10 @@ function controllerMixin(Vue, opts) {
   Vue.mixin({
     created() {
       this.$controller = controller;
-    }
+    },
   });
 }
 
 // export { Controller, controllerMixin }
-export default controllerMixin
-export { Controller }
+export default controllerMixin;
+export { Controller };

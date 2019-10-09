@@ -6,7 +6,9 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "test": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles",
+    "lint": "vue-cli-service lint",
+    "lintFix": "vue-cli-service lint --fix"
   },
   "main": "./src/main.js",
   "dependencies": {
@@ -23,10 +25,16 @@
   "devDependencies": {
     "@babel/core": "^7.6.0",
     "@babel/preset-env": "^7.6.0",
-    "@vue/cli-plugin-babel": "^3.0.5",
-    "@vue/cli-service": "^3.0.5",
+    "@vue/cli-plugin-babel": "^3.11.0",
+    "@vue/cli-plugin-eslint": "^3.11.0",
+    "@vue/cli-service": "^3.11.0",
+    "@vue/eslint-config-standard": "^4.0.0",
+    "babel-eslint": "^10.0.3",
     "babel-jest": "^24.9.0",
+    "eslint": "^6.5.1",
+    "eslint-plugin-vue": "^5.2.3",
     "jest": "^24.9.0",
+    "lint-staged": "^9.4.2",
     "vue-template-compiler": "^2.6.9",
     "webpack-visualizer-plugin": "^0.1.11"
   },
@@ -39,5 +47,14 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,vue}": [
+      "vue-cli-service lint",
+      "git add"
+    ]
+  }
 }

@@ -35,9 +35,9 @@ class Router {
   activeParcelLayer() {
     if (this.config.parcels) {
       return this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
-    } else {
-      return null;
-    }
+    } 
+    return null;
+    
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
@@ -53,20 +53,20 @@ class Router {
       if (Array.isArray(secondRouteParameter)) {
         console.log('secondRouteParameter is an Array');
         if (secondRouteParameter.length > 1) {
-          console.log('secondRouteParameter is an Array and length is greater than 1')
-          for (let [index, topicOrService] of secondRouteParameter.entries()) {
+          console.log('secondRouteParameter is an Array and length is greater than 1');
+          for (let [ index, topicOrService ] of secondRouteParameter.entries()) {
             console.log('topicOrService:', topicOrService, 'index:', index);
-            hash += `${encodeURIComponent(topicOrService)}`
+            hash += `${encodeURIComponent(topicOrService)}`;
             if (index < secondRouteParameter.length - 1) {
-              hash += `${encodeURIComponent(',')}`
+              hash += `${encodeURIComponent(',')}`;
             }
           }
         } else {
-          console.log('secondRouteParameter is an Array and length is not greater than 1')
-          hash += `${encodeURIComponent(secondRouteParameter)}`
+          console.log('secondRouteParameter is an Array and length is not greater than 1');
+          hash += `${encodeURIComponent(secondRouteParameter)}`;
         }
       } else {
-        console.log('secondRouteParameter is not an array')
+        console.log('secondRouteParameter is not an array');
         hash += `${secondRouteParameter}`;
       }
     }
@@ -145,7 +145,7 @@ class Router {
     }
 
     if (nextAddress && nextAddress !== 'addr noaddress') {
-      console.log('router hashChanged calling controller.handleSearchFormSubmit')
+      console.log('router hashChanged calling controller.handleSearchFormSubmit');
       // this.routeToAddress(nextAddress);
       this.controller.handleSearchFormSubmit(nextAddress);
     }
@@ -308,7 +308,7 @@ class Router {
       if (!this.silent) {
         // push state
         const nextHistoryState = {
-          geocode: geocodeData
+          geocode: geocodeData,
         };
         let nextHash;
         // address = 'addr ' + address;

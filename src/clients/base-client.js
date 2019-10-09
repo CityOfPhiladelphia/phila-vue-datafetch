@@ -8,11 +8,13 @@ class BaseClient {
   evaluateParams(feature, dataSource) {
     // console.log('base-client evaluateParams is running')
     const params = {};
-    if (!dataSource.options.params) { return params };
+    if (!dataSource.options.params) {
+      return params; 
+    }
     const paramEntries = Object.entries(dataSource.options.params);
     const state = this.store.state;
 
-    for (let [key, valOrGetter] of paramEntries) {
+    for (let [ key, valOrGetter ] of paramEntries) {
       let val;
 
       if (typeof valOrGetter === 'function') {
@@ -40,8 +42,7 @@ class BaseClient {
       // console.log(dataSourceKey, feature);
       try {
         feature._featureId = id;
-      }
-      catch (e) {
+      } catch (e) {
         console.warn(e);
       }
       featuresWithIds.push(feature);
@@ -72,7 +73,7 @@ class BaseClient {
     };
     const setSourceStatusOpts = {
       key,
-      status
+      status,
     };
     if (targetId) {
       setSourceDataOpts.targetId = targetId;
@@ -84,7 +85,7 @@ class BaseClient {
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    console.log('171111 base-client js is calling fetchData()')
+    console.log('171111 base-client js is calling fetchData()');
     this.fetchData();
   }
 }

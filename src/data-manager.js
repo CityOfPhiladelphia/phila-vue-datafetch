@@ -12,7 +12,7 @@ import {
   GeocodeClient,
   OwnerSearchClient,
   HttpClient,
-  EsriClient
+  EsriClient,
 } from './clients';
 
 class DataManager {
@@ -66,19 +66,19 @@ class DataManager {
     // update secondary status to `waiting`
     const setSecondarySourceStatusOpts = {
       key: dataSourceKey,
-      secondaryStatus: 'waiting'
+      secondaryStatus: 'waiting',
     };
     this.store.commit('setSecondarySourceStatus', setSecondarySourceStatusOpts);
     console.log('INCREMENT - datamanager get 100 More was clicked, type', type, 'dataSource', dataSource, 'highestPageRetrieved', highestPageRetrieved);
 
     switch(type) {
-      case 'http-get':
-        console.log('INCREMENT - http-get', dataSourceKey);
-        this.clients.http.fetchMore(feature,
-                                dataSource,
-                                dataSourceKey,
-                                highestPageRetrieved);
-        break;
+    case 'http-get':
+      console.log('INCREMENT - http-get', dataSourceKey);
+      this.clients.http.fetchMore(feature,
+        dataSource,
+        dataSourceKey,
+        highestPageRetrieved);
+      break;
     }
   }
 
@@ -100,11 +100,11 @@ class DataManager {
     const setSourceDataOpts = {
       key,
       data: stateData,
-      page: nextPage
+      page: nextPage,
     };
     const setSecondarySourceStatusOpts = {
       key,
-      secondaryStatus
+      secondaryStatus,
     };
 
     console.log('nextPage', nextPage, 'setSourceDataOpts', setSourceDataOpts);
@@ -134,7 +134,7 @@ class DataManager {
 
     let dataSources = {};
     if (doPins) {
-      console.log('fetchData is running on pins')
+      console.log('fetchData is running on pins');
       dataSources = this.config.pinSources || {};
     } else {
       dataSources = this.config.dataSources || {};
@@ -150,13 +150,13 @@ class DataManager {
             return true;
           }
         }
-      })
+      });
     }
     // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
-    for (let [dataSourceKey, dataSource] of dataSourceKeys) {
+    for (let [ dataSourceKey, dataSource ] of dataSourceKeys) {
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
@@ -196,7 +196,7 @@ class DataManager {
           // console.log('should create targets', targetIds, stateTargetIds);
           this.store.commit('createEmptySourceTargets', {
             key: dataSourceKey,
-            targetIds
+            targetIds,
           });
         }
 
@@ -204,7 +204,7 @@ class DataManager {
           throw new Error('Data source targets getter should return an array');
         }
       } else {
-        targets = [geocodeObj];
+        targets = [ geocodeObj ];
       }
 
       // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
@@ -228,7 +228,7 @@ class DataManager {
         // update status to `waiting`
         const setSourceStatusOpts = {
           key: dataSourceKey,
-          status: 'waiting'
+          status: 'waiting',
         };
         if (targetId) {
           setSourceStatusOpts.targetId = targetId;
@@ -239,38 +239,36 @@ class DataManager {
 
         // TODO do this for all targets
         switch(type) {
-          case 'http-get':
-            // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
-            this.clients.http.fetch(target,
-                                    dataSource,
-                                    dataSourceKey,
-                                    targetIdFn);
-            break;
+        case 'http-get':
+          // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+          this.clients.http.fetch(target,
+            dataSource,
+            dataSourceKey,
+            targetIdFn);
+          break;
 
-          case 'http-get-nearby':
+        case 'http-get-nearby':
           // console.log('http-get-nearby', dataSourceKey, targetIdFn)
-            this.clients.http.fetchNearby(target,
-                                          dataSource,
-                                          dataSourceKey,
-                                          targetIdFn);
-            break;
+          this.clients.http.fetchNearby(target,
+            dataSource,
+            dataSourceKey,
+            targetIdFn);
+          break;
 
-          case 'esri':
-            // console.log('esri', dataSourceKey)
-            // TODO add targets id fn
-            this.clients.esri.fetch(target, dataSource, dataSourceKey);
-            break;
+        case 'esri':
+          // console.log('esri', dataSourceKey)
+          // TODO add targets id fn
+          this.clients.esri.fetch(target, dataSource, dataSourceKey);
+          break;
 
-            break;
-          case 'esri-nearby':
-            // console.log('esri-nearby', dataSourceKey)
-            // TODO add targets id fn
-            this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
-            break;
+        case 'esri-nearby':
+          // console.log('esri-nearby', dataSourceKey)
+          // TODO add targets id fn
+          this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
+          break;
 
-          default:
-            throw `Unknown data source type: ${type}`;
-            break;
+        default:
+          throw `Unknown data source type: ${type}`;
         }  // end of switch
       }  // end of for targets loop
       // console.log('end of targets loop for', dataSourceKey);
@@ -306,7 +304,7 @@ class DataManager {
     };
     const setSourceStatusOpts = {
       key,
-      status
+      status,
     };
     if (targetId) {
       setSourceDataOpts.targetId = targetId;
@@ -334,17 +332,17 @@ class DataManager {
         // null out existing data in state
         if (targetsDef) {
           this.store.commit('clearSourceTargets', {
-            key: dataSourceKey
+            key: dataSourceKey,
           });
         } else {
           this.store.commit('setSourceData', {
             key: dataSourceKey,
-            data: null
-          })
+            data: null,
+          });
           this.store.commit('setSourceStatus', {
             key: dataSourceKey,
-            status: null
-          })
+            status: null,
+          });
         }
       }
     }
@@ -369,12 +367,12 @@ class DataManager {
         status: null,
         activeParcel: null,
         activeAddress: null,
-        activeMapreg: null
+        activeMapreg: null,
       });
       this.store.commit('setParcelData', {
         parcelLayer: 'pwd',
         multipleAllowed: false,
-        data: null
+        data: null,
       });
       this.store.commit('setActiveParcelLayer', 'pwd');
     }
@@ -466,8 +464,7 @@ class DataManager {
       // console.log(dataSourceKey, feature);
       try {
         feature._featureId = id;
-      }
-      catch (e) {
+      } catch (e) {
         console.warn(e);
       }
       featuresWithIds.push(feature);
@@ -481,8 +478,8 @@ class DataManager {
   geocode(input, category) {
     console.log('data-manager geocode is running, input:', input, 'category:', category);
     // if (category === 'address') {
-      // const didGeocode = this.didGeocode.bind(this);
-    return this.clients.geocode.fetch(input)//.then(didGeocode);
+    // const didGeocode = this.didGeocode.bind(this);
+    return this.clients.geocode.fetch(input);//.then(didGeocode);
     // } else if (category === 'owner') {
     //   // console.log('category is owner');
     //   const didOwnerSearch = this.didOwnerSearch.bind(this);
@@ -508,8 +505,8 @@ class DataManager {
       if (this.config.onGeocodeFail) {
         console.log('onGeocodeFail exists');
         let feature = {
-          properties: {}
-        }
+          properties: {},
+        };
         feature.properties.opa_account_num = this.store.state.geocode.input;
         this.resetData();
         this.fetchData(feature);
@@ -554,8 +551,11 @@ class DataManager {
     parcelQuery.where(geocodeField + " = '" + id + "'");
     return new Promise(function(resolve, reject) {
       parcelQuery.run((function(error, featureCollection, response) {
-        if (error) reject(error);
-        else resolve(response);
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
       }));
     });
   }
@@ -568,8 +568,11 @@ class DataManager {
     parcelQuery.contains(latLng);
     return new Promise(function(resolve, reject) {
       parcelQuery.run((function(error, featureCollection, response) {
-        if (error) reject(error);
-        else resolve(response);
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
       }));
     });
   }
@@ -614,8 +617,8 @@ class DataManager {
       payload = {
         parcelLayer,
         multipleAllowed,
-        data: feature
-      }
+        data: feature,
+      };
     // dor
     } else {
       payload = {
@@ -628,8 +631,8 @@ class DataManager {
         // longer available
         // activeAddress: feature ? concatDorAddress(feature) : null,
         activeAddress: null,
-        activeMapreg: feature ? feature.properties.MAPREG : null
-      }
+        activeMapreg: feature ? feature.properties.MAPREG : null,
+      };
     }
     // update state
     this.store.commit('setParcelData', payload);

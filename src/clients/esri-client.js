@@ -77,7 +77,7 @@ class EsriClient extends BaseClient {
     // params.geometries = `[${feature.geometry.coordinates.join(', ')}]`
     // TODO get some of these values from map, etc.
     const coords = feature.geometry.coordinates;
-    const coords2272 = proj4(projection4326, projection2272, [coords[0], coords[1]]);
+    const coords2272 = proj4(projection4326, projection2272, [ coords[0], coords[1] ]);
     // console.log('coords:', coords, 'coords2272:', coords2272);
     const params = {
       // geometries: feature => '[' + feature.geometry.coordinates[0] + ', ' + feature.geometry.coordinates[1] + ']',
@@ -118,7 +118,7 @@ class EsriClient extends BaseClient {
         return;
       }
 
-      const latLngCoords = xyCoords.map(xyCoord => [...xyCoord].reverse());
+      const latLngCoords = xyCoords.map(xyCoord => [ ...xyCoord ].reverse());
 
       // get nearby features using buffer
       const buffer = L.polygon(latLngCoords);
@@ -131,13 +131,13 @@ class EsriClient extends BaseClient {
       const parameters = {};
       // console.log('about to call fetchBySpatialQuery');
       this.fetchBySpatialQuery(dataSourceKey,
-                               dataSourceUrl,
-                               'within',
-                               buffer,
-                               parameters,
-                               options,
-                               calculateDistance ? coords : null
-                              );
+        dataSourceUrl,
+        'within',
+        buffer,
+        parameters,
+        options,
+        calculateDistance ? coords : null
+      );
     }, response => {
       // console.log('did fetch esri nearby error', response);
 
@@ -189,13 +189,13 @@ class EsriClient extends BaseClient {
             // console.log('feature:', feature, 'featureCoords[0]:', featureCoords[0]);
             let instance;
             if (feature.geometry.type === 'LineString') {
-              instance = lineString([featureCoords[0], featureCoords[1]], {name: 'line 1'});
+              instance = lineString([ featureCoords[0], featureCoords[1] ], { name: 'line 1' });
             } else {
-              instance = polygon([featureCoords[0]]);
+              instance = polygon([ featureCoords[0] ]);
             }
-              const vertices = explode(instance)
-              const closestVertex = nearest(from, vertices);
-              dist = distance(from, closestVertex, { units: 'miles' })
+            const vertices = explode(instance);
+            const closestVertex = nearest(from, vertices);
+            dist = distance(from, closestVertex, { units: 'miles' });
           } else {
             const to = point(featureCoords);
             dist = distance(from, to, { units: 'miles' });
@@ -208,7 +208,7 @@ class EsriClient extends BaseClient {
           feature._distance = distFeet;
 
           return feature;
-        })
+        });
       }
 
       this.dataManager.didFetchData(dataSourceKey, status, features);

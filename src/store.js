@@ -41,16 +41,16 @@ const pvdStore = {
       // if the source has targets, just set it to be an empty object
       if (config.dataSources[key].targets) {
         val = {
-          targets: {}
+          targets: {},
         };
       } else {
         val = {
-         // we have to define these here, because vue can't observe properties that
-         // are added later.
-         status: null,
-         secondaryStatus: null,
-         data: null
-       };
+          // we have to define these here, because vue can't observe properties that
+          // are added later.
+          status: null,
+          secondaryStatus: null,
+          data: null,
+        };
       }
 
       o[key] = val;
@@ -68,16 +68,16 @@ const pvdStore = {
       // if the source has targets, just set it to be an empty object
       if (config.pinSources[key].targets) {
         val = {
-          targets: {}
+          targets: {},
         };
       } else {
         val = {
-         // we have to define these here, because vue can't observe properties that
-         // are added later.
-         status: null,
-         secondaryStatus: null,
-         data: null
-       };
+          // we have to define these here, because vue can't observe properties that
+          // are added later.
+          status: null,
+          secondaryStatus: null,
+          data: null,
+        };
       }
 
       o[key] = val;
@@ -97,7 +97,7 @@ const pvdStore = {
           status: null,
           activeParcel: null,
           activeAddress: null,
-          activeMapreg: null
+          activeMapreg: null,
         };
       } else {
         val = null;
@@ -206,11 +206,11 @@ const pvdStore = {
       },
       // this sets empty targets for a data source
       createEmptySourceTargets(state, payload) {
-        const {key, targetIds} = payload;
+        const { key, targetIds } = payload;
         state.sources[key].targets = targetIds.reduce((acc, targetId) => {
           acc[targetId] = {
             status: null,
-            data: null
+            data: null,
           };
           return acc;
         }, {});
@@ -264,8 +264,8 @@ const pvdStore = {
       setDidToggleModal(state, name) {
         state.modals.open = name;
       },
-    }
-  }
-}
+    },
+  },
+};
 
 export default pvdStore;

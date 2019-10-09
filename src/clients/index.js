@@ -7,5 +7,5 @@ export {
   GeocodeClient,
   OwnerSearchClient,
   HttpClient,
-  EsriClient
+  EsriClient,
 };

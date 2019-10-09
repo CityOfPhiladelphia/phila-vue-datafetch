@@ -7,7 +7,7 @@ import BaseClient from './base-client';
 class GeocodeClient extends BaseClient {
   // fetch(input, category) {
   async fetch(input) {
-    console.log('geocode client fetch', input)//, 'this.store:', this.store);
+    console.log('geocode client fetch', input);//, 'this.store:', this.store);
 
     const store = this.store;
     let geocodeConfig;
@@ -55,7 +55,7 @@ class GeocodeClient extends BaseClient {
     let feature = features[0];
     let relatedFeatures = [];
     for (let relatedFeature of features.slice(1)){
-      if (!!feature.properties.address_high) {
+      if (feature.properties.address_high) {
         if (relatedFeature.properties.address_high) {
           relatedFeatures.push(relatedFeature);
         }

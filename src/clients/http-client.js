@@ -129,25 +129,25 @@ class HttpClient extends BaseClient {
     if (dateMinNum) {
       // let subFn, addFn;
       switch (dateMinType) {
-        case 'hour':
-          subFn = subHours;
-          break;
-        case 'day':
-          subFn = subDays;
-          break;
-        case 'week':
-          subFn = subWeeks;
-          break;
-        case 'month':
-          subFn = subMonths;
-          break;
-        case 'year':
-          subFn = subYears;
-          break;
+      case 'hour':
+        subFn = subHours;
+        break;
+      case 'day':
+        subFn = subDays;
+        break;
+      case 'week':
+        subFn = subWeeks;
+        break;
+      case 'month':
+        subFn = subMonths;
+        break;
+      case 'year':
+        subFn = subYears;
+        break;
       }
 
       // let test = format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD');
-      params['q'] = params['q'] + " and " + dateField + " > '" + format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD') + "'"
+      params['q'] = params['q'] + " and " + dateField + " > '" + format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD') + "'";
     }
 
     // if the data is not dependent on other data
