@@ -19,6 +19,14 @@ Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/w
 
 ## Release Notes
 
+### 0.0.29 - 10/23/2019
+
+* fixes bug with date-fns due to upgrade
+
+### 0.0.28 - 10/22/2019
+
+* upgrades from dependabot
+
 ### 0.0.27 - 10/8/2019
 
 * small bug fixes, including working with keywords from a ComboSearch and handling topics when there are no parcels layers in state

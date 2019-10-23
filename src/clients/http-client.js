@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { format, subHours, addHours, subDays, addDays, subWeeks, addWeeks, subMonths, addMonths, subYears, addYears, isWithinRange } from 'date-fns';
+import { format, subHours, addHours, subDays, addDays, subWeeks, addWeeks, subMonths, addMonths, subYears, addYears } from 'date-fns';
 import BaseClient from './base-client';
 
 class HttpClient extends BaseClient {
