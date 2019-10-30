@@ -6,10 +6,10 @@ class BaseClient {
   }
 
   evaluateParams(feature, dataSource) {
-    // console.log('base-client evaluateParams is running')
+    console.log('base-client evaluateParams is running, feature:', feature, 'dataSource:', dataSource);
     const params = {};
     if (!dataSource.options.params) {
-      return params; 
+      return params;
     }
     const paramEntries = Object.entries(dataSource.options.params);
     const state = this.store.state;
@@ -18,6 +18,7 @@ class BaseClient {
       let val;
 
       if (typeof valOrGetter === 'function') {
+        console.log('valOrGetter is a function:', valOrGetter);
         val = valOrGetter(feature, state);
       } else {
         val = valOrGetter;
