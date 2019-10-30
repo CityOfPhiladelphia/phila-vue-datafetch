@@ -21,6 +21,21 @@ const initialState = {
     data: null,
     input: null,
   },
+  activeSearch: {
+  },
+  bufferSearch: {
+    status: null,
+    data: null,
+    input: null,
+  },
+  shapeSearch: {
+    status: null,
+    data: null,
+    input: null,
+  },
+  condoUnits: {
+    units: null,
+  },
   searchType: 'address',
   lastSearchMethod: 'geocode',
   modals: {
@@ -86,12 +101,26 @@ const pvdStore = {
     }, {});
     return sources;
   },
+  createActivesearch(config) {
+    // console.log('createSources is running, config:', config);
+    const sourceKeys = Object.keys(config.activeSearch || {});
+    const sources = sourceKeys.reduce((o, key) => {
+      let val = {
+        status: null,
+        data: null,
+      };
+      o[key] = val;
+      return o;
+    }, {});
+    return sources;
+  },
 
   createParcels(config) {
+    console.log('createParcels is running, config:', config);
     const parcelKeys = Object.keys(config.parcels || {});
     const parcels = parcelKeys.reduce((o, key) => {
       let val;
-      if (config.parcels[key].multipleAllowed) {
+      if (config.parcels[key].multipleAllowed && config.parcels[key].mapregStuff) {
         val = {
           data: [],
           status: null,
@@ -99,7 +128,9 @@ const pvdStore = {
           activeAddress: null,
           activeMapreg: null,
         };
+        console.log('if mapregStuff section running, key:', key, 'val:', val);
       } else {
+        console.log('else mapregStuff section running, key:', key);
         val = null;
         // val = {
         //   geometry: null,
@@ -109,10 +140,13 @@ const pvdStore = {
         // };
       }
 
+      console.log('o:', o, 'key:', key, 'val:', val, 'typeof val:', typeof val);
       o[key] = val;
+      console.log('o:', o, 'key:', key, 'val:', val);
 
       return o;
     }, {});
+    console.log('end of createParcels, parcels:', parcels);
     return parcels;
   },
 
@@ -206,6 +240,7 @@ const pvdStore = {
       },
       // this sets empty targets for a data source
       createEmptySourceTargets(state, payload) {
+        console.log('createEmptySourceTargets is running');
         const { key, targetIds } = payload;
         state.sources[key].targets = targetIds.reduce((acc, targetId) => {
           acc[targetId] = {
@@ -221,10 +256,10 @@ const pvdStore = {
       },
       // this is the map center as an xy coordinate array (not latlng)
       setParcelData(state, payload) {
-        // console.log('store setParcelData payload:', payload);
-        const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg } = payload || {};
-        // console.log('store setParcelData parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
-        if (!multipleAllowed) {
+        console.log('store setParcelData payload:', payload);
+        const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg, mapregStuff } = payload || {};
+        console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
+        if (!multipleAllowed || !mapregStuff) {
           state.parcels[parcelLayer] = data;
         } else {
           state.parcels[parcelLayer].data = data;

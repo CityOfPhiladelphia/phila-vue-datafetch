@@ -22,7 +22,7 @@ import {
 
 class Controller {
   constructor(opts) {
-    // console.log('in Controller constructor, opts:', opts);
+    console.log('in Controller constructor, opts:', opts);
     const store = this.store = opts.store;
     const config = this.config = opts.config;
     this.history = window.history;
@@ -88,6 +88,7 @@ class Controller {
   // }
 
   initializeStatuses(input, searchCategory) {
+    console.log('initializeStatuses is running');
     this.store.commit('setGeocodeStatus', null);
     if (!searchCategory || searchCategory === 'address') {
       this.store.commit('setGeocodeInput', input);
@@ -110,12 +111,15 @@ class Controller {
     for (let parcelLayer of parcelLayers) {
       const configForParcelLayer = this.config.parcels[parcelLayer];
       const multipleAllowed = configForParcelLayer.multipleAllowed;
+      const mapregStuff = configForParcelLayer.mapregStuff;
+      console.log('in initializeStatuses, mapregStuff:', mapregStuff);
       let payload;
       // pwd
-      if (!multipleAllowed) {
+      if (!multipleAllowed || !mapregStuff) {
         payload = {
           parcelLayer: parcelLayer,
           multipleAllowed,
+          mapregStuff,
           data: null,
         };
       // dor
@@ -123,6 +127,7 @@ class Controller {
         payload = {
           parcelLayer: parcelLayer,
           multipleAllowed,
+          mapregStuff,
           data: [],
           status: null,
           activeParcel: null,
@@ -255,18 +260,20 @@ class Controller {
     const otherParcelLayers = Object.keys(this.config.parcels || {});
     otherParcelLayers.splice(otherParcelLayers.indexOf(activeParcelLayer), 1);
     for (let otherParcelLayer of otherParcelLayers) {
-      // console.log('for let otherParcelLayer of otherParcelLayers is running');
       const configForOtherParcelLayer = this.config.parcels[otherParcelLayer];
+      console.log('for let otherParcelLayer of otherParcelLayers is running, configForOtherParcelLayer:', configForOtherParcelLayer);
       const otherMultipleAllowed = configForOtherParcelLayer.multipleAllowed;
+      const otherMapregStuff = configForOtherParcelLayer.mapregStuff;
 
       // is tbis line necessary?
-      this.dataManager.setParcelsInState(otherParcelLayer, otherMultipleAllowed, null, []);
+      this.dataManager.setParcelsInState(otherParcelLayer, otherMultipleAllowed, null, [], otherMapregStuff);
 
       let otherResponse = await this.dataManager.getParcelsByLatLng(latLng, otherParcelLayer, 'noFetch');
       this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
     }
 
     // this.dataManager.resetData();
+    console.log('getting to end of handleMapClick, calling fetchData');
     this.dataManager.fetchData();
   }
 
@@ -312,6 +319,7 @@ class Controller {
 }
 
 function controllerMixin(Vue, opts) {
+  console.log('function controllerMixin is running, opts:', opts);
   const controller = new Controller(opts);
 
   Vue.mixin({

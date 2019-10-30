@@ -3,31 +3,72 @@ import { format, subHours, addHours, subDays, addDays, subWeeks, addWeeks, subMo
 import BaseClient from './base-client';
 
 class HttpClient extends BaseClient {
-  // evaluateParams(feature, dataSource) {
-  //   console.log('http-client evaluateParams is running');
-  //   const params = {};
-  //   if (!dataSource.options.params) { return params };
-  //   const paramEntries = Object.entries(dataSource.options.params);
-  //   const state = this.store.state;
+
+  // fetchDataInSegments(feature, dataSource, dataSourceKey, targetIdFn, params) {
+  //   // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
   //
-  //   for (let [key, valOrGetter] of paramEntries) {
-  //     let val;
+  //   let featureArr = feature.split(',');
+  //   // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length)
+  //   // Divide feature into groups of 200 so the url won't create an error
   //
-  //     if (typeof valOrGetter === 'function') {
-  //       val = valOrGetter(feature, state);
-  //     } else {
-  //       val = valOrGetter;
-  //     }
+  //   let featuresObj = [];
+  //   let featuresLength = featureArr.length,
+  //     chunk = 200,
+  //     subset;
   //
-  //     params[key] = val;
+  //   for (let i = 0; i < featuresLength; i += chunk) {
+  //     subset = featureArr.slice(i, i + chunk);
+  //     // output DIV with 12 items
+  //     featuresObj.push(subset);
   //   }
   //
-  //   return params;
+  //   // console.log("subset: ", subset)
+  //   // console.log("featuresObj: ", featuresObj)
+  //
+  //   let data = [], targetId =[];
+  //   let url = dataSource.url;
+  //   const options = dataSource.options;
+  //   const urlAddition = params.urlAddition;
+  //
+  //   if (urlAddition) {
+  //     url += encodeURIComponent(urlAddition);
+  //     // url += encodeURIComponent(urlAddition.properties.street_address);
+  //   }
+  //   // console.log('url', url);
+  //   const successFn = options.success;
+  //
+  //   let responseResult = [];
+  //
+  //   async function getDataBySegments() {
+  //     const allFeaturesReturned = await featuresObj.map( async features => {
+  //       // if the data is not dependent on other data
+  //
+  //       let params = this.evaluateParams(features, dataSource);
+  //       let featureResponse = await axios.get(url, { params });
+  //       data = await data.concat(successFn(featureResponse.data));
+  //
+  //       if (targetIdFn) {
+  //         targetId = targetIdFn(feature);
+  //         // console.log('in http-client, targetIdFn:', targetIdFn, 'feature:', feature, 'targetId:', targetId);
+  //       }
+  //     });
+  //
+  //     let promisesFinished = await Promise.all(allFeaturesReturned);
+  //
+  //     this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
+  //   }
+  //
+  //   getDataBySegments = getDataBySegments.bind(this);
+  //
+  //   // return getDataBySegments();
+  //   let final = getDataBySegments();
+  //   return final;
   // }
+
 
   fetch(feature, dataSource, dataSourceKey, targetIdFn) {
     let params = this.evaluateParams(feature, dataSource);
-    // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
     let url = dataSource.url;
     const options = dataSource.options;
     const urlAddition = params.urlAddition;

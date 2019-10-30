@@ -114,10 +114,78 @@ class DataManager {
   }
 
 
+  defineTargets(dataSourceKey, targetsDef) {
+    console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
+    const state = this.store.state;
+    // targets may cause a looped axios call, or may just call one once and get multiple results
+    let targetsFn = targetsDef.get;
+    // let targetIdFn = targetsDef.getTargetId;
+
+    if (typeof targetsFn !== 'function') {
+      throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
+    }
+    let targets = targetsFn(state);
+    let targetIdFn = targetsDef.getTargetId;
+
+    // console.log("Define Targets Starting", targets)
+    // check if target objs exist in state.
+    let targetIds;
+    if ( typeof targets.length != 'undefined'){
+      targetIds = targets.map(targetIdFn);
+    }
+    // console.log("targetIds: ", targetIds)
+    const stateTargets = state.sources[dataSourceKey].targets;
+    const stateTargetIds = Object.keys(stateTargets);
+    // the inclusion check wasn't working because ids were strings in
+    // one set and ints in another, so do this.
+    const stateTargetIdsStr = stateTargetIds.map(String);
+    let shouldCreateTargets;
+    if (targetsDef.runOnce) {
+      shouldCreateTargets = false;
+    } else {
+      shouldCreateTargets = !targetIds.every(targetId => {
+        const targetIdStr = String(targetId);
+        return stateTargetIdsStr.includes(targetIdStr);
+      });
+    }
+
+    console.log('in defineTargets, shouldCreateTargets:', shouldCreateTargets);
+
+    // if not, create them.
+    if (shouldCreateTargets) {
+      // console.log('should create targets', targetIds, stateTargetIds);
+      this.store.commit('createEmptySourceTargets', {
+        key: dataSourceKey,
+        targetIds,
+      });
+    }
+
+    if (!Array.isArray(targets)) {
+      throw new Error('Data source targets getter should return an array');
+    }
+
+    // this over-rides if the targets are set to "runOnce = true"
+    if (targetsDef.runOnce) {
+      let idsOfOwnersOrProps = "";
+      for (let target of targets) {
+        if(target.properties){
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
+        } else {
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.parcel_number + "',";
+        }
+      }
+      idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
+      targets = [ idsOfOwnersOrProps ];
+    }
+    // console.log("defineTargets targets: ", targets)
+    return targets;
+  }
+
   fetchData(optionalFeature) {
     // console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
+    let ownerSearchObj;
 
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
@@ -170,14 +238,36 @@ class DataManager {
       let targetIdFn;
       let targetsFn;
 
+
+
+      // if (targetsDef) {
+      //   targetsFn = targetsDef.get;
+      //   // console.log("targetsFn: ", targetsFn)
+      //   targetIdFn = targetsDef.getTargetId;
+      //   // targets = this.defineTargets(dataSourceKey, targetsDef);
+      //   targets = targetsFn(state);
+      //
+      // } else if (this.store.state.lastSearchMethod !== 'owner search') {
+      //   targets = [ geocodeObj ];
+      // } else {
+      //   targets = [ ownerSearchObj ][0];
+      // }
+
       if (targetsDef) {
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
+
+        // if (this.config.app) {
+        //   if (this.config.app.title === 'Property Data Explorer') {
+        //     targets = this.defineTargets(dataSourceKey, targetsDef);
+        //   }
+        // } else {
 
         if (typeof targetsFn !== 'function') {
           throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
         }
         targets = targetsFn(state);
+        // console.log('targetsFn:', targetsFn, 'targets:', targets);
 
         // check if target objs exist in state.
         const targetIds = targets.map(targetIdFn);
@@ -191,6 +281,8 @@ class DataManager {
           return stateTargetIdsStr.includes(targetIdStr);
         });
 
+        console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
+
         // if not, create them.
         if (shouldCreateTargets) {
           // console.log('should create targets', targetIds, stateTargetIds);
@@ -203,13 +295,18 @@ class DataManager {
         if (!Array.isArray(targets)) {
           throw new Error('Data source targets getter should return an array');
         }
+        // }
       } else {
         targets = [ geocodeObj ];
       }
 
+
+
+
       // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
+        console.log('fetchData, target:', target);
         // get id of target
         let targetId;
         if (targetIdFn) {
@@ -363,6 +460,7 @@ class DataManager {
       this.store.commit('setParcelData', {
         parcelLayer: 'dor',
         multipleAllowed: true,
+        mapregStuff: this.config.parcels.dor.mapregStuff,
         data: [],
         status: null,
         activeParcel: null,
@@ -372,6 +470,7 @@ class DataManager {
       this.store.commit('setParcelData', {
         parcelLayer: 'pwd',
         multipleAllowed: false,
+        mapregStuff: this.config.parcels.pwd.mapregStuff,
         data: null,
       });
       this.store.commit('setActiveParcelLayer', 'pwd');
@@ -580,6 +679,7 @@ class DataManager {
   processParcels(error, featureCollection, parcelLayer, fetch) {
     console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection);
     const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
+    const mapregStuff = this.config.parcels[parcelLayer].mapregStuff;
 
     if (error || !featureCollection || featureCollection.features.length === 0) {
       return;
@@ -606,17 +706,19 @@ class DataManager {
     }
 
     // at this point there is definitely a feature or features - put it in state
-    this.setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted);
+    this.setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff);
     return feature;
   }
 
-  setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted) {
+  setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff) {
+    console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'mapregStuff:', mapregStuff);
     let payload;
     // pwd
-    if (!multipleAllowed) {
+    if (!multipleAllowed || !mapregStuff) {
       payload = {
         parcelLayer,
         multipleAllowed,
+        mapregStuff,
         data: feature,
       };
     // dor
@@ -624,6 +726,7 @@ class DataManager {
       payload = {
         parcelLayer,
         multipleAllowed,
+        mapregStuff,
         data: featuresSorted,
         status: 'success',
         activeParcel: feature ? feature.id : null,

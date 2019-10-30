@@ -4263,7 +4263,7 @@ date-fns@^1.27.2:
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.30.1.tgz#2e71bf0b119153dbb4cc4e88d9ea5acfb50dc05c"
   integrity sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
 
-date-fns@^2.5.1:
+date-fns@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.6.0.tgz#a5bc82e6a4c3995ae124b0ba1a71aec7b8cbd666"
   integrity sha512-F55YxqRdEfP/eYQmQjLN798v0AwLjmZ8nMBjdQvNwEE3N/zWVrlkkqT+9seBlPlsbkybG4JmWg3Ee3dIV9BcGQ==
@@ -5026,7 +5026,7 @@ esrecurse@^4.1.0:
   dependencies:
     estraverse "^4.1.0"
 
-esri-leaflet@^2.2.3:
+esri-leaflet@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/esri-leaflet/-/esri-leaflet-2.3.1.tgz#f1b1724525e92260e4e71edf8abf1c4d62793cf3"
   integrity sha512-KboDAAsoEonyYlkW1keOov1XndDyM/qQwWlLdP26WhTMPH/S5QvYsKP9ueKsc73m90YmvXZqC5Qp4wv1m3Xtrw==
@@ -7261,7 +7261,7 @@ leaflet-virtual-grid@^1.0.7:
   dependencies:
     leaflet "^1.0.0"
 
-leaflet@^1.0.0, leaflet@^1.4.0:
+leaflet@^1.0.0, leaflet@^1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/leaflet/-/leaflet-1.5.1.tgz#9afb9d963d66c870066b1342e7a06f92840f46bf"
   integrity sha512-ekM9KAeG99tYisNBg0IzEywAlp0hYI5XRipsqRXyRTeuU8jcuntilpp+eFf5gaE0xubc9RuSNIVtByEKwqFV0w==
