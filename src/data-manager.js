@@ -187,9 +187,6 @@ class DataManager {
     let geocodeObj;
     let ownerSearchObj;
 
-    // this was added to allow fetchData to run even without a geocode result
-    // for the real estate tax site which sometimes needs data from TIPS
-    // even if the property is not in OPA and AIS
     let doPins = false;
     if (optionalFeature) {
       if (optionalFeature === "pins") {
@@ -211,6 +208,9 @@ class DataManager {
     let dataSourceKeys = Object.entries(dataSources);
     // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
+    // this was added to allow fetchData to run even without a geocode result
+    // for the real estate tax site which sometimes needs data from TIPS
+    // even if the property is not in OPA and AIS
     if (!geocodeObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
         if (dataSourceKey[1].dependent) {
@@ -273,9 +273,11 @@ class DataManager {
         const targetIds = targets.map(targetIdFn);
         const stateTargets = state.sources[dataSourceKey].targets;
         const stateTargetIds = Object.keys(stateTargets);
+
         // the inclusion check wasn't working because ids were strings in
         // one set and ints in another, so do this.
         const stateTargetIdsStr = stateTargetIds.map(String);
+
         const shouldCreateTargets = !targetIds.every(targetId => {
           const targetIdStr = String(targetId);
           return stateTargetIdsStr.includes(targetIdStr);

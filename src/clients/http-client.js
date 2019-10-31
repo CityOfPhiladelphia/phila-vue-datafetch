@@ -86,7 +86,9 @@ class HttpClient extends BaseClient {
 
     // if the data is not dependent on other data
     axios.get(url, { params }).then(response => {
-    // axios.get('http://data.phila.gov/resource/w7rb-qrn8.json?parcel_number=012099800%27').then(response => {
+
+      // console.log('in axios callback in http-client, this.store.state:', this.store.state);
+      // axios.get('http://data.phila.gov/resource/w7rb-qrn8.json?parcel_number=012099800%27').then(response => {
       // call success fn
       let data = response.data;
 
