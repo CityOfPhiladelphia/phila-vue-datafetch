@@ -84,7 +84,7 @@ class HttpClient extends BaseClient {
       // call success fn
       let data = response.data;
       if (successFn) {
-        data = successFn(data);
+        data = successFn(data, this.store.state);
       }
       // console.log('data', data);
       this.dataManager.didFetchMoreData(dataSourceKey, 'success', data);
