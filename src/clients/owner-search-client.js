@@ -17,7 +17,7 @@ class OwnerSearchClient extends BaseClient {
     // update state
     this.store.commit('setOwnerSearchStatus', 'waiting');
     // console.log('OWNER SEARCH CLIENT setting last search method to owner search');
-    // this.store.commit('setLastSearchMethod', 'owner search');
+    this.store.commit('setLastSearchMethod', 'owner search');
 
     const success = this.success.bind(this);
     const error = this.error.bind(this);

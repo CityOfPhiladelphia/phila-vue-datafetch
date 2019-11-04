@@ -10,6 +10,7 @@ import { query as Query } from 'esri-leaflet';
 import utils from './utils.js';
 import {
   GeocodeClient,
+  ActiveSearchClient,
   OwnerSearchClient,
   HttpClient,
   EsriClient,
@@ -30,6 +31,7 @@ class DataManager {
     // response back to this?
     const clientOpts = { config, store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
+    this.clients.activeSearch = new ActiveSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
@@ -56,6 +58,35 @@ class DataManager {
   // }
 
   /* DATA FETCHING METHODS */
+
+  /* DATA FETCHING METHODS */
+
+  fetchRowData(){
+    // console.log("Fetching row data")
+
+    var state = this.store.state;
+    let input = [];
+    if (state.lastSearchMethod === 'owner search') {
+      input = state.ownerSearch.data.filter(object => {
+        return object._featureId === state.activeFeature.featureId;
+      });
+    } else if (state.lastSearchMethod === 'shape search' || state.lastSearchMethod === 'buffer search') {
+      input = state.shapeSearch.data.rows.filter(object => {
+        return object._featureId === state.activeFeature.featureId;
+      });
+    } else {
+      let data;
+      if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
+        let result = state.geocode.related.filter(object => object._featureId === state.activeFeature.featureId);
+        data = result[0];
+      } else {
+        data = state.geocode.data;
+      }
+      input.push(data);
+    }
+    //console.log('fetchRowData is running, input:', input);
+    this.clients.activeSearch.fetch(input[0]);
+  }
 
   fetchMoreData(dataSourceKey, highestPageRetrieved) {
     console.log('data-manager.js fetchMoreData is running');
@@ -184,10 +215,27 @@ class DataManager {
   }
 
   fetchData(optionalFeature) {
-    // console.log('\nFETCH DATA');
+    console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
     let ownerSearchObj;
+    let shapeSearchObj;
+    if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true) {
+    // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
+      console.log('this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
+      geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
+      // ownerSearchObj = geocodeObj;
+
+    } else {
+      geocodeObj = this.store.state.geocode.data;
+      ownerSearchObj = this.store.state.ownerSearch.data;
+      if (this.store.state.shapeSearch.data) {
+        shapeSearchObj = this.store.state.shapeSearch.data.rows;
+      }
+    }
+
+    console.log('geocodeObj:', geocodeObj);
+    // let ownerSearchObj = this.store.state.ownerSearch.data;
 
     let doPins = false;
     if (optionalFeature) {
@@ -208,12 +256,12 @@ class DataManager {
     }
 
     let dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
     // even if the property is not in OPA and AIS
-    if (!geocodeObj) {
+    if (!geocodeObj && !ownerSearchObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
         if (dataSourceKey[1].dependent) {
           if (dataSourceKey[1].dependent === 'parcel' || dataSourceKey[1].dependent === 'none') {
@@ -222,7 +270,8 @@ class DataManager {
         }
       });
     }
-    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+
+    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
@@ -230,6 +279,7 @@ class DataManager {
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
+      console.log('targetsDef:', targetsDef);
 
       // if the data sources specifies a features getter, use that to source
       // features for evaluating params/forming requests. otherwise,
@@ -645,6 +695,7 @@ class DataManager {
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
     const parcelQuery = Query({ url });
+    console.log('geocodeField:', geocodeField);
 
     if (id.includes('|')) {
       const idSplit = id.split('|');
@@ -658,14 +709,17 @@ class DataManager {
       }
       // console.log('there is a pipe, queryString:', queryString);
       parcelQuery.where(queryString);
+    } else if (Array.isArray(id)) {
+      parcelQuery.where(geocodeField + " IN (" + id + ")");
     } else {
       // console.log('there is not a pipe');
       parcelQuery.where(geocodeField + " = '" + id + "'");
     }
 
-    parcelQuery.where(geocodeField + " = '" + id + "'");
+    // parcelQuery.where(geocodeField + " = '" + id + "'");
     return new Promise(function(resolve, reject) {
       parcelQuery.run((function(error, featureCollection, response) {
+        console.log('end of getParcelsById response:', response, 'featureCollection:', featureCollection);
         if (error) {
           reject(error);
         } else {
@@ -693,8 +747,8 @@ class DataManager {
   }
 
   processParcels(error, featureCollection, parcelLayer, fetch) {
-    console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection);
     const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
+    console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
     const mapregStuff = this.config.parcels[parcelLayer].mapregStuff;
 
     if (error || !featureCollection || featureCollection.features.length === 0) {
@@ -727,18 +781,30 @@ class DataManager {
   }
 
   setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff) {
-    console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'mapregStuff:', mapregStuff);
+    console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
     let payload;
     // pwd
-    if (!multipleAllowed || !mapregStuff) {
+    if (!multipleAllowed && !mapregStuff) {
+      console.log('1');
       payload = {
         parcelLayer,
         multipleAllowed,
         mapregStuff,
         data: feature,
       };
+    } else if (multipleAllowed && !mapregStuff) {
+      console.log('2');
+      payload = {
+        parcelLayer,
+        multipleAllowed,
+        mapregStuff,
+        data: featuresSorted,
+        status: 'success',
+      };
+
     // dor
     } else {
+      console.log('3');
       payload = {
         parcelLayer,
         multipleAllowed,
@@ -755,6 +821,13 @@ class DataManager {
     }
     // update state
     this.store.commit('setParcelData', payload);
+  }
+
+  clearOwnerSearch(){
+    // console.log('clearOwnerSearch is running');
+    this.store.commit('setOwnerSearchStatus', null);
+    this.store.commit('setOwnerSearchData', null);
+    this.store.commit('setOwnerSearchInput', null);
   }
 
   // didGeocode(feature) {
