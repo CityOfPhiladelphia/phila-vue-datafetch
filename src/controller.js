@@ -16,6 +16,7 @@ import {
   OwnerSearchClient,
   HttpClient,
   EsriClient,
+  CondoSearchClient,
 } from './clients';
 
 // console.log('controller.js is being read')
@@ -47,6 +48,7 @@ class Controller {
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
+    this.clients.condoSearch = new CondoSearchClient(clientOpts);
   }
 
   /*
@@ -242,6 +244,7 @@ class Controller {
     const props = processedParcel.properties || {};
     const geocodeField = this.config.parcels[activeParcelLayer].geocodeField;
     const id = props[geocodeField];
+    // console.log('props:', props);
     // if (id) this.router.routeToAddress(id);
 
     // since we definitely have a new parcel, and will attempt to geocode it:
@@ -249,7 +252,19 @@ class Controller {
     // 2. attempt to replace
 
     let aisResponse = await this.clients.geocode.fetch(id);
-    console.log('after await aisResponse:', aisResponse);
+    // console.log('after await aisResponse 1:', aisResponse);
+
+    // if (!aisResponse) {
+    //   aisResponse = await this.clients.ownerSearch.fetch(id);
+    // }
+    // console.log('after await aisResponse 2:', aisResponse);
+
+    if (!aisResponse) {
+      aisResponse = await this.clients.condoSearch.fetch(props.ADDRESS);
+    }
+    // console.log('after await aisResponse 2:', aisResponse);
+
+
 
     this.router.setRouteByGeocode();
 

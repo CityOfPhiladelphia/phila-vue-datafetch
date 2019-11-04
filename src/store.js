@@ -140,13 +140,13 @@ const pvdStore = {
         // };
       }
 
-      console.log('o:', o, 'key:', key, 'val:', val, 'typeof val:', typeof val);
+      // console.log('o:', o, 'key:', key, 'val:', val, 'typeof val:', typeof val);
       o[key] = val;
-      console.log('o:', o, 'key:', key, 'val:', val);
+      // console.log('o:', o, 'key:', key, 'val:', val);
 
       return o;
     }, {});
-    console.log('end of createParcels, parcels:', parcels);
+    // console.log('end of createParcels, parcels:', parcels);
     return parcels;
   },
 
@@ -172,7 +172,7 @@ const pvdStore = {
         state.clickCoords = payload;
       },
       setSourceStatus(state, payload) {
-        // console.log('setSourceStatus is running, payload:', payload, 'state', state);
+        console.log('setSourceStatus is running, payload:', payload);
         const key = payload.key;
         const status = payload.status;
 
@@ -202,7 +202,7 @@ const pvdStore = {
         // }
       },
       setSourceData(state, payload) {
-        // console.log('store setSourceData payload:', state);
+        console.log('store setSourceData is running, payload:', payload);
         const key = payload.key;
         const data = payload.data;
 
@@ -218,6 +218,12 @@ const pvdStore = {
         } else {
           state.pinSources[key].data = data;
         }
+      },
+      setSourceDataObject(state, payload) {
+        console.log('store setSourceDataObject is running, payload:', payload);
+        const key = payload.key;
+        const data = payload.data;
+        state.sources[key].targets = data;
       },
       setSourceDataMore(state, payload) {
         const key = payload.key;
@@ -251,8 +257,12 @@ const pvdStore = {
         }, {});
       },
       clearSourceTargets(state, payload) {
+        // console.log('clearSourceTargets is running, payload:', payload);
         const key = payload.key;
         state.sources[key].targets = {};
+        if (state.sources[key].status) {
+          state.sources[key].status = null;
+        }
       },
       // this is the map center as an xy coordinate array (not latlng)
       setParcelData(state, payload) {
@@ -298,6 +308,11 @@ const pvdStore = {
       },
       setDidToggleModal(state, name) {
         state.modals.open = name;
+      },
+
+      setUnits(state, payload) {
+        // console.log("setShapeSearchUnits: ", payload)
+        state.condoUnits.units = payload;
       },
     },
   },

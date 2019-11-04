@@ -62,7 +62,7 @@ export default {
     // console.log('getMultiPolyDistances, coords:', coords)
     let turfCoordinates = [];
     for (let coordinate of coords) {
-      console.log('in getMultiPolyDistances, coordinate:', coordinate);
+      // console.log('in getMultiPolyDistances, coordinate:', coordinate);
       turfCoordinates.push(point(coordinate));
     }
     let distances = [];
@@ -75,7 +75,7 @@ export default {
   calculateAreaAndPerimeter(feature) {
     let coords = feature.geometry.coordinates;
 
-    console.log('utils.calculateAreaAndPerimeter, feature:', feature, 'coords.length:', coords.length);
+    // console.log('utils.calculateAreaAndPerimeter, feature:', feature, 'coords.length:', coords.length);
     if (coords.length > 1) {
       let distances = [];
       let areas = [];
@@ -85,7 +85,7 @@ export default {
           // console.log('in multiPolygon loop');
           const turfPolygon = multiPolygon(coordsSet);
           distances.push(this.getMultiPolyDistances(coordsSet).reduce(function(acc, val) {
-            return acc + val; 
+            return acc + val;
           }));
           areas.push(area(turfPolygon) * 10.7639);
           // console.log('areas:', areas);
@@ -93,31 +93,31 @@ export default {
           // console.log('in polygon loop');
           const turfPolygon = polygon(coordsSet);
           distances.push(this.getDistances(coordsSet).reduce(function(acc, val) {
-            return acc + val; 
+            return acc + val;
           }));
           areas.push(area(turfPolygon) * 10.7639);
         }
       }
       return { perimeter: distances.reduce(function(acc, val) {
-        return acc + val; 
+        return acc + val;
       }),
       area: areas.reduce(function(acc, val) {
-        return acc + val; 
+        return acc + val;
       }),
       };
       // feature.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
       // feature.properties.TURF_AREA = areas.reduce(function(acc, val) { return acc + val; });
-    } 
+    }
     // console.log('coords:', coords);
     const turfPolygon = polygon(coords);
     let distances = this.getDistances(coords);
     return { perimeter: distances.reduce(function(acc, val) {
-      return acc + val; 
+      return acc + val;
     }),
     area: area(turfPolygon) * 10.7639,
     };
     // feature.properties.TURF_PERIMETER = distances.reduce(function(acc, val) { return acc + val; });
     // feature.properties.TURF_AREA = area(turfPolygon) * 10.7639;
-    
+
   },
 };
