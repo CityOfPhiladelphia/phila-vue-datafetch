@@ -13,6 +13,7 @@ import {
   OwnerSearchClient,
   HttpClient,
   EsriClient,
+  CondoSearchClient,
 } from './clients';
 
 class DataManager {
@@ -32,6 +33,7 @@ class DataManager {
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
+    this.clients.condoSearch = new CondoSearchClient(clientOpts);
   }
 
   /* STATE HELPERS */
@@ -229,8 +231,6 @@ class DataManager {
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
 
-      // console.log('key:', dataSourceKey, type);
-
       // if the data sources specifies a features getter, use that to source
       // features for evaluating params/forming requests. otherwise,
       // default to the geocode result.
@@ -238,66 +238,54 @@ class DataManager {
       let targetIdFn;
       let targetsFn;
 
-
-
-      // if (targetsDef) {
-      //   targetsFn = targetsDef.get;
-      //   // console.log("targetsFn: ", targetsFn)
-      //   targetIdFn = targetsDef.getTargetId;
-      //   // targets = this.defineTargets(dataSourceKey, targetsDef);
-      //   targets = targetsFn(state);
-      //
-      // } else if (this.store.state.lastSearchMethod !== 'owner search') {
-      //   targets = [ geocodeObj ];
-      // } else {
-      //   targets = [ ownerSearchObj ][0];
-      // }
-
       if (targetsDef) {
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
 
-        // if (this.config.app) {
-        //   if (this.config.app.title === 'Property Data Explorer') {
-        //     targets = this.defineTargets(dataSourceKey, targetsDef);
-        //   }
-        // } else {
+        // this is a ridiculous hack that routes over to a function specifically for PDE
+        if (this.config.app) {
+          if (this.config.app.title === 'Property Data Explorer') {
+            targets = this.defineTargets(dataSourceKey, targetsDef);
+            console.log('in Property Data Explorer, targets:', targets);
+          }
+        } else {
 
-        if (typeof targetsFn !== 'function') {
-          throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
-        }
-        targets = targetsFn(state);
-        // console.log('targetsFn:', targetsFn, 'targets:', targets);
+          if (typeof targetsFn !== 'function') {
+            throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
+          }
+          targets = targetsFn(state);
 
-        // check if target objs exist in state.
-        const targetIds = targets.map(targetIdFn);
-        const stateTargets = state.sources[dataSourceKey].targets;
-        const stateTargetIds = Object.keys(stateTargets);
+          console.log('in fetchData, targets:', targets);
 
-        // the inclusion check wasn't working because ids were strings in
-        // one set and ints in another, so do this.
-        const stateTargetIdsStr = stateTargetIds.map(String);
+          // check if target objs exist in state.
+          const targetIds = targets.map(targetIdFn);
+          const stateTargets = state.sources[dataSourceKey].targets;
+          const stateTargetIds = Object.keys(stateTargets);
 
-        const shouldCreateTargets = !targetIds.every(targetId => {
-          const targetIdStr = String(targetId);
-          return stateTargetIdsStr.includes(targetIdStr);
-        });
+          // the inclusion check wasn't working because ids were strings in
+          // one set and ints in another, so do this.
+          const stateTargetIdsStr = stateTargetIds.map(String);
 
-        console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
-
-        // if not, create them.
-        if (shouldCreateTargets) {
-          // console.log('should create targets', targetIds, stateTargetIds);
-          this.store.commit('createEmptySourceTargets', {
-            key: dataSourceKey,
-            targetIds,
+          const shouldCreateTargets = !targetIds.every(targetId => {
+            const targetIdStr = String(targetId);
+            return stateTargetIdsStr.includes(targetIdStr);
           });
-        }
 
-        if (!Array.isArray(targets)) {
-          throw new Error('Data source targets getter should return an array');
+          console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
+
+          // if not, create them.
+          if (shouldCreateTargets) {
+            // console.log('should create targets', targetIds, stateTargetIds);
+            this.store.commit('createEmptySourceTargets', {
+              key: dataSourceKey,
+              targetIds,
+            });
+          }
+
+          if (!Array.isArray(targets)) {
+            throw new Error('Data source targets getter should return an array');
+          }
         }
-        // }
       } else {
         targets = [ geocodeObj ];
       }
@@ -308,7 +296,7 @@ class DataManager {
       // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
-        console.log('fetchData, target:', target);
+        // console.log('fetchData, target:', target);
         // get id of target
         let targetId;
         if (targetIdFn) {
@@ -319,6 +307,7 @@ class DataManager {
 
         // check if it's ready
         const isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
+        // console.log('isReady:', isReady);
         if (!isReady) {
           // console.log('not ready');
           continue;
@@ -335,15 +324,37 @@ class DataManager {
 
         this.store.commit('setSourceStatus', setSourceStatusOpts);
 
+        if (targetsDef) {
+          if (targetsDef.runOnce) {
+            targetIdFn = function(feature) {
+              return feature.parcel_number;
+            };
+          }
+        }
 
         // TODO do this for all targets
         switch(type) {
         case 'http-get':
           // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
-          this.clients.http.fetch(target,
-            dataSource,
-            dataSourceKey,
-            targetIdFn);
+          if (this.config.app) {
+            if (this.config.app.title === 'Property Data Explorer') {
+              this.clients.http.fetchPde(target,
+                dataSource,
+                dataSourceKey,
+                targetIdFn);
+            } else {
+              this.clients.http.fetch(target,
+                dataSource,
+                dataSourceKey,
+                targetIdFn);
+            }
+          } else {
+            this.clients.http.fetch(target,
+              dataSource,
+              dataSourceKey,
+              targetIdFn);
+          }
+
           break;
 
         case 'http-get-nearby':
@@ -375,52 +386,55 @@ class DataManager {
     // console.log('end of outer loop');
   }
 
-  didFetchData(key, status, data, targetId) {
-    // console.log('data-manager.js didFetchData is running');
+  didFetchData(key, status, dataOrNull, targetId, targetIdFn) {
 
-    const dataOrNull = status === 'error' ? null : data;
-    let stateData = dataOrNull;
+    let data = status === 'error' ? null : dataOrNull;
     // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data);
-    let rows;
-    if (stateData) {
-      rows = stateData.rows;
+
+    // assign feature ids
+    if (Array.isArray(data)) {
+      data = this.assignFeatureIds(data, key, targetId);
+    } else if (data) {
+      data.rows = this.assignFeatureIds(data.rows, key, targetId);
     }
 
-    // if this is an array, assign feature ids
-    if (Array.isArray(stateData)) {
-      stateData = this.assignFeatureIds(stateData, key, targetId);
-    } else if (stateData) {
-      stateData.rows = this.assignFeatureIds(rows, key, targetId);
-    }
+    const setSourceStatusOpts = { key, status };
+    const setSourceDataOpts = { key, data };
 
-    // does this data source have targets?
-    // const targets = this.config.dataSources[key].targets;
-
-    // put data in state
-    const setSourceDataOpts = {
-      key,
-      data: stateData,
-    };
-    const setSourceStatusOpts = {
-      key,
-      status,
-    };
     if (targetId) {
-      setSourceDataOpts.targetId = targetId;
       setSourceStatusOpts.targetId = targetId;
+      setSourceDataOpts.targetId = targetId;
     }
-
-    // commit
-    this.store.commit('setSourceData', setSourceDataOpts);
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
+    // this doesn't make any sense - why is a targetIdFn the determining factor on the state data structure?
+    if (targetIdFn) {
+      let sourceDataObj = this.turnToTargets(key, data, targetIdFn);
+      this.store.commit('setSourceDataObject', sourceDataObj);
+    } else {
+      this.store.commit('setSourceData', setSourceDataOpts);
+    }
+
     // try fetching more data
-    // console.log('171111 data-manager.js line 319 - didFetchData - is calling fetchData on targetId', targetId, 'key', key);
+    // console.log('data-manager.js - didFetchData - is calling fetchData on targetId', targetId, 'key', key);
     this.fetchData();
   }
 
+  // TODO - this is probably completely wasteful
+  turnToTargets(key, data, targetIdFn) {
+    let newLargeObj = { 'key': key };
+    let newSmallObj = {};
+    for (let datum of data) {
+      newSmallObj[datum.parcel_number] = {
+        'data': datum,
+      };
+    }
+    newLargeObj['data'] = newSmallObj;
+    return newLargeObj;
+  }
+
   resetData() {
-    // console.log('resetData is running')
+    // console.log('resetData is running');
     const dataSources = this.config.dataSources || {};
 
     for (let dataSourceKey of Object.keys(dataSources)) {
