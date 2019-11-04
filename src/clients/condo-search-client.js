@@ -25,18 +25,22 @@ class CondoSearchClient extends BaseClient {
   }
 
   setFeatureProperties(feature, totalUnits) {
+    console.log('setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
+    console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
-    feature.properties.street_address = this.store.state.parcels.pwd.properties.ADDRESS;
-    feature.properties.opa_address = this.store.state.parcels.pwd.properties.ADDRESS;
-    feature.properties.pwd_parcel_id = this.store.state.parcels.pwd.properties.PARCELID;
-    feature._featureId = this.store.state.parcels.pwd.properties.PARCELID;
+    feature.properties.street_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
+    console.log('setFeatureProperties is still running');
+    feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
+    feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.PARCELID;
+    feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
     feature.condo = true;
+    console.log('setFeatureProperties is ending');
 
   }
 
   fetch(input) {
-    // console.log('condosearch fetch is running, input', input)
+    console.log('condosearch fetch is running, input', input);
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
     condoConfig.url = this.config.geocoder.url;
@@ -59,7 +63,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   success(response) {
-    // console.log('condo success is running');
+    console.log('condo success is running');
     const store = this.store;
     const data = response.data;
     let features = data.features;
@@ -96,6 +100,7 @@ class CondoSearchClient extends BaseClient {
       }
 
       if(this.store.state.parcels.pwd === null) {
+        console.log('getPages if is running');
         const latLng = { lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] };
         const callback = () => {
           // console.log('callback is running');
@@ -113,11 +118,11 @@ class CondoSearchClient extends BaseClient {
             this.dataManager.fetchData();
           }
 
-          if(feature.geometry.coordinates) {
-            // console.log('if feature.geometry.coordinates is running');
-            this.store.commit('setMapZoom', 18);
-            this.store.commit('setMapCenter', feature.geometry.coordinates);
-          }
+          // if(feature.geometry.coordinates) {
+          //   // console.log('if feature.geometry.coordinates is running');
+          //   this.store.commit('setMapZoom', 18);
+          //   this.store.commit('setMapCenter', feature.geometry.coordinates);
+          // }
 
           return feature;
         };
@@ -129,11 +134,14 @@ class CondoSearchClient extends BaseClient {
         // }
 
       } else {
+        console.log('getPages else is running, feature:', feature);
 
         this.setFeatureProperties(feature, totalUnits);
 
+        console.log('getPages else is still running 1');
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
+        console.log('getPages else is still running 2');
         if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
           this.store.commit('setLastSearchMethod', 'geocode');
         }

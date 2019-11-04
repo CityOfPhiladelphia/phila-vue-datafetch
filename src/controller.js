@@ -55,6 +55,10 @@ class Controller {
   EVENT HANDLERS
   */
 
+  activeFeatureChange(){
+    this.dataManager.fetchRowData();
+  }
+
   appDidLoad() {
     // console.log('pvd appDidLoad is running');
     // route once on load
@@ -158,7 +162,14 @@ class Controller {
     let aisResponse = await this.clients.geocode.fetch(value);
     console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
 
-    this.router.setRouteByGeocode();
+    if (aisResponse) {
+      this.router.setRouteByGeocode();
+    } else {
+      aisResponse = await this.clients.ownerSearch.fetch(value);
+    }
+
+    console.log('aisResponse:', aisResponse);
+
 
     // TODO
     const { activeParcelLayer, lastSearchMethod } = this.store.state;
@@ -184,10 +195,23 @@ class Controller {
       console.log('in loop, parcelLayer:', parcelLayer);
       const configForParcelLayer = this.config.parcels[parcelLayer];
       const parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder;
-      const parcelId = aisResponse.properties[parcelIdInGeocoder];
-      if (parcelId && parcelId.length > 0) {
-        response = await this.dataManager.getParcelsById(parcelId, parcelLayer);
-        theParcels.push(response);
+
+      let ids;
+      if (aisResponse.properties) {
+        ids = aisResponse.properties[parcelIdInGeocoder];
+      } else {
+        ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id );
+        ids = ids.filter( id => id != "" );
+      }
+      if (ids && ids.length > 0) {
+        response = await this.dataManager.getParcelsById(ids, parcelLayer);
+        console.log('in handleSearchFormSubmit, response:', response);
+        if (response.type === 'FeatureCollection') {
+          theParcels = response.features;
+        } else {
+          theParcels.push(response);
+        }
+        console.log('theParcels:', theParcels);
         // TODO - catch error before this if necessary
       } else {
         if (configForParcelLayer.getByLatLngIfIdFails) {
@@ -252,7 +276,7 @@ class Controller {
     // 2. attempt to replace
 
     let aisResponse = await this.clients.geocode.fetch(id);
-    // console.log('after await aisResponse 1:', aisResponse);
+    console.log('after await aisResponse 1:', aisResponse);
 
     // if (!aisResponse) {
     //   aisResponse = await this.clients.ownerSearch.fetch(id);
@@ -260,6 +284,7 @@ class Controller {
     // console.log('after await aisResponse 2:', aisResponse);
 
     if (!aisResponse) {
+      console.log('if !aisResponse is running');
       aisResponse = await this.clients.condoSearch.fetch(props.ADDRESS);
     }
     // console.log('after await aisResponse 2:', aisResponse);

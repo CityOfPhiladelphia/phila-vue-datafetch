@@ -314,6 +314,15 @@ const pvdStore = {
         // console.log("setShapeSearchUnits: ", payload)
         state.condoUnits.units = payload;
       },
+      setActiveSearchStatus(state, payload) {
+        let key = payload.activeSearchKey;
+        state.activeSearch[payload.activeSearchKey].status = payload.status;
+      },
+      setActiveSearchData(state, payload) {
+        const key = payload.activeSearchKey;
+        const data = payload.data;
+        state.activeSearch[key].data = data;
+      },
     },
   },
 };
