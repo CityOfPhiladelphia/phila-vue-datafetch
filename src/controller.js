@@ -168,7 +168,12 @@ class Controller {
       aisResponse = await this.clients.ownerSearch.fetch(value);
     }
 
-    console.log('aisResponse:', aisResponse);
+    if (!aisResponse) {
+      console.log('if !aisResponse is running, value:', value);
+      aisResponse = await this.clients.condoSearch.fetch(value);
+      console.log('aisResponse:', aisResponse);
+    }
+
 
 
     // TODO
@@ -199,19 +204,26 @@ class Controller {
       let ids;
       if (aisResponse.properties) {
         ids = aisResponse.properties[parcelIdInGeocoder];
-      } else {
+      } else if (this.store.state.ownerSearch.data) {
         ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id );
         ids = ids.filter( id => id != "" );
+      } else {
+        ids = aisResponse.map(item => item.properties.pwd_parcel_id );
+        ids = ids.filter( id => id != "" );
       }
+
+      console.log('about to get parcels, ids:', ids);
+
       if (ids && ids.length > 0) {
+        console.log('it has ids');
         response = await this.dataManager.getParcelsById(ids, parcelLayer);
         console.log('in handleSearchFormSubmit, response:', response);
-        if (response.type === 'FeatureCollection') {
-          theParcels = response.features;
-        } else {
-          theParcels.push(response);
-        }
-        console.log('theParcels:', theParcels);
+        // if (response.type === 'FeatureCollection') {
+        //   theParcels = response.features;
+        // } else {
+        //   theParcels.push(response);
+        // }
+        // console.log('theParcels:', theParcels);
         // TODO - catch error before this if necessary
       } else {
         if (configForParcelLayer.getByLatLngIfIdFails) {
@@ -222,9 +234,10 @@ class Controller {
           let [ lng, lat ] = coords;
           const latlng = L.latLng(lat, lng);
           response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
-          theParcels.push(response);
+          // theParcels.push(response);
         }
       }
+
       this.dataManager.processParcels(false, response, parcelLayer);
       // this.dataManager.resetData();
       this.dataManager.fetchData();
@@ -284,10 +297,10 @@ class Controller {
     // console.log('after await aisResponse 2:', aisResponse);
 
     if (!aisResponse) {
-      console.log('if !aisResponse is running');
+      console.log('if !aisResponse is running, props.ADDRESS:', props.ADDRESS);
       aisResponse = await this.clients.condoSearch.fetch(props.ADDRESS);
     }
-    // console.log('after await aisResponse 2:', aisResponse);
+    console.log('after await aisResponse 2:', aisResponse);
 
 
 

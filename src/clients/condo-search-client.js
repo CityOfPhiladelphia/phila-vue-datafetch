@@ -51,7 +51,7 @@ class CondoSearchClient extends BaseClient {
     const params = condoConfig.params;
 
     // update state
-    this.store.commit('setGeocodeStatus', 'waiting');
+    // this.store.commit('setGeocodeStatus', 'waiting');
 
     const success = this.success.bind(this);
     const error = this.error.bind(this);
@@ -99,43 +99,57 @@ class CondoSearchClient extends BaseClient {
         feature.properties[i] = "";
       }
 
+      // if(this.store.state.parcels.pwd === null) {
+      //   console.log('getPages if is running');
+      //   const latLng = { lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] };
+      //   const callback = () => {
+      //     // console.log('callback is running');
+      //
+      //     this.setFeatureProperties(feature, totalUnits);
+      //
+      //     store.commit('setGeocodeData', feature);
+      //     store.commit('setGeocodeStatus', 'success');
+      //     if (this.store.state.lastSearchMethod === 'buffer search') {
+      //       console.log('in callback, in buffer search mode');
+      //       this.dataManager.didGeocode(feature);
+      //     }
+      //     if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
+      //       this.store.commit('setLastSearchMethod', 'geocode');
+      //       this.dataManager.fetchData();
+      //     }
+      //
+      //     // if(feature.geometry.coordinates) {
+      //     //   // console.log('if feature.geometry.coordinates is running');
+      //     //   this.store.commit('setMapZoom', 18);
+      //     //   this.store.commit('setMapCenter', feature.geometry.coordinates);
+      //     // }
+      //
+      //     return feature;
+      //   };
+      //
+      //   // if (this.store.state.lastSearchMethod === 'reverseGeocode') {
+      //   console.log('getPages if is still running');
+      //   return features;
+      //   // this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
+      //   // } else {
+      //   // this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'fetch', callback);
+      //   // }
+      //
+      // } else {
+      console.log('getPages else is running, feature:', feature);
+
       if(this.store.state.parcels.pwd === null) {
-        console.log('getPages if is running');
-        const latLng = { lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] };
-        const callback = () => {
-          // console.log('callback is running');
+        // this.setFeatureProperties(feature, totalUnits);
 
-          this.setFeatureProperties(feature, totalUnits);
-
-          store.commit('setGeocodeData', feature);
-          store.commit('setGeocodeStatus', 'success');
-          if (this.store.state.lastSearchMethod === 'buffer search') {
-            console.log('in callback, in buffer search mode');
-            this.dataManager.didGeocode(feature);
-          }
-          if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
-            this.store.commit('setLastSearchMethod', 'geocode');
-            this.dataManager.fetchData();
-          }
-
-          // if(feature.geometry.coordinates) {
-          //   // console.log('if feature.geometry.coordinates is running');
-          //   this.store.commit('setMapZoom', 18);
-          //   this.store.commit('setMapCenter', feature.geometry.coordinates);
-          // }
-
-          return feature;
-        };
-
-        // if (this.store.state.lastSearchMethod === 'reverseGeocode') {
-        this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
-        // } else {
-        // this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'fetch', callback);
-        // }
-
+        console.log('getPages else is still running 1');
+        store.commit('setGeocodeData', feature);
+        store.commit('setGeocodeStatus', 'success');
+        console.log('getPages else is still running 2');
+        if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
+          this.store.commit('setLastSearchMethod', 'geocode');
+        }
+        console.log('feature:', feature);
       } else {
-        console.log('getPages else is running, feature:', feature);
-
         this.setFeatureProperties(feature, totalUnits);
 
         console.log('getPages else is still running 1');
@@ -145,9 +159,12 @@ class CondoSearchClient extends BaseClient {
         if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
           this.store.commit('setLastSearchMethod', 'geocode');
         }
-
-        return feature;
+        console.log('feature:', feature);
       }
+
+
+      return feature;
+      // }
     }
 
     getPages = getPages.bind(this);
