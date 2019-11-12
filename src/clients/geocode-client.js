@@ -63,6 +63,12 @@ class GeocodeClient extends BaseClient {
         relatedFeatures.push(relatedFeature);
       }
     }
+    if (relatedFeatures.length > 0) {
+      feature.condo = true;
+      this.store.commit('setUnits', {
+        [feature.properties.pwd_parcel_id]: features,
+      });
+    }
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');

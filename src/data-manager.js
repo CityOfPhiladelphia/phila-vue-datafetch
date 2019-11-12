@@ -224,6 +224,7 @@ class DataManager {
     // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
       console.log('this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
       geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
+      // geocodeObj = this.store.state.geocode.data;//.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
       // ownerSearchObj = geocodeObj;
 
     } else {
