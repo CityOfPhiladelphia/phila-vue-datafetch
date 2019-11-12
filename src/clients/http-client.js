@@ -50,7 +50,7 @@ class HttpClient extends BaseClient {
       let data = response.data;
 
       if (successFn) {
-        data = successFn(data);
+        data = successFn(data, this.store.state);
       }
 
       // get target id, if there should be one

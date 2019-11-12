@@ -19,6 +19,14 @@ Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/w
 
 ## Release Notes
 
+### 0.0.30 - 11/12/2019
+
+* pushes change to fix http-get further
+
+### 0.0.30 - 11/12/2019
+
+* pushes change to fix http-get
+
 ### 0.0.29 - 10/23/2019
 
 * fixes bug with date-fns due to upgrade
