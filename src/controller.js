@@ -150,6 +150,7 @@ class Controller {
   async handleSearchFormSubmit(value, searchCategory) {
     console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
+
     this.dataManager.resetData();
 
     this.initializeStatuses(value, searchCategory);
@@ -168,11 +169,11 @@ class Controller {
       aisResponse = await this.clients.ownerSearch.fetch(value);
     }
 
-    if (!aisResponse) {
-      console.log('if !aisResponse is running, value:', value);
-      aisResponse = await this.clients.condoSearch.fetch(value);
-      console.log('aisResponse:', aisResponse);
-    }
+    // if (!aisResponse) {
+    //   console.log('if !aisResponse is running, value:', value);
+    //   aisResponse = await this.clients.condoSearch.fetch(value);
+    //   console.log('aisResponse:', aisResponse);
+    // }
 
 
 
