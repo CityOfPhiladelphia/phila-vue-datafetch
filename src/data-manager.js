@@ -215,15 +215,19 @@ class DataManager {
   }
 
   fetchData(optionalFeature) {
-    console.log('\nFETCH DATA');
+    // console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
     let ownerSearchObj;
     let shapeSearchObj;
     if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true) {
     // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
-      console.log('this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
-      geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
+      // console.log('this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
+      if (Array.isArray(this.store.state.parcels.pwd)) {
+        geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
+      } else {
+        geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
+      }
       // geocodeObj = this.store.state.geocode.data;//.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
       // ownerSearchObj = geocodeObj;
 
@@ -235,7 +239,7 @@ class DataManager {
       }
     }
 
-    console.log('geocodeObj:', geocodeObj);
+    // console.log('geocodeObj:', geocodeObj);
     // let ownerSearchObj = this.store.state.ownerSearch.data;
 
     let doPins = false;
@@ -250,14 +254,14 @@ class DataManager {
 
     let dataSources = {};
     if (doPins) {
-      console.log('fetchData is running on pins');
+      // console.log('fetchData is running on pins');
       dataSources = this.config.pinSources || {};
     } else {
       dataSources = this.config.dataSources || {};
     }
 
     let dataSourceKeys = Object.entries(dataSources);
-    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
@@ -272,7 +276,7 @@ class DataManager {
       });
     }
 
-    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
@@ -280,7 +284,7 @@ class DataManager {
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
-      console.log('targetsDef:', targetsDef);
+      // console.log('targetsDef:', targetsDef);
 
       // if the data sources specifies a features getter, use that to source
       // features for evaluating params/forming requests. otherwise,
@@ -297,7 +301,7 @@ class DataManager {
         if (this.config.app) {
           if (this.config.app.title === 'Property Data Explorer') {
             targets = this.defineTargets(dataSourceKey, targetsDef);
-            console.log('in Property Data Explorer, targets:', targets);
+            // console.log('in Property Data Explorer, targets:', targets);
           }
         } else {
 
@@ -306,7 +310,7 @@ class DataManager {
           }
           targets = targetsFn(state);
 
-          console.log('in fetchData, targets:', targets);
+          // console.log('in fetchData, targets:', targets);
 
           // check if target objs exist in state.
           const targetIds = targets.map(targetIdFn);
@@ -322,7 +326,7 @@ class DataManager {
             return stateTargetIdsStr.includes(targetIdStr);
           });
 
-          console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
+          // console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
 
           // if not, create them.
           if (shouldCreateTargets) {

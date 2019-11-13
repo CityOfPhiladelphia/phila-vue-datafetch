@@ -69,6 +69,7 @@ class GeocodeClient extends BaseClient {
         [feature.properties.pwd_parcel_id]: features,
       });
     }
+    console.log('geocode-client, feature:', feature, 'relatedFeatures:', relatedFeatures);
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');

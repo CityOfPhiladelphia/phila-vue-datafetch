@@ -49,13 +49,14 @@ const initialState = {
 
 const pvdStore = {
   createSources(config) {
-    // console.log('createSources is running, config:', config);
+    console.log('createSources is running, config:', config);
     const sourceKeys = Object.keys(config.dataSources || {});
     const sources = sourceKeys.reduce((o, key) => {
       let val;
       // if the source has targets, just set it to be an empty object
       if (config.dataSources[key].targets) {
         val = {
+          status: null,
           targets: {},
         };
       } else {
@@ -128,9 +129,9 @@ const pvdStore = {
           activeAddress: null,
           activeMapreg: null,
         };
-        console.log('if mapregStuff section running, key:', key, 'val:', val);
+        // console.log('if mapregStuff section running, key:', key, 'val:', val);
       } else {
-        console.log('else mapregStuff section running, key:', key);
+        // console.log('else mapregStuff section running, key:', key);
         val = null;
         // val = {
         //   geometry: null,
@@ -172,7 +173,7 @@ const pvdStore = {
         state.clickCoords = payload;
       },
       setSourceStatus(state, payload) {
-        console.log('setSourceStatus is running, payload:', payload);
+        // console.log('setSourceStatus is running, payload:', payload);
         const key = payload.key;
         const status = payload.status;
 
@@ -202,7 +203,7 @@ const pvdStore = {
         // }
       },
       setSourceData(state, payload) {
-        console.log('store setSourceData is running, payload:', payload);
+        // console.log('store setSourceData is running, payload:', payload);
         const key = payload.key;
         const data = payload.data;
 
@@ -220,7 +221,7 @@ const pvdStore = {
         }
       },
       setSourceDataObject(state, payload) {
-        console.log('store setSourceDataObject is running, payload:', payload);
+        // console.log('store setSourceDataObject is running, payload:', payload);
         const key = payload.key;
         const data = payload.data;
         state.sources[key].targets = data;
@@ -266,9 +267,9 @@ const pvdStore = {
       },
       // this is the map center as an xy coordinate array (not latlng)
       setParcelData(state, payload) {
-        console.log('store setParcelData payload:', payload);
+        // console.log('store setParcelData payload:', payload);
         const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg, mapregStuff } = payload || {};
-        console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
+        // console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
         if (!multipleAllowed || !mapregStuff) {
           state.parcels[parcelLayer] = data;
         } else {
