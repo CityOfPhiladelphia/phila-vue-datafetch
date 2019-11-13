@@ -282,7 +282,7 @@ class Controller {
     const props = processedParcel.properties || {};
     const geocodeField = this.config.parcels[activeParcelLayer].geocodeField;
     const id = props[geocodeField];
-    // console.log('props:', props);
+    console.log('props:', props);
     // if (id) this.router.routeToAddress(id);
 
     // since we definitely have a new parcel, and will attempt to geocode it:

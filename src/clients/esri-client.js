@@ -136,7 +136,7 @@ class EsriClient extends BaseClient {
         buffer,
         parameters,
         options,
-        calculateDistance ? coords : null
+        calculateDistance ? coords : null,
       );
     }, response => {
       // console.log('did fetch esri nearby error', response);
