@@ -67,7 +67,7 @@ class HttpClient extends BaseClient {
 
   fetchPde(feature, dataSource, dataSourceKey, targetIdFn) {
     let params = this.evaluateParams(feature, dataSource);
-    console.log('http-client fetchPde, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    // console.log('http-client fetchPde, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
 
     let featureArr = feature.split(',');
     // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length)
