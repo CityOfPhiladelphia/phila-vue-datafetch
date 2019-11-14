@@ -17,6 +17,8 @@ import {
   HttpClient,
   EsriClient,
   CondoSearchClient,
+  ShapeSearchClient,
+  BufferSearchClient,
 } from './clients';
 
 // console.log('controller.js is being read')
@@ -49,6 +51,8 @@ class Controller {
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
+    this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
+    this.clients.bufferSearch = new BufferSearchClient(clientOpts);
   }
 
   /*
@@ -282,7 +286,7 @@ class Controller {
     const props = processedParcel.properties || {};
     const geocodeField = this.config.parcels[activeParcelLayer].geocodeField;
     const id = props[geocodeField];
-    console.log('props:', props);
+    // console.log('props:', props);
     // if (id) this.router.routeToAddress(id);
 
     // since we definitely have a new parcel, and will attempt to geocode it:
@@ -290,7 +294,7 @@ class Controller {
     // 2. attempt to replace
 
     let aisResponse = await this.clients.geocode.fetch(id);
-    console.log('after await aisResponse 1:', aisResponse);
+    // console.log('after await aisResponse 1:', aisResponse);
 
     // if (!aisResponse) {
     //   aisResponse = await this.clients.ownerSearch.fetch(id);
@@ -298,10 +302,10 @@ class Controller {
     // console.log('after await aisResponse 2:', aisResponse);
 
     if (!aisResponse) {
-      console.log('if !aisResponse is running, props.ADDRESS:', props.ADDRESS);
+      // console.log('if !aisResponse is running, props.ADDRESS:', props.ADDRESS);
       aisResponse = await this.clients.condoSearch.fetch(props.ADDRESS);
     }
-    console.log('after await aisResponse 2:', aisResponse);
+    // console.log('after await aisResponse 2:', aisResponse);
 
 
 
@@ -328,6 +332,58 @@ class Controller {
 
     // this.dataManager.resetData();
     console.log('getting to end of handleMapClick, calling fetchData');
+    this.dataManager.fetchData();
+  }
+
+  async getParcelsByDrawnShape(state) {
+    const shape = this.store.state.drawShape;
+    const parcels = [];
+    let response = await this.dataManager.getParcelsByShape(shape, parcels);
+    console.log('getParcelsByDrawnShape, response:', response);
+
+    const configForParcelLayer = this.config.parcels.pwd;
+    const geocodeField = configForParcelLayer.geocodeField;
+    const otherParcelLayers = Object.keys(this.config.parcels || {});
+    otherParcelLayers.splice(otherParcelLayers.indexOf(parcels), 1);
+    const lastSearchMethod = this.store.state.lastSearchMethod;
+
+    // console.log('didGetParcels - parcelLayer:', parcelLayer, 'otherParcelLayers:', otherParcelLayers, 'configForParcelLayer:', configForParcelLayer);
+
+    // if (error) {
+    //   if (configForParcelLayer.clearStateOnError) {
+    //   }
+    //   return;
+    // }
+    if (!response) {
+      return;
+    }
+
+    const features = response.features;
+
+    if (features.length === 0) {
+      return;
+    } else if (features.length > 200) {
+      console.log('there are greater than 200 parcels');
+      this.store.commit('setShapeSearchStatus', 'too many');
+      this.resetData();
+      this.resetGeocode();
+      this.clearOwnerSearch();
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setParcelData', {});
+      this.store.commit('setLastSearchMethod', 'geocode');
+      this.store.commit('setBufferShape', null);
+      return;
+    }
+    // at this point there is definitely a feature or features - put it in state
+    this.dataManager.setParcelsInState(parcels, features);
+    // this.geocode(features);
+    this.store.commit('setLastSearchMethod', 'shape search');
+    this.dataManager.removeShape();
+    // this.clearShapeSearch()
+    this.resetGeocode();
+    // const didShapeSearch = this.didShapeSearch.bind(this);
+    let shapeResponse = await this.clients.shapeSearch.fetch(features);
+    console.log('shapeResponse:', shapeResponse);
     this.dataManager.fetchData();
   }
 

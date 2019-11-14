@@ -182,7 +182,7 @@ class DataManager {
       });
     }
 
-    console.log('in defineTargets, shouldCreateTargets:', shouldCreateTargets);
+    // console.log('in defineTargets, shouldCreateTargets:', shouldCreateTargets);
 
     // if not, create them.
     if (shouldCreateTargets) {
@@ -266,8 +266,9 @@ class DataManager {
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
     // even if the property is not in OPA and AIS
-    if (!geocodeObj && !ownerSearchObj) {
+    if (!geocodeObj && !ownerSearchObj && !shapeSearchObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
+        // console.log('dataSourceKey:', dataSourceKey);
         if (dataSourceKey[1].dependent) {
           if (dataSourceKey[1].dependent === 'parcel' || dataSourceKey[1].dependent === 'none') {
             return true;
@@ -519,7 +520,7 @@ class DataManager {
   // this gets called when the current geocoded address is wiped out, such as
   // when you click on the "Atlas" title and it navigates to an empty hash
   resetGeocode() {
-    console.log('resetGeocode is running');
+    console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
     // reset geocode
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
@@ -528,16 +529,18 @@ class DataManager {
 
     // reset parcels
     if (this.config.parcels) {
-      this.store.commit('setParcelData', {
-        parcelLayer: 'dor',
-        multipleAllowed: true,
-        mapregStuff: this.config.parcels.dor.mapregStuff,
-        data: [],
-        status: null,
-        activeParcel: null,
-        activeAddress: null,
-        activeMapreg: null,
-      });
+      if (this.config.parcels.dor) {
+        this.store.commit('setParcelData', {
+          parcelLayer: 'dor',
+          multipleAllowed: true,
+          mapregStuff: this.config.parcels.dor.mapregStuff,
+          data: [],
+          status: null,
+          activeParcel: null,
+          activeAddress: null,
+          activeMapreg: null,
+        });
+      }
       this.store.commit('setParcelData', {
         parcelLayer: 'pwd',
         multipleAllowed: false,
@@ -751,6 +754,26 @@ class DataManager {
     });
   }
 
+  getParcelsByShape(latlng, parcelLayer) {
+    // console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer)
+    const latLng = L.polygon(latlng._latlngs, latlng.options);
+    const url = this.config.map.featureLayers.pwdParcels.url;
+
+    const parcelQuery = Query({ url });
+    parcelQuery.intersects(latLng);
+
+    return new Promise(function(resolve, reject) {
+      parcelQuery.run((function(error, featureCollection, response) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
+      }));
+    });
+
+  }
+
   processParcels(error, featureCollection, parcelLayer, fetch) {
     const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
     console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
@@ -786,11 +809,11 @@ class DataManager {
   }
 
   setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff) {
-    console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
+    // console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
     let payload;
     // pwd
     if (!multipleAllowed && !mapregStuff) {
-      console.log('1');
+      // console.log('1');
       payload = {
         parcelLayer,
         multipleAllowed,
@@ -798,7 +821,7 @@ class DataManager {
         data: feature,
       };
     } else if (multipleAllowed && !mapregStuff) {
-      console.log('2');
+      // console.log('2');
       payload = {
         parcelLayer,
         multipleAllowed,
@@ -809,7 +832,7 @@ class DataManager {
 
     // dor
     } else {
-      console.log('3');
+      // console.log('3');
       payload = {
         parcelLayer,
         multipleAllowed,
@@ -833,6 +856,12 @@ class DataManager {
     this.store.commit('setOwnerSearchStatus', null);
     this.store.commit('setOwnerSearchData', null);
     this.store.commit('setOwnerSearchInput', null);
+  }
+
+  removeShape() {
+    if(this.store.state.editableLayers !== null ){
+      this.store.state.editableLayers.clearLayers();
+    }
   }
 
   // didGeocode(feature) {
