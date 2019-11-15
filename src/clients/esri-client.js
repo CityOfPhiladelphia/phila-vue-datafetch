@@ -1,4 +1,5 @@
 import axios from 'axios';
+import utils from '../utils.js';
 
 // import * as turf from '@turf/turf';
 // import { point, polygon, distance, explode, nearest-point } from '@turf/turf';
@@ -61,8 +62,8 @@ class EsriClient extends BaseClient {
 
   fetchNearby(feature, dataSource, dataSourceKey) {
     // console.log('esri fetchNearby running, dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
-    const projection4326 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
-    const projection2272 = "+proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs";
+    const projection4326 = utils.projection4326;
+    const projection2272 = utils.projection2272;
 
     const dataSourceUrl = dataSource.url;
     const {

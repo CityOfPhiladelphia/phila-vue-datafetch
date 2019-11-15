@@ -5,6 +5,12 @@ and storing them in state.
 The router should own an instance of DataManager and make calls to it based on
 navigation events.
 */
+
+import proj4 from 'proj4';
+import axios from 'axios';
+import explode from '@turf/explode';
+import nearest from '@turf/nearest-point';
+
 import * as L from 'leaflet';
 import { query as Query } from 'esri-leaflet';
 import utils from './utils.js';
@@ -56,8 +62,6 @@ class DataManager {
   //
   //   return config || {};
   // }
-
-  /* DATA FETCHING METHODS */
 
   /* DATA FETCHING METHODS */
 
@@ -148,7 +152,7 @@ class DataManager {
 
 
   defineTargets(dataSourceKey, targetsDef) {
-    console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
+    // console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -771,8 +775,137 @@ class DataManager {
         }
       }));
     });
-
   }
+
+  getParcelsByBuffer(latlng, parcelLayer) {
+    console.log('getParcelsByBuffer is running, latlng:', latlng, 'this.store.state.parcels.pwd:', this.store.state.parcels.pwd);
+
+    // if (this.store.state.parcels.pwd === null) {
+    const latLng = L.latLng(latlng.lat, latlng.lng);
+    const url = this.config.map.featureLayers.pwdParcels.url;
+    const parcelQuery = Query({ url });
+    // console.log(parcelQuery);
+    parcelQuery.contains(latLng);
+
+    return new Promise(function(resolve, reject) {
+      parcelQuery.run((function(error, featureCollection, response) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
+      }));
+    });
+    //   parcelQuery.run((function(error, featureCollection, response) {
+    //     // console.log('in getParcelsByLatLng, featureCollection:', featureCollection);
+    //     this.finishParcelsByBuffer(error, featureCollection, response, parcelLayer, latlng);
+    //   }).bind(this))
+    // } else {
+    //   this.finishParcelsByBuffer(null, null, latlng, parcelLayer, latlng);
+    // }
+  }
+
+  // finishParcelsByBuffer(error = [], featureCollection = [], response = {}, parcelLayer, latlng) {
+  //   console.log('finishParcelsByBuffer is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
+  //
+  //   const projection4326 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+  //   const projection2272 = "+proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs";
+  //
+  //   const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
+  //   const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
+  //   const calculateDistance = true;
+  //   const distances = 250;
+  //
+  //   // if you do it by point
+  //   const coords = [latlng.lng, latlng.lat];
+  //   const coords2272 = proj4(projection4326, projection2272, [coords[0], coords[1]]);
+  //   // console.log('coords:', coords, 'coords2272:', coords2272);
+  //
+  //   // if you do it by parcel
+  //   let parcelGeom
+  //   // if (this.store.state.parcels.pwd !== null) {
+  //   //   parcelGeom = this.store.state.parcels.pwd.geometry;
+  //   // } else {
+  //     parcelGeom = response.features[0].geometry
+  //   // }
+  //
+  //   console.log('parcelGeom:', parcelGeom);
+  //
+  //   let polyCoords2272 = []
+  //   for (let polyCoord of parcelGeom.coordinates[0]) {
+  //     let polyCoord2272 = proj4(projection4326, projection2272, [polyCoord[0], polyCoord[1]])
+  //     polyCoords2272.push(polyCoord2272);
+  //   }
+  //
+  //   let newGeometries = {
+  //     "geometryType": "esriGeometryPolygon",
+  //     "geometries": [{ "rings": [polyCoords2272] }]
+  //   }
+  //
+  //   const params = {
+  //     // geometries: `[${coords2272.join(', ')}]`,
+  //     geometries: newGeometries,
+  //     inSR: 2272,
+  //     outSR: 4326,
+  //     bufferSR: 2272,
+  //     distances: distances, //|| 0.0028,
+  //     // inSR: 4326,
+  //     // outSR: 4326,
+  //     // bufferSR: 4326,
+  //     // distances: distances, //|| 0.0028,
+  //     unionResults: true,
+  //     geodesic: false,
+  //     f: 'json',
+  //   };
+  //   // console.log('esri nearby params', params);
+  //
+  //   // get buffer polygon
+  //   const bufferUrl = geometryServerUrl.replace(/\/$/, '') + '/buffer';
+  //   // console.log('bufferUrl:', bufferUrl);
+  //
+  //   axios.get(bufferUrl, { params }).then(response => {
+  //     const data = response.data;
+  //     // console.log('axios in finishParcelsByBuffer is running, response:', response);//, 'data:', data);
+  //
+  //     // console.log('did get esri nearby buffer', data);
+  //
+  //     const geoms = data.geometries || [];
+  //     const geom = geoms[0] || {};
+  //     const rings = geom.rings || [];
+  //     const xyCoords = rings[0];
+  //
+  //     // check for xy coords
+  //     if (!xyCoords) {
+  //       // we can't do anything without coords, so bail out
+  //       // this.dataManager.didFetchData(dataSourceKey, 'error');
+  //       return;
+  //     }
+  //
+  //     const latLngCoords = xyCoords.map(xyCoord => [...xyCoord].reverse());
+  //
+  //     // get nearby features using buffer
+  //     const buffer = L.polygon(latLngCoords);
+  //     const map = this.store.state.map.map;
+  //
+  //     // DEBUG
+  //     this.store.commit('setBufferShape', latLngCoords);
+  //     // buffer.addTo(map);
+  //
+  //     //this is a space holder
+  //     const parameters = {};
+  //     this.fetchBySpatialQuery(parcelUrl,
+  //                              'intersects',
+  //                              buffer,
+  //                              parameters,
+  //                              calculateDistance ? coords : null,
+  //                              // options,
+  //                             );
+  //   }, response => {
+  //     // console.log('getParcelsByBuffer error:', response);
+  //
+  //     // this.dataManager.didFetchData(dataSourceKey, 'error');
+  //   });
+  // }
 
   processParcels(error, featureCollection, parcelLayer, fetch) {
     const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
@@ -809,11 +942,11 @@ class DataManager {
   }
 
   setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff) {
-    // console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
+    console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
     let payload;
     // pwd
     if (!multipleAllowed && !mapregStuff) {
-      // console.log('1');
+      console.log('1');
       payload = {
         parcelLayer,
         multipleAllowed,
@@ -821,7 +954,7 @@ class DataManager {
         data: feature,
       };
     } else if (multipleAllowed && !mapregStuff) {
-      // console.log('2');
+      console.log('2');
       payload = {
         parcelLayer,
         multipleAllowed,
@@ -832,7 +965,7 @@ class DataManager {
 
     // dor
     } else {
-      // console.log('3');
+      console.log('3');
       payload = {
         parcelLayer,
         multipleAllowed,
