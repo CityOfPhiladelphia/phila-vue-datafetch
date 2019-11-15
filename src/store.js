@@ -23,11 +23,6 @@ const initialState = {
   },
   activeSearch: {
   },
-  bufferSearch: {
-    status: null,
-    data: null,
-    input: null,
-  },
   shapeSearch: {
     status: null,
     data: null,
@@ -269,10 +264,12 @@ const pvdStore = {
       setParcelData(state, payload) {
         // console.log('store setParcelData payload:', payload);
         const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg, mapregStuff } = payload || {};
-        // console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
+        console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
         if (!multipleAllowed || !mapregStuff) {
+          console.log('if');
           state.parcels[parcelLayer] = data;
         } else {
+          console.log('else');
           state.parcels[parcelLayer].data = data;
           state.parcels[parcelLayer].status = status;
           state.parcels[parcelLayer].activeParcel = activeParcel;
@@ -323,6 +320,22 @@ const pvdStore = {
         const key = payload.activeSearchKey;
         const data = payload.data;
         state.activeSearch[key].data = data;
+      },
+
+      setShapeSearchStatus(state, payload) {
+        //console.log('setShapeSearchStatus is running, payload:', payload);
+        state.shapeSearch.status = payload;
+      },
+      setShapeSearchInput(state, payload) {
+        state.shapeSearch.input = payload;
+      },
+      setShapeSearchData(state, payload) {
+        state.shapeSearch.data = payload;
+      },
+      setShapeSearchDataPush(state, payload) {
+        let objIndex = parseInt(payload.objIndex);
+        delete payload.objIndex;
+        state.shapeSearch.data.rows.splice(objIndex + 1, 0, ...payload);
       },
     },
   },
