@@ -20,8 +20,10 @@ class BufferSearchClient extends BaseClient {
     const projection4326 = utils.projection4326;
     const projection2272 = utils.projection2272;
 
-    const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
+    const parcelUrl = this.config.map.featureLayers.pwdParcels;
+    // const geometryServerUrl = this.config.map.tools.geometryServer;
     const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
+    console.log('geometryServerUrl:', geometryServerUrl);
     const calculateDistance = true;
     const distances = 250;
 
@@ -31,13 +33,7 @@ class BufferSearchClient extends BaseClient {
     // console.log('coords:', coords, 'coords2272:', coords2272);
 
     // if you do it by parcel
-    let parcelGeom;
-    // if (this.store.state.parcels.pwd !== null) {
-    //   parcelGeom = this.store.state.parcels.pwd.geometry;
-    // } else {
-    parcelGeom = response.features[0].geometry;
-    // }
-
+    const parcelGeom = response.features[0].geometry;
     console.log('parcelGeom:', parcelGeom);
 
     let polyCoords2272 = [];
@@ -58,10 +54,6 @@ class BufferSearchClient extends BaseClient {
       outSR: 4326,
       bufferSR: 2272,
       distances: distances, //|| 0.0028,
-      // inSR: 4326,
-      // outSR: 4326,
-      // bufferSR: 4326,
-      // distances: distances, //|| 0.0028,
       unionResults: true,
       geodesic: false,
       f: 'json',

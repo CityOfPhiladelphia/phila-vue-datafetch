@@ -91,12 +91,10 @@ class BaseClient {
   }
 
   evaluateDataForUnits(data) {
-    //console.log('shape-search-client evaluateDataForUnits data: ', data);
-    // console.log("evaluateDataForUnits dataRows: ",dataRows);
-    let groupedData = _.groupBy(data.rows, a => a.pwd_parcel_id);
-    // console.log("evaluateDataForUnits groupedData: ", groupedData);
+    console.log('base-client evaluateDataForUnits data:', data);
 
     var units = [], filteredData, dataList = [];
+    let groupedData = _.groupBy(data.rows, a => a.pwd_parcel_id);
 
     for (let item in groupedData){
       groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) : dataList.push(groupedData[item][0]);

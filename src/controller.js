@@ -295,12 +295,14 @@ class Controller {
     // 2. attempt to replace
 
     let aisResponse = await this.clients.geocode.fetch(id);
+    // let aisResponse = await this.clients.geocode.fetch(props.ADDRESS);
     // console.log('after await aisResponse 1:', aisResponse);
 
     if (!aisResponse) {
       // console.log('if !aisResponse is running, props.ADDRESS:', props.ADDRESS);
       aisResponse = await this.clients.condoSearch.fetch(props.ADDRESS);
     }
+
     // console.log('after await aisResponse 2:', aisResponse);
 
     this.router.setRouteByGeocode();
@@ -371,8 +373,6 @@ class Controller {
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
       }
     }
-
-
 
     // this.dataManager.resetData();
     console.log('getting to end of handleMapClick, calling fetchData');
