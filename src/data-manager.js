@@ -224,18 +224,21 @@ class DataManager {
     let geocodeObj;
     let ownerSearchObj;
     let shapeSearchObj;
-    if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true) {
+    if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true && this.store.state.condoUnits.units.length) {
     // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
-      // console.log('this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
+
+      // console.log('in if, this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
       if (Array.isArray(this.store.state.parcels.pwd)) {
         geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
       } else {
         geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
       }
+
       // geocodeObj = this.store.state.geocode.data;//.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
       // ownerSearchObj = geocodeObj;
 
     } else {
+      // console.log('in else, setting geocodeObj');
       geocodeObj = this.store.state.geocode.data;
       ownerSearchObj = this.store.state.ownerSearch.data;
       if (this.store.state.shapeSearch.data) {
@@ -243,7 +246,7 @@ class DataManager {
       }
     }
 
-    // console.log('geocodeObj:', geocodeObj);
+    // console.log('geocodeObj first time:', geocodeObj);
     // let ownerSearchObj = this.store.state.ownerSearch.data;
 
     let doPins = false;
@@ -252,9 +255,9 @@ class DataManager {
         doPins = true;
       }
       geocodeObj = optionalFeature;
-    } else {
-      geocodeObj = this.store.state.geocode.data;
-    }
+    } //else {
+    //   geocodeObj = this.store.state.geocode.data;
+    // }
 
     let dataSources = {};
     if (doPins) {
