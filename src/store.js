@@ -266,10 +266,10 @@ const pvdStore = {
         const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg, mapregStuff } = payload || {};
         console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
         if (!multipleAllowed || !mapregStuff) {
-          console.log('if');
+          // console.log('if');
           state.parcels[parcelLayer] = data;
         } else {
-          console.log('else');
+          // console.log('else');
           state.parcels[parcelLayer].data = data;
           state.parcels[parcelLayer].status = status;
           state.parcels[parcelLayer].activeParcel = activeParcel;

@@ -520,8 +520,20 @@ class DataManager {
             status: null,
           });
         }
+
+        this.store.commit('setShapeSearchData', null);
+        this.store.commit('setShapeSearchStatus', null);
       }
     }
+  }
+
+  resetGeocodeOnly() {
+    console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
+    // reset geocode
+    this.store.commit('setGeocodeStatus', null);
+    this.store.commit('setGeocodeData', null);
+    this.store.commit('setGeocodeRelated', null);
+    this.store.commit('setGeocodeInput', null);
   }
 
   // this gets called when the current geocoded address is wiped out, such as
