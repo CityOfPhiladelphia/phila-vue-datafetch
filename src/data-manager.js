@@ -219,7 +219,7 @@ class DataManager {
   }
 
   fetchData(optionalFeature) {
-    // console.log('\nFETCH DATA');
+    console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
     let ownerSearchObj;
@@ -774,7 +774,7 @@ class DataManager {
   }
 
   getParcelsByShape(latlng, parcelLayer) {
-    // console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer)
+    console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer);
     const latLng = L.polygon(latlng._latlngs, latlng.options);
     const url = this.config.map.featureLayers.pwdParcels.url;
 

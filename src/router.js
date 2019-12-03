@@ -2,11 +2,13 @@ import { parse as parseUrl } from 'url';
 
 class Router {
   constructor(opts) {
+    console.log('Router constructor, opts:', opts);
     const config = this.config = opts.config;
     this.store = opts.store;
     this.controller = opts.controller;
     this.dataManager = opts.dataManager;
     this.history = window.history;
+    this.vueRouter = opts.router;
 
     // check if the router should be silent (i.e. not update the url or listen
     // for hash changes)
@@ -35,9 +37,9 @@ class Router {
   activeParcelLayer() {
     if (this.config.parcels) {
       return this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
-    } 
+    }
     return null;
-    
+
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
@@ -306,25 +308,53 @@ class Router {
       // REVIEW this is only pushing state when routing is turned on. but maybe we
       // want this to happen all the time, right?
       if (!this.silent) {
-        // push state
-        const nextHistoryState = {
-          geocode: geocodeData,
-        };
-        let nextHash;
-        // address = 'addr ' + address;
-        if (topic) {
-          nextHash = this.makeHash(address, topic);
+        if (this.config.router.type === 'vue') {
+          console.log('in setRouteByGeocode, router type is vue');
+          if (this.store.state.bufferMode) {
+            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}});
+          } else {
+            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}});
+          }
         } else {
-          nextHash = this.makeHash(address, '');
+          console.log('in setRouteByGeocode, router type is not vue');
+          const nextHistoryState = {
+            geocode: geocodeData,
+          };
+          let nextHash;
+          // address = 'addr ' + address;
+          if (topic) {
+            nextHash = this.makeHash(address, topic);
+          } else {
+            nextHash = this.makeHash(address, '');
+          }
+          // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
+          this.history.pushState(nextHistoryState, null, nextHash);
         }
-        // console.log('nextHistoryState', nextHistoryState, 'nextHash', nextHash);
-        this.history.pushState(nextHistoryState, null, nextHash);
       }
     } else {
       // wipe out hash if a geocode fails
       if (!this.silent) {
         this.history.pushState(null, null, '#');
       }
+    }
+  }
+
+  setRouteByShapeSearch() {
+    console.log('router.js didShapeSearch is running');
+    const shapeInput = this.store.state.shapeSearch.input;
+    console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
+    // only run this if the shape is in the store (which it will not be if it is created from the route)
+    if (shapeInput) {
+      let shape = '[[';
+      var i;
+      for (i=0; i < shapeInput.length - 1; i++) {
+        shape += shapeInput[i].lat.toFixed(5) + ',' + shapeInput[i].lng.toFixed(5) + '],[';
+      }
+      shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]';
+
+      // console.log('didShapeSearch is running, shape:', shape);
+
+      this.vueRouter.push({ query: { shape }});
     }
   }
 }

@@ -40,6 +40,7 @@ class Controller {
     // create router
     opts.dataManager = dataManager;
     this.router = new Router(opts);
+    this.vueRouter = opts.router;
 
     // create clients
     this.clients = {};
@@ -157,6 +158,51 @@ class Controller {
     }
   }
 
+  async runBufferProcess(parcelResponse) {
+    let aisResponse = this.store.state.geocode.data;
+    console.log('handleMapClick ran in bufferMode, feature.geometry.coordinates:', aisResponse.geometry.coordinates);
+    const latLng = { lat: aisResponse.geometry.coordinates[1], lng: aisResponse.geometry.coordinates[0] };
+    // this.store.commit('setMapCenter', aisResponse.geometry.coordinates);
+    // let parcelResponse = await this.dataManager.getParcelsByBuffer(latLng, []);
+    console.log('parcelResponse:', parcelResponse);
+    if (parcelResponse) {
+      let bufferShapeResponse = await this.clients.bufferSearch.fetchBufferShape(null, null, parcelResponse, 'pwd', latLng);
+      console.log('bufferShapeResponse:', bufferShapeResponse);
+
+      const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
+      const parameters = {};
+      const calculateDistance = true;
+      const coords = aisResponse.geometry.coordinates;
+      let spatialResponse = await this.clients.bufferSearch.fetchBySpatialQuery(parcelUrl,
+        'intersects',
+        bufferShapeResponse,
+        parameters,
+        calculateDistance ? coords : null,
+      );
+
+      console.log('spatialResponse:', spatialResponse);
+
+      if (!spatialResponse) {
+        return;
+      }
+
+      const features = spatialResponse.features;
+
+      if (features.length === 0) {
+        return;
+      }
+      // at this point there is definitely a feature or features - put it in state
+      this.dataManager.setParcelsInState('pwd', true, null, features, false);
+      // this.geocode(features);
+      this.store.commit('setLastSearchMethod', 'buffer search');
+      // this.resetGeocode();
+      this.store.commit('setBufferMode', false);
+      let shapeResponse = await this.clients.shapeSearch.fetch(features);
+      // console.log('shapeResponse:', shapeResponse);
+      return shapeResponse;
+    }
+  }
+
   async handleSearchFormSubmit(value, searchCategory) {
     console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
@@ -173,9 +219,9 @@ class Controller {
     let aisResponse = await this.clients.geocode.fetch(value);
     console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
 
-    if (aisResponse) {
+    if (aisResponse && !this.store.state.bufferMode) {
       this.router.setRouteByGeocode();
-    } else {
+    } else if (!this.store.state.bufferMode) {
       aisResponse = await this.clients.ownerSearch.fetch(value);
     }
 
@@ -251,6 +297,12 @@ class Controller {
 
       this.dataManager.processParcels(false, response, parcelLayer);
       // this.dataManager.resetData();
+      let parcelResponse = response;
+
+      if (this.store.state.bufferMode) {
+        this.runBufferProcess(response);
+      }
+
       this.dataManager.fetchData();
     }
     console.log('end of handleSearchFormSubmit');
@@ -322,47 +374,7 @@ class Controller {
 
     // handle if it is in buffer mode
     if (this.store.state.bufferMode) {
-      console.log('handleMapClick ran in bufferMode, feature.geometry.coordinates:', aisResponse.geometry.coordinates);
-      const latLng = { lat: aisResponse.geometry.coordinates[1], lng: aisResponse.geometry.coordinates[0] };
-      // this.store.commit('setMapCenter', aisResponse.geometry.coordinates);
-      // let parcelResponse = await this.dataManager.getParcelsByBuffer(latLng, []);
-      console.log('parcelResponse:', parcelResponse);
-      if (parcelResponse) {
-        let bufferShapeResponse = await this.clients.bufferSearch.fetchBufferShape(null, null, parcelResponse, 'pwd', latLng);
-        console.log('bufferShapeResponse:', bufferShapeResponse);
-
-        const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
-        const parameters = {};
-        const calculateDistance = true;
-        const coords = aisResponse.geometry.coordinates;
-        let spatialResponse = await this.clients.bufferSearch.fetchBySpatialQuery(parcelUrl,
-          'intersects',
-          bufferShapeResponse,
-          parameters,
-          calculateDistance ? coords : null,
-        );
-
-        console.log('spatialResponse:', spatialResponse);
-
-        if (!spatialResponse) {
-          return;
-        }
-
-        const features = spatialResponse.features;
-
-        if (features.length === 0) {
-          return;
-        }
-        // at this point there is definitely a feature or features - put it in state
-        this.dataManager.setParcelsInState('pwd', true, null, features, false);
-        // this.geocode(features);
-        this.store.commit('setLastSearchMethod', 'buffer search');
-        // this.resetGeocode();
-        this.store.commit('setBufferMode', false);
-        let shapeResponse = await this.clients.shapeSearch.fetch(features);
-        console.log('shapeResponse:', shapeResponse);
-
-      }
+      this.runBufferProcess(parcelResponse);
     } else {
 
       // after getting the parcel of the activeParcelLayer, check if there are
@@ -392,7 +404,29 @@ class Controller {
 
   async handleDrawnShape(state) {
     console.log('handleDrawnShape is running');
-    const shape = this.store.state.drawShape;
+    let shape = this.store.state.drawShape;
+
+    if (!shape) {
+      let query = this.vueRouter.history.current.query;
+      // console.log('App.vue mounted is running, this.$route.query:', this.$route.query);
+      // this.introPage = false;
+      // this.$store.commit('setIntroPage', false);
+      let queryShape = query.shape;
+      queryShape = queryShape.slice(2, queryShape.length-2);
+      queryShape = queryShape.split('],[');
+      let test = [];
+      for (let point of queryShape) {
+        test.push(point.split(','));
+      }
+      let _latlngs = [];
+      for (let item of test) {
+        let latlng = new L.LatLng(parseFloat(item[0]), parseFloat(item[1]));
+        _latlngs.push(latlng);
+      }
+      shape = { _latlngs };
+    }
+
+
     const parcels = [];
     let response = await this.dataManager.getParcelsByShape(shape, parcels);
     console.log('handleDrawnShape, response:', response);
@@ -439,10 +473,16 @@ class Controller {
     this.dataManager.removeShape();
     // this.clearShapeSearch()
     this.dataManager.resetGeocodeOnly();
+
+    this.router.setRouteByShapeSearch();
     // const didShapeSearch = this.didShapeSearch.bind(this);
     let shapeResponse = await this.clients.shapeSearch.fetch(features);
     console.log('shapeResponse:', shapeResponse);
     this.dataManager.fetchData();
+  }
+
+  getParcelsByPoints(points) {
+    this.dataManager.getParcelsByShape(points);
   }
 
 
