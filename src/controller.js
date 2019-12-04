@@ -209,6 +209,20 @@ class Controller {
 
     this.dataManager.resetData();
 
+    if(value === '' || value === null) {
+      console.log('submitting blank value');
+      this.resetGeocode();
+      this.dataManager.clearOwnerSearch();
+      this.store.commit('setShapeSearchStatus', null);
+      this.store.commit('setShapeSearchInput', null);
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setParcelData', {});
+      this.store.commit('setLastSearchMethod', 'geocode');
+      this.store.commit('setBufferShape', null);
+      this.router.setRouteByGeocode();
+      return;
+    }
+
     this.initializeStatuses(value, searchCategory);
     if(searchCategory === "keyword") {
       return;
@@ -457,7 +471,7 @@ class Controller {
       this.store.commit('setShapeSearchStatus', 'too many');
       this.resetData();
       this.resetGeocode();
-      this.clearOwnerSearch();
+      this.dataManager.clearOwnerSearch();
       this.store.commit('setShapeSearchData', null);
       this.store.commit('setParcelData', {});
       this.store.commit('setLastSearchMethod', 'geocode');
