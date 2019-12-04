@@ -333,6 +333,7 @@ const pvdStore = {
         state.shapeSearch.data = payload;
       },
       setShapeSearchDataPush(state, payload) {
+        console.log('store.js, setShapeSearchDataPush is running, payload:', payload);
         let objIndex = parseInt(payload.objIndex);
         delete payload.objIndex;
         state.shapeSearch.data.rows.splice(objIndex + 1, 0, ...payload);

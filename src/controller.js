@@ -300,7 +300,7 @@ class Controller {
       let parcelResponse = response;
 
       if (this.store.state.bufferMode) {
-        this.runBufferProcess(response);
+        await this.runBufferProcess(response);
       }
 
       this.dataManager.fetchData();
@@ -374,7 +374,7 @@ class Controller {
 
     // handle if it is in buffer mode
     if (this.store.state.bufferMode) {
-      this.runBufferProcess(parcelResponse);
+      await this.runBufferProcess(parcelResponse);
     } else {
 
       // after getting the parcel of the activeParcelLayer, check if there are

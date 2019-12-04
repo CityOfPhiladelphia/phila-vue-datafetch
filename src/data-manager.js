@@ -152,7 +152,7 @@ class DataManager {
 
 
   defineTargets(dataSourceKey, targetsDef) {
-    // console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
+    console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -186,7 +186,7 @@ class DataManager {
       });
     }
 
-    // console.log('in defineTargets, shouldCreateTargets:', shouldCreateTargets);
+    console.log('in defineTargets, shouldCreateTargets:', shouldCreateTargets);
 
     // if not, create them.
     if (shouldCreateTargets) {
@@ -238,7 +238,7 @@ class DataManager {
       // ownerSearchObj = geocodeObj;
 
     } else {
-      // console.log('in else, setting geocodeObj');
+      console.log('fetchData, in else, setting geocodeObj');
       geocodeObj = this.store.state.geocode.data;
       ownerSearchObj = this.store.state.ownerSearch.data;
       if (this.store.state.shapeSearch.data) {
@@ -302,6 +302,7 @@ class DataManager {
       let targetsFn;
 
       if (targetsDef) {
+        console.log('in fetchData, IF targetsDef is true');
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
 
@@ -309,7 +310,7 @@ class DataManager {
         if (this.config.app) {
           if (this.config.app.title === 'Property Data Explorer') {
             targets = this.defineTargets(dataSourceKey, targetsDef);
-            // console.log('in Property Data Explorer, targets:', targets);
+            console.log('in Property Data Explorer, targets:', targets);
           }
         } else {
 
@@ -334,7 +335,7 @@ class DataManager {
             return stateTargetIdsStr.includes(targetIdStr);
           });
 
-          // console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
+          console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
 
           // if not, create them.
           if (shouldCreateTargets) {
@@ -350,16 +351,14 @@ class DataManager {
           }
         }
       } else {
+        console.log('in fetchData, ELSE (no targetsDef) is running');
         targets = [ geocodeObj ];
       }
 
-
-
-
-      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
+      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
-        // console.log('fetchData, target:', target);
+        console.log('fetchData, target:', target);
         // get id of target
         let targetId;
         if (targetIdFn) {
@@ -370,7 +369,7 @@ class DataManager {
 
         // check if it's ready
         const isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
-        // console.log('isReady:', isReady);
+        console.log('isReady:', isReady);
         if (!isReady) {
           // console.log('not ready');
           continue;
@@ -398,7 +397,7 @@ class DataManager {
         // TODO do this for all targets
         switch(type) {
         case 'http-get':
-          // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+          console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
           if (this.config.app) {
             if (this.config.app.title === 'Property Data Explorer') {
               this.clients.http.fetchPde(target,
@@ -520,11 +519,13 @@ class DataManager {
             status: null,
           });
         }
-
-        this.store.commit('setShapeSearchData', null);
-        this.store.commit('setShapeSearchStatus', null);
       }
     }
+  }
+
+  resetShape() {
+    this.store.commit('setShapeSearchData', null);
+    this.store.commit('setShapeSearchStatus', null);
   }
 
   resetGeocodeOnly() {
@@ -616,7 +617,7 @@ class DataManager {
   }
 
   checkDataSourceReady(key, options, targetId) {
-    // console.log(`check data source ready: ${key} ${targetId || ''}`, options);
+    console.log(`check data source ready: ${key} ${targetId || ''}`, options);
 
     const deps = options.deps;
     // console.log('deps', deps);
@@ -631,6 +632,7 @@ class DataManager {
       if (targetId) {
         targetObj = targetObj.targets[targetId];
       }
+      console.log('checkDataSourceReady, IF depsMet is TRUE, targetObj:', targetObj, '!targetObj.status:', targetObj.status, '!targetObj.status:', !targetObj.status);
 
       // if the target obj has a status of null, this data source is ready.
       isReady = !targetObj.status;
@@ -701,6 +703,7 @@ class DataManager {
         };
         feature.properties.opa_account_num = this.store.state.geocode.input;
         this.resetData();
+        this.resetShape();
         this.fetchData(feature);
 
       } else {
