@@ -17,7 +17,7 @@
     "date-fns": "^2.8.1",
     "esri-leaflet": "^2.3.1",
     "https-proxy-agent": "^3.0.1",
-    "leaflet": "^1.6.0",
+    "leaflet": "^1.5.1",
     "proj4": "^2.6.0",
     "vue": "^2.6.10",
     "vuex": "^3.1.2"

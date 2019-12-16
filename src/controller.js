@@ -325,18 +325,14 @@ class Controller {
   async handleMapClick(e) {
     console.log('handle map click', e, this);
 
-
     // TODO figure out why form submits via enter key are generating a map
     // click event and remove this
     if (e.originalEvent.keyCode === 13) {
       return;
     }
-    this.store.commit('setLastSearchMethod', 'reverseGeocode');
 
     // get parcels that intersect map click xy
     const latLng = e.latlng;
-    this.store.commit('setClickCoords', latLng);
-    this.store.commit('setGeocodeInput', null);
 
     // if click is on a topic with pwd parcels, you do not want to find dor parcels unless the
     // click was actually on a pwd parcel that could be geocoded, because just running
@@ -354,7 +350,12 @@ class Controller {
       return;
     }
 
+    this.store.commit('setLastSearchMethod', 'reverseGeocode');
+    this.store.commit('setClickCoords', latLng);
+    this.store.commit('setGeocodeInput', null);
+
     this.dataManager.resetData();
+    this.dataManager.resetShape();
 
     if (this.store.state.lastSearchMethod !== 'buffer search') {
       // console.log('in didGetParcels, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
@@ -480,6 +481,7 @@ class Controller {
     }
 
     this.dataManager.resetData();
+    this.dataManager.resetShape();
     // at this point there is definitely a feature or features - put it in state
     this.dataManager.setParcelsInState('pwd', true, null, features, false);
     // this.geocode(features);
