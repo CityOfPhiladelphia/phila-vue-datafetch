@@ -21,6 +21,16 @@ const initialState = {
     data: null,
     input: null,
   },
+  activeSearch: {
+  },
+  shapeSearch: {
+    status: null,
+    data: null,
+    input: null,
+  },
+  condoUnits: {
+    units: null,
+  },
   searchType: 'address',
   lastSearchMethod: 'geocode',
   modals: {
@@ -34,13 +44,14 @@ const initialState = {
 
 const pvdStore = {
   createSources(config) {
-    // console.log('createSources is running, config:', config);
+    console.log('createSources is running, config:', config);
     const sourceKeys = Object.keys(config.dataSources || {});
     const sources = sourceKeys.reduce((o, key) => {
       let val;
       // if the source has targets, just set it to be an empty object
       if (config.dataSources[key].targets) {
         val = {
+          status: null,
           targets: {},
         };
       } else {
@@ -86,12 +97,26 @@ const pvdStore = {
     }, {});
     return sources;
   },
+  createActivesearch(config) {
+    // console.log('createSources is running, config:', config);
+    const sourceKeys = Object.keys(config.activeSearch || {});
+    const sources = sourceKeys.reduce((o, key) => {
+      let val = {
+        status: null,
+        data: null,
+      };
+      o[key] = val;
+      return o;
+    }, {});
+    return sources;
+  },
 
   createParcels(config) {
+    console.log('createParcels is running, config:', config);
     const parcelKeys = Object.keys(config.parcels || {});
     const parcels = parcelKeys.reduce((o, key) => {
       let val;
-      if (config.parcels[key].multipleAllowed) {
+      if (config.parcels[key].multipleAllowed && config.parcels[key].mapregStuff) {
         val = {
           data: [],
           status: null,
@@ -99,7 +124,9 @@ const pvdStore = {
           activeAddress: null,
           activeMapreg: null,
         };
+        // console.log('if mapregStuff section running, key:', key, 'val:', val);
       } else {
+        // console.log('else mapregStuff section running, key:', key);
         val = null;
         // val = {
         //   geometry: null,
@@ -109,10 +136,13 @@ const pvdStore = {
         // };
       }
 
+      // console.log('o:', o, 'key:', key, 'val:', val, 'typeof val:', typeof val);
       o[key] = val;
+      // console.log('o:', o, 'key:', key, 'val:', val);
 
       return o;
     }, {});
+    // console.log('end of createParcels, parcels:', parcels);
     return parcels;
   },
 
@@ -138,7 +168,7 @@ const pvdStore = {
         state.clickCoords = payload;
       },
       setSourceStatus(state, payload) {
-        // console.log('setSourceStatus is running, payload:', payload, 'state', state);
+        // console.log('setSourceStatus is running, payload:', payload);
         const key = payload.key;
         const status = payload.status;
 
@@ -168,7 +198,7 @@ const pvdStore = {
         // }
       },
       setSourceData(state, payload) {
-        // console.log('store setSourceData payload:', state);
+        // console.log('store setSourceData is running, payload:', payload);
         const key = payload.key;
         const data = payload.data;
 
@@ -184,6 +214,12 @@ const pvdStore = {
         } else {
           state.pinSources[key].data = data;
         }
+      },
+      setSourceDataObject(state, payload) {
+        // console.log('store setSourceDataObject is running, payload:', payload);
+        const key = payload.key;
+        const data = payload.data;
+        state.sources[key].targets = data;
       },
       setSourceDataMore(state, payload) {
         const key = payload.key;
@@ -206,6 +242,7 @@ const pvdStore = {
       },
       // this sets empty targets for a data source
       createEmptySourceTargets(state, payload) {
+        console.log('createEmptySourceTargets is running');
         const { key, targetIds } = payload;
         state.sources[key].targets = targetIds.reduce((acc, targetId) => {
           acc[targetId] = {
@@ -216,17 +253,23 @@ const pvdStore = {
         }, {});
       },
       clearSourceTargets(state, payload) {
+        // console.log('clearSourceTargets is running, payload:', payload);
         const key = payload.key;
         state.sources[key].targets = {};
+        if (state.sources[key].status) {
+          state.sources[key].status = null;
+        }
       },
       // this is the map center as an xy coordinate array (not latlng)
       setParcelData(state, payload) {
         // console.log('store setParcelData payload:', payload);
-        const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg } = payload || {};
-        // console.log('store setParcelData parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
-        if (!multipleAllowed) {
+        const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg, mapregStuff } = payload || {};
+        console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
+        if (!multipleAllowed || !mapregStuff) {
+          // console.log('if');
           state.parcels[parcelLayer] = data;
         } else {
+          // console.log('else');
           state.parcels[parcelLayer].data = data;
           state.parcels[parcelLayer].status = status;
           state.parcels[parcelLayer].activeParcel = activeParcel;
@@ -263,6 +306,37 @@ const pvdStore = {
       },
       setDidToggleModal(state, name) {
         state.modals.open = name;
+      },
+
+      setUnits(state, payload) {
+        // console.log("setShapeSearchUnits: ", payload)
+        state.condoUnits.units = payload;
+      },
+      setActiveSearchStatus(state, payload) {
+        let key = payload.activeSearchKey;
+        state.activeSearch[payload.activeSearchKey].status = payload.status;
+      },
+      setActiveSearchData(state, payload) {
+        const key = payload.activeSearchKey;
+        const data = payload.data;
+        state.activeSearch[key].data = data;
+      },
+
+      setShapeSearchStatus(state, payload) {
+        //console.log('setShapeSearchStatus is running, payload:', payload);
+        state.shapeSearch.status = payload;
+      },
+      setShapeSearchInput(state, payload) {
+        state.shapeSearch.input = payload;
+      },
+      setShapeSearchData(state, payload) {
+        state.shapeSearch.data = payload;
+      },
+      setShapeSearchDataPush(state, payload) {
+        console.log('store.js, setShapeSearchDataPush is running, payload:', payload);
+        let objIndex = parseInt(payload.objIndex);
+        delete payload.objIndex;
+        state.shapeSearch.data.rows.splice(objIndex + 1, 0, ...payload);
       },
     },
   },

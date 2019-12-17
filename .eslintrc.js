@@ -34,6 +34,10 @@ module.exports = {
     "comma-dangle": [ "error", "always-multiline" ],
     "semi": [ "error", "always" ],
 
+    "require-atomic-updates": "off",
+    "no-func-assign": "off",
+    "no-undef": "off",
+
     // Vue Rules
     "vue/no-v-html": "off",
     "vue/order-in-components": "error",

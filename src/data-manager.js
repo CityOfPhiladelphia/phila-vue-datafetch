@@ -5,14 +5,22 @@ and storing them in state.
 The router should own an instance of DataManager and make calls to it based on
 navigation events.
 */
+
+import proj4 from 'proj4';
+import axios from 'axios';
+import explode from '@turf/explode';
+import nearest from '@turf/nearest-point';
+
 import * as L from 'leaflet';
 import { query as Query } from 'esri-leaflet';
 import utils from './utils.js';
 import {
   GeocodeClient,
+  ActiveSearchClient,
   OwnerSearchClient,
   HttpClient,
   EsriClient,
+  CondoSearchClient,
 } from './clients';
 
 class DataManager {
@@ -29,9 +37,11 @@ class DataManager {
     // response back to this?
     const clientOpts = { config, store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
+    this.clients.activeSearch = new ActiveSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
+    this.clients.condoSearch = new CondoSearchClient(clientOpts);
   }
 
   /* STATE HELPERS */
@@ -54,6 +64,33 @@ class DataManager {
   // }
 
   /* DATA FETCHING METHODS */
+
+  fetchRowData(){
+    // console.log("Fetching row data")
+
+    var state = this.store.state;
+    let input = [];
+    if (state.lastSearchMethod === 'owner search') {
+      input = state.ownerSearch.data.filter(object => {
+        return object._featureId === state.activeFeature.featureId;
+      });
+    } else if (state.lastSearchMethod === 'shape search' || state.lastSearchMethod === 'buffer search') {
+      input = state.shapeSearch.data.rows.filter(object => {
+        return object._featureId === state.activeFeature.featureId;
+      });
+    } else {
+      let data;
+      if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
+        let result = state.geocode.related.filter(object => object._featureId === state.activeFeature.featureId);
+        data = result[0];
+      } else {
+        data = state.geocode.data;
+      }
+      input.push(data);
+    }
+    //console.log('fetchRowData is running, input:', input);
+    this.clients.activeSearch.fetch(input[0]);
+  }
 
   fetchMoreData(dataSourceKey, highestPageRetrieved) {
     console.log('data-manager.js fetchMoreData is running');
@@ -114,27 +151,117 @@ class DataManager {
   }
 
 
+  defineTargets(dataSourceKey, targetsDef) {
+    console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
+    const state = this.store.state;
+    // targets may cause a looped axios call, or may just call one once and get multiple results
+    let targetsFn = targetsDef.get;
+    // let targetIdFn = targetsDef.getTargetId;
+
+    if (typeof targetsFn !== 'function') {
+      throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
+    }
+    let targets = targetsFn(state);
+    let targetIdFn = targetsDef.getTargetId;
+
+    // console.log("Define Targets Starting", targets)
+    // check if target objs exist in state.
+    let targetIds;
+    if ( typeof targets.length != 'undefined'){
+      targetIds = targets.map(targetIdFn);
+    }
+    // console.log("targetIds: ", targetIds)
+    const stateTargets = state.sources[dataSourceKey].targets;
+    const stateTargetIds = Object.keys(stateTargets);
+    // the inclusion check wasn't working because ids were strings in
+    // one set and ints in another, so do this.
+    const stateTargetIdsStr = stateTargetIds.map(String);
+    let shouldCreateTargets;
+    if (targetsDef.runOnce) {
+      shouldCreateTargets = false;
+    } else {
+      shouldCreateTargets = !targetIds.every(targetId => {
+        const targetIdStr = String(targetId);
+        return stateTargetIdsStr.includes(targetIdStr);
+      });
+    }
+
+    console.log('in defineTargets, shouldCreateTargets:', shouldCreateTargets);
+
+    // if not, create them.
+    if (shouldCreateTargets) {
+      // console.log('should create targets', targetIds, stateTargetIds);
+      this.store.commit('createEmptySourceTargets', {
+        key: dataSourceKey,
+        targetIds,
+      });
+    }
+
+    if (!Array.isArray(targets)) {
+      throw new Error('Data source targets getter should return an array');
+    }
+
+    // this over-rides if the targets are set to "runOnce = true"
+    if (targetsDef.runOnce) {
+      let idsOfOwnersOrProps = "";
+      for (let target of targets) {
+        if(target.properties){
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
+        } else {
+          idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.parcel_number + "',";
+        }
+      }
+      idsOfOwnersOrProps = idsOfOwnersOrProps.substring(0, idsOfOwnersOrProps.length - 1);
+      targets = [ idsOfOwnersOrProps ];
+    }
+    // console.log("defineTargets targets: ", targets)
+    return targets;
+  }
+
   fetchData(optionalFeature) {
-    // console.log('\nFETCH DATA');
+    console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
+    let ownerSearchObj;
+    let shapeSearchObj;
+    if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true && this.store.state.condoUnits.units.length) {
+    // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
 
-    // this was added to allow fetchData to run even without a geocode result
-    // for the real estate tax site which sometimes needs data from TIPS
-    // even if the property is not in OPA and AIS
+      // console.log('in if, this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
+      if (Array.isArray(this.store.state.parcels.pwd)) {
+        geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
+      } else {
+        geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
+      }
+
+      // geocodeObj = this.store.state.geocode.data;//.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
+      // ownerSearchObj = geocodeObj;
+
+    } else {
+      console.log('fetchData, in else, setting geocodeObj');
+      geocodeObj = this.store.state.geocode.data;
+      ownerSearchObj = this.store.state.ownerSearch.data;
+      if (this.store.state.shapeSearch.data) {
+        shapeSearchObj = this.store.state.shapeSearch.data.rows;
+      }
+    }
+
+    // console.log('geocodeObj first time:', geocodeObj);
+    // let ownerSearchObj = this.store.state.ownerSearch.data;
+
     let doPins = false;
     if (optionalFeature) {
       if (optionalFeature === "pins") {
         doPins = true;
       }
       geocodeObj = optionalFeature;
-    } else {
-      geocodeObj = this.store.state.geocode.data;
-    }
+    } //else {
+    //   geocodeObj = this.store.state.geocode.data;
+    // }
 
     let dataSources = {};
     if (doPins) {
-      console.log('fetchData is running on pins');
+      // console.log('fetchData is running on pins');
       dataSources = this.config.pinSources || {};
     } else {
       dataSources = this.config.dataSources || {};
@@ -143,8 +270,12 @@ class DataManager {
     let dataSourceKeys = Object.entries(dataSources);
     // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
-    if (!geocodeObj) {
+    // this was added to allow fetchData to run even without a geocode result
+    // for the real estate tax site which sometimes needs data from TIPS
+    // even if the property is not in OPA and AIS
+    if (!geocodeObj && !ownerSearchObj && !shapeSearchObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
+        // console.log('dataSourceKey:', dataSourceKey);
         if (dataSourceKey[1].dependent) {
           if (dataSourceKey[1].dependent === 'parcel' || dataSourceKey[1].dependent === 'none') {
             return true;
@@ -152,6 +283,7 @@ class DataManager {
         }
       });
     }
+
     // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
@@ -160,8 +292,7 @@ class DataManager {
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
-
-      // console.log('key:', dataSourceKey, type);
+      // console.log('targetsDef:', targetsDef);
 
       // if the data sources specifies a features getter, use that to source
       // features for evaluating params/forming requests. otherwise,
@@ -171,45 +302,63 @@ class DataManager {
       let targetsFn;
 
       if (targetsDef) {
+        console.log('in fetchData, IF targetsDef is true');
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
 
-        if (typeof targetsFn !== 'function') {
-          throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
-        }
-        targets = targetsFn(state);
+        // this is a ridiculous hack that routes over to a function specifically for PDE
+        if (this.config.app) {
+          if (this.config.app.title === 'Property Data Explorer') {
+            targets = this.defineTargets(dataSourceKey, targetsDef);
+            console.log('in Property Data Explorer, targets:', targets);
+          }
+        } else {
 
-        // check if target objs exist in state.
-        const targetIds = targets.map(targetIdFn);
-        const stateTargets = state.sources[dataSourceKey].targets;
-        const stateTargetIds = Object.keys(stateTargets);
-        // the inclusion check wasn't working because ids were strings in
-        // one set and ints in another, so do this.
-        const stateTargetIdsStr = stateTargetIds.map(String);
-        const shouldCreateTargets = !targetIds.every(targetId => {
-          const targetIdStr = String(targetId);
-          return stateTargetIdsStr.includes(targetIdStr);
-        });
+          if (typeof targetsFn !== 'function') {
+            throw new Error(`Invalid targets getter for data source '${dataSourceKey}'`);
+          }
+          targets = targetsFn(state);
 
-        // if not, create them.
-        if (shouldCreateTargets) {
-          // console.log('should create targets', targetIds, stateTargetIds);
-          this.store.commit('createEmptySourceTargets', {
-            key: dataSourceKey,
-            targetIds,
+          // console.log('in fetchData, targets:', targets);
+
+          // check if target objs exist in state.
+          const targetIds = targets.map(targetIdFn);
+          const stateTargets = state.sources[dataSourceKey].targets;
+          const stateTargetIds = Object.keys(stateTargets);
+
+          // the inclusion check wasn't working because ids were strings in
+          // one set and ints in another, so do this.
+          const stateTargetIdsStr = stateTargetIds.map(String);
+
+          const shouldCreateTargets = !targetIds.every(targetId => {
+            const targetIdStr = String(targetId);
+            return stateTargetIdsStr.includes(targetIdStr);
           });
-        }
 
-        if (!Array.isArray(targets)) {
-          throw new Error('Data source targets getter should return an array');
+          console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
+
+          // if not, create them.
+          if (shouldCreateTargets) {
+            // console.log('should create targets', targetIds, stateTargetIds);
+            this.store.commit('createEmptySourceTargets', {
+              key: dataSourceKey,
+              targetIds,
+            });
+          }
+
+          if (!Array.isArray(targets)) {
+            throw new Error('Data source targets getter should return an array');
+          }
         }
       } else {
+        console.log('in fetchData, ELSE (no targetsDef) is running');
         targets = [ geocodeObj ];
       }
 
-      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
+      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
+        console.log('fetchData, target:', target);
         // get id of target
         let targetId;
         if (targetIdFn) {
@@ -220,6 +369,7 @@ class DataManager {
 
         // check if it's ready
         const isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
+        console.log('isReady:', isReady);
         if (!isReady) {
           // console.log('not ready');
           continue;
@@ -236,15 +386,37 @@ class DataManager {
 
         this.store.commit('setSourceStatus', setSourceStatusOpts);
 
+        if (targetsDef) {
+          if (targetsDef.runOnce) {
+            targetIdFn = function(feature) {
+              return feature.parcel_number;
+            };
+          }
+        }
 
         // TODO do this for all targets
         switch(type) {
         case 'http-get':
-          // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
-          this.clients.http.fetch(target,
-            dataSource,
-            dataSourceKey,
-            targetIdFn);
+          console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+          if (this.config.app) {
+            if (this.config.app.title === 'Property Data Explorer') {
+              this.clients.http.fetchPde(target,
+                dataSource,
+                dataSourceKey,
+                targetIdFn);
+            } else {
+              this.clients.http.fetch(target,
+                dataSource,
+                dataSourceKey,
+                targetIdFn);
+            }
+          } else {
+            this.clients.http.fetch(target,
+              dataSource,
+              dataSourceKey,
+              targetIdFn);
+          }
+
           break;
 
         case 'http-get-nearby':
@@ -276,52 +448,55 @@ class DataManager {
     // console.log('end of outer loop');
   }
 
-  didFetchData(key, status, data, targetId) {
-    // console.log('data-manager.js didFetchData is running');
+  didFetchData(key, status, dataOrNull, targetId, targetIdFn) {
 
-    const dataOrNull = status === 'error' ? null : data;
-    let stateData = dataOrNull;
+    let data = status === 'error' ? null : dataOrNull;
     // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data);
-    let rows;
-    if (stateData) {
-      rows = stateData.rows;
+
+    // assign feature ids
+    if (Array.isArray(data)) {
+      data = this.assignFeatureIds(data, key, targetId);
+    } else if (data) {
+      data.rows = this.assignFeatureIds(data.rows, key, targetId);
     }
 
-    // if this is an array, assign feature ids
-    if (Array.isArray(stateData)) {
-      stateData = this.assignFeatureIds(stateData, key, targetId);
-    } else if (stateData) {
-      stateData.rows = this.assignFeatureIds(rows, key, targetId);
-    }
+    const setSourceStatusOpts = { key, status };
+    const setSourceDataOpts = { key, data };
 
-    // does this data source have targets?
-    // const targets = this.config.dataSources[key].targets;
-
-    // put data in state
-    const setSourceDataOpts = {
-      key,
-      data: stateData,
-    };
-    const setSourceStatusOpts = {
-      key,
-      status,
-    };
     if (targetId) {
-      setSourceDataOpts.targetId = targetId;
       setSourceStatusOpts.targetId = targetId;
+      setSourceDataOpts.targetId = targetId;
     }
-
-    // commit
-    this.store.commit('setSourceData', setSourceDataOpts);
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
+    // this doesn't make any sense - why is a targetIdFn the determining factor on the state data structure?
+    if (targetIdFn) {
+      let sourceDataObj = this.turnToTargets(key, data, targetIdFn);
+      this.store.commit('setSourceDataObject', sourceDataObj);
+    } else {
+      this.store.commit('setSourceData', setSourceDataOpts);
+    }
+
     // try fetching more data
-    // console.log('171111 data-manager.js line 319 - didFetchData - is calling fetchData on targetId', targetId, 'key', key);
+    // console.log('data-manager.js - didFetchData - is calling fetchData on targetId', targetId, 'key', key);
     this.fetchData();
   }
 
+  // TODO - this is probably completely wasteful
+  turnToTargets(key, data, targetIdFn) {
+    let newLargeObj = { 'key': key };
+    let newSmallObj = {};
+    for (let datum of data) {
+      newSmallObj[datum.parcel_number] = {
+        'data': datum,
+      };
+    }
+    newLargeObj['data'] = newSmallObj;
+    return newLargeObj;
+  }
+
   resetData() {
-    // console.log('resetData is running')
+    // console.log('resetData is running');
     const dataSources = this.config.dataSources || {};
 
     for (let dataSourceKey of Object.keys(dataSources)) {
@@ -348,10 +523,24 @@ class DataManager {
     }
   }
 
+  resetShape() {
+    this.store.commit('setShapeSearchData', null);
+    this.store.commit('setShapeSearchStatus', null);
+  }
+
+  resetGeocodeOnly() {
+    console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
+    // reset geocode
+    this.store.commit('setGeocodeStatus', null);
+    this.store.commit('setGeocodeData', null);
+    this.store.commit('setGeocodeRelated', null);
+    this.store.commit('setGeocodeInput', null);
+  }
+
   // this gets called when the current geocoded address is wiped out, such as
   // when you click on the "Atlas" title and it navigates to an empty hash
   resetGeocode() {
-    console.log('resetGeocode is running');
+    console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
     // reset geocode
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
@@ -360,18 +549,22 @@ class DataManager {
 
     // reset parcels
     if (this.config.parcels) {
-      this.store.commit('setParcelData', {
-        parcelLayer: 'dor',
-        multipleAllowed: true,
-        data: [],
-        status: null,
-        activeParcel: null,
-        activeAddress: null,
-        activeMapreg: null,
-      });
+      if (this.config.parcels.dor) {
+        this.store.commit('setParcelData', {
+          parcelLayer: 'dor',
+          multipleAllowed: true,
+          mapregStuff: this.config.parcels.dor.mapregStuff,
+          data: [],
+          status: null,
+          activeParcel: null,
+          activeAddress: null,
+          activeMapreg: null,
+        });
+      }
       this.store.commit('setParcelData', {
         parcelLayer: 'pwd',
         multipleAllowed: false,
+        mapregStuff: this.config.parcels.pwd.mapregStuff,
         data: null,
       });
       this.store.commit('setActiveParcelLayer', 'pwd');
@@ -424,7 +617,7 @@ class DataManager {
   }
 
   checkDataSourceReady(key, options, targetId) {
-    // console.log(`check data source ready: ${key} ${targetId || ''}`, options);
+    console.log(`check data source ready: ${key} ${targetId || ''}`, options);
 
     const deps = options.deps;
     // console.log('deps', deps);
@@ -439,6 +632,7 @@ class DataManager {
       if (targetId) {
         targetObj = targetObj.targets[targetId];
       }
+      console.log('checkDataSourceReady, IF depsMet is TRUE, targetObj:', targetObj, '!targetObj.status:', targetObj.status, '!targetObj.status:', !targetObj.status);
 
       // if the target obj has a status of null, this data source is ready.
       isReady = !targetObj.status;
@@ -509,6 +703,7 @@ class DataManager {
         };
         feature.properties.opa_account_num = this.store.state.geocode.input;
         this.resetData();
+        this.resetShape();
         this.fetchData(feature);
 
       } else {
@@ -530,6 +725,7 @@ class DataManager {
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
     const parcelQuery = Query({ url });
+    console.log('geocodeField:', geocodeField);
 
     if (id.includes('|')) {
       const idSplit = id.split('|');
@@ -543,14 +739,17 @@ class DataManager {
       }
       // console.log('there is a pipe, queryString:', queryString);
       parcelQuery.where(queryString);
+    } else if (Array.isArray(id)) {
+      parcelQuery.where(geocodeField + " IN (" + id + ")");
     } else {
       // console.log('there is not a pipe');
       parcelQuery.where(geocodeField + " = '" + id + "'");
     }
 
-    parcelQuery.where(geocodeField + " = '" + id + "'");
+    // parcelQuery.where(geocodeField + " = '" + id + "'");
     return new Promise(function(resolve, reject) {
       parcelQuery.run((function(error, featureCollection, response) {
+        console.log('end of getParcelsById response:', response, 'featureCollection:', featureCollection);
         if (error) {
           reject(error);
         } else {
@@ -577,9 +776,159 @@ class DataManager {
     });
   }
 
+  getParcelsByShape(latlng, parcelLayer) {
+    console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer);
+    const latLng = L.polygon(latlng._latlngs, latlng.options);
+    const url = this.config.map.featureLayers.pwdParcels.url;
+
+    const parcelQuery = Query({ url });
+    parcelQuery.intersects(latLng);
+
+    return new Promise(function(resolve, reject) {
+      parcelQuery.run((function(error, featureCollection, response) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
+      }));
+    });
+  }
+
+  getParcelsByBuffer(latlng, parcelLayer) {
+    console.log('getParcelsByBuffer is running, latlng:', latlng, 'this.store.state.parcels.pwd:', this.store.state.parcels.pwd);
+
+    // if (this.store.state.parcels.pwd === null) {
+    const latLng = L.latLng(latlng.lat, latlng.lng);
+    const url = this.config.map.featureLayers.pwdParcels.url;
+    const parcelQuery = Query({ url });
+    // console.log(parcelQuery);
+    parcelQuery.contains(latLng);
+
+    return new Promise(function(resolve, reject) {
+      parcelQuery.run((function(error, featureCollection, response) {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response);
+        }
+      }));
+    });
+    //   parcelQuery.run((function(error, featureCollection, response) {
+    //     // console.log('in getParcelsByLatLng, featureCollection:', featureCollection);
+    //     this.finishParcelsByBuffer(error, featureCollection, response, parcelLayer, latlng);
+    //   }).bind(this))
+    // } else {
+    //   this.finishParcelsByBuffer(null, null, latlng, parcelLayer, latlng);
+    // }
+  }
+
+  // finishParcelsByBuffer(error = [], featureCollection = [], response = {}, parcelLayer, latlng) {
+  //   console.log('finishParcelsByBuffer is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
+  //
+  //   const projection4326 = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";
+  //   const projection2272 = "+proj=lcc +lat_1=40.96666666666667 +lat_2=39.93333333333333 +lat_0=39.33333333333334 +lon_0=-77.75 +x_0=600000 +y_0=0 +ellps=GRS80 +datum=NAD83 +to_meter=0.3048006096012192 +no_defs";
+  //
+  //   const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
+  //   const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
+  //   const calculateDistance = true;
+  //   const distances = 250;
+  //
+  //   // if you do it by point
+  //   const coords = [latlng.lng, latlng.lat];
+  //   const coords2272 = proj4(projection4326, projection2272, [coords[0], coords[1]]);
+  //   // console.log('coords:', coords, 'coords2272:', coords2272);
+  //
+  //   // if you do it by parcel
+  //   let parcelGeom
+  //   // if (this.store.state.parcels.pwd !== null) {
+  //   //   parcelGeom = this.store.state.parcels.pwd.geometry;
+  //   // } else {
+  //     parcelGeom = response.features[0].geometry
+  //   // }
+  //
+  //   console.log('parcelGeom:', parcelGeom);
+  //
+  //   let polyCoords2272 = []
+  //   for (let polyCoord of parcelGeom.coordinates[0]) {
+  //     let polyCoord2272 = proj4(projection4326, projection2272, [polyCoord[0], polyCoord[1]])
+  //     polyCoords2272.push(polyCoord2272);
+  //   }
+  //
+  //   let newGeometries = {
+  //     "geometryType": "esriGeometryPolygon",
+  //     "geometries": [{ "rings": [polyCoords2272] }]
+  //   }
+  //
+  //   const params = {
+  //     // geometries: `[${coords2272.join(', ')}]`,
+  //     geometries: newGeometries,
+  //     inSR: 2272,
+  //     outSR: 4326,
+  //     bufferSR: 2272,
+  //     distances: distances, //|| 0.0028,
+  //     // inSR: 4326,
+  //     // outSR: 4326,
+  //     // bufferSR: 4326,
+  //     // distances: distances, //|| 0.0028,
+  //     unionResults: true,
+  //     geodesic: false,
+  //     f: 'json',
+  //   };
+  //   // console.log('esri nearby params', params);
+  //
+  //   // get buffer polygon
+  //   const bufferUrl = geometryServerUrl.replace(/\/$/, '') + '/buffer';
+  //   // console.log('bufferUrl:', bufferUrl);
+  //
+  //   axios.get(bufferUrl, { params }).then(response => {
+  //     const data = response.data;
+  //     // console.log('axios in finishParcelsByBuffer is running, response:', response);//, 'data:', data);
+  //
+  //     // console.log('did get esri nearby buffer', data);
+  //
+  //     const geoms = data.geometries || [];
+  //     const geom = geoms[0] || {};
+  //     const rings = geom.rings || [];
+  //     const xyCoords = rings[0];
+  //
+  //     // check for xy coords
+  //     if (!xyCoords) {
+  //       // we can't do anything without coords, so bail out
+  //       // this.dataManager.didFetchData(dataSourceKey, 'error');
+  //       return;
+  //     }
+  //
+  //     const latLngCoords = xyCoords.map(xyCoord => [...xyCoord].reverse());
+  //
+  //     // get nearby features using buffer
+  //     const buffer = L.polygon(latLngCoords);
+  //     const map = this.store.state.map.map;
+  //
+  //     // DEBUG
+  //     this.store.commit('setBufferShape', latLngCoords);
+  //     // buffer.addTo(map);
+  //
+  //     //this is a space holder
+  //     const parameters = {};
+  //     this.fetchBySpatialQuery(parcelUrl,
+  //                              'intersects',
+  //                              buffer,
+  //                              parameters,
+  //                              calculateDistance ? coords : null,
+  //                              // options,
+  //                             );
+  //   }, response => {
+  //     // console.log('getParcelsByBuffer error:', response);
+  //
+  //     // this.dataManager.didFetchData(dataSourceKey, 'error');
+  //   });
+  // }
+
   processParcels(error, featureCollection, parcelLayer, fetch) {
-    console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection);
     const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
+    console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
+    const mapregStuff = this.config.parcels[parcelLayer].mapregStuff;
 
     if (error || !featureCollection || featureCollection.features.length === 0) {
       return;
@@ -606,24 +955,39 @@ class DataManager {
     }
 
     // at this point there is definitely a feature or features - put it in state
-    this.setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted);
+    this.setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff);
     return feature;
   }
 
-  setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted) {
+  setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff) {
+    console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
     let payload;
     // pwd
-    if (!multipleAllowed) {
+    if (!multipleAllowed && !mapregStuff) {
+      console.log('1');
       payload = {
         parcelLayer,
         multipleAllowed,
+        mapregStuff,
         data: feature,
       };
-    // dor
-    } else {
+    } else if (multipleAllowed && !mapregStuff) {
+      console.log('2');
       payload = {
         parcelLayer,
         multipleAllowed,
+        mapregStuff,
+        data: featuresSorted,
+        status: 'success',
+      };
+
+    // dor
+    } else {
+      console.log('3');
+      payload = {
+        parcelLayer,
+        multipleAllowed,
+        mapregStuff,
         data: featuresSorted,
         status: 'success',
         activeParcel: feature ? feature.id : null,
@@ -636,6 +1000,19 @@ class DataManager {
     }
     // update state
     this.store.commit('setParcelData', payload);
+  }
+
+  clearOwnerSearch(){
+    // console.log('clearOwnerSearch is running');
+    this.store.commit('setOwnerSearchStatus', null);
+    this.store.commit('setOwnerSearchData', null);
+    this.store.commit('setOwnerSearchInput', null);
+  }
+
+  removeShape() {
+    if(this.store.state.editableLayers !== null ){
+      this.store.state.editableLayers.clearLayers();
+    }
   }
 
   // didGeocode(feature) {

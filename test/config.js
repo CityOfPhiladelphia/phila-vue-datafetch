@@ -31,6 +31,7 @@ const config = {
   parcels: {
     pwd: {
       multipleAllowed: false,
+      mapregStuff: false,
       geocodeFailAttemptParcel: null,
       clearStateOnError: false,
       wipeOutOtherParcelsOnReverseGeocodeOnly: true,
@@ -40,6 +41,7 @@ const config = {
     },
     dor: {
       multipleAllowed: true,
+      mapregStuff: true,
       geocodeFailAttemptParcel: 'pwd',
       clearStateOnError: true,
       wipeOutOtherParcelsOnReverseGeocodeOnly: false,
@@ -68,11 +70,13 @@ const config = {
       url: 'https://phl.carto.com/api/v2/sql',
       options: {
         params: {
-          q: function(feature){ return "select * from li_permits where address = '" + feature.properties.street_address + "' or addresskey = '" + feature.properties.li_address_key.toString() + "'"},
-        }
-      }
+          q: function(feature){
+            return "select * from li_permits where address = '" + feature.properties.street_address + "' or addresskey = '" + feature.properties.li_address_key.toString() + "'";
+          },
+        },
+      },
     },
-  }
-}
+  },
+};
 
 export default config;
