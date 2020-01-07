@@ -8,7 +8,7 @@ import BaseClient from './base-client';
 class ShapeSearchClient extends BaseClient {
 
   fetch(input) {
-    console.log('shape-search-client fetch is running, input:', input);
+    // console.log('shape-search-client fetch is running, input:', input);
     const data = input.map(a => a.properties.PARCELID);
     // console.log('shapeSearch DATA', data);
 
@@ -27,7 +27,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   success(response) {
-    console.log('shapeSearch success response.data: ', response.data);
+    // console.log('shapeSearch success response.data: ', response.data);
 
     const store = this.store;
 
@@ -55,7 +55,7 @@ class ShapeSearchClient extends BaseClient {
   }
 
   error(error) {
-    console.log("shape search error response: ", error);
+    // console.log("shape search error response: ", error);
     return;
   }
 }

@@ -44,7 +44,7 @@ const initialState = {
 
 const pvdStore = {
   createSources(config) {
-    console.log('createSources is running, config:', config);
+    // console.log('createSources is running, config:', config);
     const sourceKeys = Object.keys(config.dataSources || {});
     const sources = sourceKeys.reduce((o, key) => {
       let val;
@@ -112,7 +112,7 @@ const pvdStore = {
   },
 
   createParcels(config) {
-    console.log('createParcels is running, config:', config);
+    // console.log('createParcels is running, config:', config);
     const parcelKeys = Object.keys(config.parcels || {});
     const parcels = parcelKeys.reduce((o, key) => {
       let val;
@@ -242,7 +242,7 @@ const pvdStore = {
       },
       // this sets empty targets for a data source
       createEmptySourceTargets(state, payload) {
-        console.log('createEmptySourceTargets is running');
+        // console.log('createEmptySourceTargets is running');
         const { key, targetIds } = payload;
         state.sources[key].targets = targetIds.reduce((acc, targetId) => {
           acc[targetId] = {
@@ -264,7 +264,7 @@ const pvdStore = {
       setParcelData(state, payload) {
         // console.log('store setParcelData payload:', payload);
         const { parcelLayer, data, multipleAllowed, status, activeParcel, activeAddress, activeMapreg, mapregStuff } = payload || {};
-        console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
+        // console.log('store setParcelData mapregStuff:', mapregStuff, 'parcelLayer:', parcelLayer, 'data:', data, 'multipleAllowed:', multipleAllowed, 'status:', status, 'activeParcel:', activeParcel);
         if (!multipleAllowed || !mapregStuff) {
           // console.log('if');
           state.parcels[parcelLayer] = data;

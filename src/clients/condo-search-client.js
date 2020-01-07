@@ -6,7 +6,7 @@ import BaseClient from './base-client';
 class CondoSearchClient extends BaseClient {
 
   evaluateDataForUnits(data) {
-    console.log('condo-search-client evaluateDataForUnit, data:', data);
+    // console.log('condo-search-client evaluateDataForUnit, data:', data);
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
@@ -25,22 +25,22 @@ class CondoSearchClient extends BaseClient {
   }
 
   setFeatureProperties(feature, totalUnits) {
-    console.log('setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
-    console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
+    // console.log('setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
+    // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
     feature.properties.street_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
-    console.log('setFeatureProperties is still running');
+    // console.log('setFeatureProperties is still running');
     feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
     feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.PARCELID;
     feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
     feature.condo = true;
-    console.log('setFeatureProperties is ending');
+    // console.log('setFeatureProperties is ending');
 
   }
 
   fetch(input) {
-    console.log('condo-search-client fetch is running, input', input);
+    // console.log('condo-search-client fetch is running, input', input);
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
     condoConfig.url = this.config.geocoder.url;
@@ -63,7 +63,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   success(response) {
-    console.log('condo success is running');
+    // console.log('condo success is running');
     const store = this.store;
     const data = response.data;
     let features = data.features;
@@ -136,30 +136,30 @@ class CondoSearchClient extends BaseClient {
       //   // }
       //
       // } else {
-      console.log('getPages else is running, feature:', feature);
+      // console.log('getPages else is running, feature:', feature);
 
       if(this.store.state.parcels.pwd === null) {
         // this.setFeatureProperties(feature, totalUnits);
 
-        console.log('getPages else is still running 1');
+        // console.log('getPages else is still running 1');
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
-        console.log('getPages else is still running 2');
+        // console.log('getPages else is still running 2');
         if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
           this.store.commit('setLastSearchMethod', 'geocode');
         }
-        console.log('feature:', feature);
+        // console.log('feature:', feature);
       } else {
         this.setFeatureProperties(feature, totalUnits);
 
-        console.log('getPages else is still running 1');
+        // console.log('getPages else is still running 1');
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
-        console.log('getPages else is still running 2');
+        // console.log('getPages else is still running 2');
         if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
           this.store.commit('setLastSearchMethod', 'geocode');
         }
-        console.log('feature:', feature);
+        // console.log('feature:', feature);
       }
 
 
