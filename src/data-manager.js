@@ -526,6 +526,7 @@ class DataManager {
   resetShape() {
     this.store.commit('setShapeSearchData', null);
     this.store.commit('setShapeSearchStatus', null);
+    this.store.commit('setUnits', null);
   }
 
   resetGeocodeOnly() {
@@ -534,6 +535,7 @@ class DataManager {
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
+    this.store.commit('setUnits', null);
     this.store.commit('setGeocodeInput', null);
   }
 
@@ -545,6 +547,7 @@ class DataManager {
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
+    this.store.commit('setUnits', null);
     this.store.commit('setGeocodeInput', null);
 
     // reset parcels
