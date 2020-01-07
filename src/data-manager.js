@@ -93,7 +93,7 @@ class DataManager {
   }
 
   fetchMoreData(dataSourceKey, highestPageRetrieved) {
-    console.log('data-manager.js fetchMoreData is running');
+    // console.log('data-manager.js fetchMoreData is running');
     const feature = this.store.state.geocode.data;
     const dataSource = this.config.dataSources[dataSourceKey];
 
@@ -106,11 +106,11 @@ class DataManager {
       secondaryStatus: 'waiting',
     };
     this.store.commit('setSecondarySourceStatus', setSecondarySourceStatusOpts);
-    console.log('INCREMENT - datamanager get 100 More was clicked, type', type, 'dataSource', dataSource, 'highestPageRetrieved', highestPageRetrieved);
+    // console.log('INCREMENT - datamanager get 100 More was clicked, type', type, 'dataSource', dataSource, 'highestPageRetrieved', highestPageRetrieved);
 
     switch(type) {
     case 'http-get':
-      console.log('INCREMENT - http-get', dataSourceKey);
+      // console.log('INCREMENT - http-get', dataSourceKey);
       this.clients.http.fetchMore(feature,
         dataSource,
         dataSourceKey,
@@ -120,7 +120,7 @@ class DataManager {
   }
 
   didFetchMoreData(key, secondaryStatus, data) {
-    console.log('INCREMENT - DID FETCH More DATA:', key, secondaryStatus, data);
+    // console.log('INCREMENT - DID FETCH More DATA:', key, secondaryStatus, data);
 
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
@@ -144,7 +144,7 @@ class DataManager {
       secondaryStatus,
     };
 
-    console.log('nextPage', nextPage, 'setSourceDataOpts', setSourceDataOpts);
+    // console.log('nextPage', nextPage, 'setSourceDataOpts', setSourceDataOpts);
     // commit
     this.store.commit('setSourceDataMore', setSourceDataOpts);
     this.store.commit('setSecondarySourceStatus', setSecondarySourceStatusOpts);
@@ -152,7 +152,7 @@ class DataManager {
 
 
   defineTargets(dataSourceKey, targetsDef) {
-    console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
+    // console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -186,7 +186,7 @@ class DataManager {
       });
     }
 
-    console.log('in defineTargets, shouldCreateTargets:', shouldCreateTargets);
+    // console.log('in defineTargets, shouldCreateTargets:', shouldCreateTargets);
 
     // if not, create them.
     if (shouldCreateTargets) {
@@ -219,7 +219,7 @@ class DataManager {
   }
 
   fetchData(optionalFeature) {
-    console.log('\nFETCH DATA');
+    // console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
     let ownerSearchObj;
@@ -238,7 +238,7 @@ class DataManager {
       // ownerSearchObj = geocodeObj;
 
     } else {
-      console.log('fetchData, in else, setting geocodeObj');
+      // console.log('fetchData, in else, setting geocodeObj');
       geocodeObj = this.store.state.geocode.data;
       ownerSearchObj = this.store.state.ownerSearch.data;
       if (this.store.state.shapeSearch.data) {
@@ -302,7 +302,7 @@ class DataManager {
       let targetsFn;
 
       if (targetsDef) {
-        console.log('in fetchData, IF targetsDef is true');
+        // console.log('in fetchData, IF targetsDef is true');
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
 
@@ -310,7 +310,7 @@ class DataManager {
         if (this.config.app) {
           if (this.config.app.title === 'Property Data Explorer') {
             targets = this.defineTargets(dataSourceKey, targetsDef);
-            console.log('in Property Data Explorer, targets:', targets);
+            // console.log('in Property Data Explorer, targets:', targets);
           }
         } else {
 
@@ -335,7 +335,7 @@ class DataManager {
             return stateTargetIdsStr.includes(targetIdStr);
           });
 
-          console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
+          // console.log('in fetchData, shouldCreateTargets:', shouldCreateTargets);
 
           // if not, create them.
           if (shouldCreateTargets) {
@@ -351,14 +351,14 @@ class DataManager {
           }
         }
       } else {
-        console.log('in fetchData, ELSE (no targetsDef) is running');
+        // console.log('in fetchData, ELSE (no targetsDef) is running');
         targets = [ geocodeObj ];
       }
 
-      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
+      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
-        console.log('fetchData, target:', target);
+        // console.log('fetchData, target:', target);
         // get id of target
         let targetId;
         if (targetIdFn) {
@@ -369,7 +369,7 @@ class DataManager {
 
         // check if it's ready
         const isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
-        console.log('isReady:', isReady);
+        // console.log('isReady:', isReady);
         if (!isReady) {
           // console.log('not ready');
           continue;
@@ -397,7 +397,7 @@ class DataManager {
         // TODO do this for all targets
         switch(type) {
         case 'http-get':
-          console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+          // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
           if (this.config.app) {
             if (this.config.app.title === 'Property Data Explorer') {
               this.clients.http.fetchPde(target,
@@ -529,7 +529,7 @@ class DataManager {
   }
 
   resetGeocodeOnly() {
-    console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
+    // console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
     // reset geocode
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
@@ -540,7 +540,7 @@ class DataManager {
   // this gets called when the current geocoded address is wiped out, such as
   // when you click on the "Atlas" title and it navigates to an empty hash
   resetGeocode() {
-    console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
+    // console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
     // reset geocode
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
@@ -617,7 +617,7 @@ class DataManager {
   }
 
   checkDataSourceReady(key, options, targetId) {
-    console.log(`check data source ready: ${key} ${targetId || ''}`, options);
+    // console.log(`check data source ready: ${key} ${targetId || ''}`, options);
 
     const deps = options.deps;
     // console.log('deps', deps);
@@ -632,7 +632,7 @@ class DataManager {
       if (targetId) {
         targetObj = targetObj.targets[targetId];
       }
-      console.log('checkDataSourceReady, IF depsMet is TRUE, targetObj:', targetObj, '!targetObj.status:', targetObj.status, '!targetObj.status:', !targetObj.status);
+      // console.log('checkDataSourceReady, IF depsMet is TRUE, targetObj:', targetObj, '!targetObj.status:', targetObj.status, '!targetObj.status:', !targetObj.status);
 
       // if the target obj has a status of null, this data source is ready.
       isReady = !targetObj.status;
@@ -670,7 +670,7 @@ class DataManager {
 
   /* GEOCODING */
   geocode(input, category) {
-    console.log('data-manager geocode is running, input:', input, 'category:', category);
+    // console.log('data-manager geocode is running, input:', input, 'category:', category);
     // if (category === 'address') {
     // const didGeocode = this.didGeocode.bind(this);
     return this.clients.geocode.fetch(input);//.then(didGeocode);
@@ -686,18 +686,18 @@ class DataManager {
   }
 
   didOwnerSearch() {
-    console.log('callback from owner search is running');
+    // console.log('callback from owner search is running');
   }
 
   didTryGeocode(feature) {
-    console.log('didTryGeocode is running, feature:', feature);
+    // console.log('didTryGeocode is running, feature:', feature);
     if (this.store.state.geocode.status === 'error') {
 
       // this was added to allow fetchData to run even without a geocode result
       // for the real estate tax site which sometimes needs data from TIPS
       // even if the property is not in OPA and AIS
       if (this.config.onGeocodeFail) {
-        console.log('onGeocodeFail exists');
+        // console.log('onGeocodeFail exists');
         let feature = {
           properties: {},
         };
@@ -720,12 +720,12 @@ class DataManager {
   }
 
   getParcelsById(id, parcelLayer) {
-    console.log('data-manager.js getParcelsById', parcelLayer, 'id:', id);
+    // console.log('data-manager.js getParcelsById', parcelLayer, 'id:', id);
     const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
     const parcelQuery = Query({ url });
-    console.log('geocodeField:', geocodeField);
+    // console.log('geocodeField:', geocodeField);
 
     if (id.includes('|')) {
       const idSplit = id.split('|');
@@ -749,7 +749,7 @@ class DataManager {
     // parcelQuery.where(geocodeField + " = '" + id + "'");
     return new Promise(function(resolve, reject) {
       parcelQuery.run((function(error, featureCollection, response) {
-        console.log('end of getParcelsById response:', response, 'featureCollection:', featureCollection);
+        // console.log('end of getParcelsById response:', response, 'featureCollection:', featureCollection);
         if (error) {
           reject(error);
         } else {
@@ -760,7 +760,7 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
-    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     const latLng = L.latLng(latlng.lat, latlng.lng);
     const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
     const parcelQuery = Query({ url });
@@ -777,7 +777,7 @@ class DataManager {
   }
 
   getParcelsByShape(latlng, parcelLayer) {
-    console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer);
+    // console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer);
     const latLng = L.polygon(latlng._latlngs, latlng.options);
     const url = this.config.map.featureLayers.pwdParcels.url;
 
@@ -796,7 +796,7 @@ class DataManager {
   }
 
   getParcelsByBuffer(latlng, parcelLayer) {
-    console.log('getParcelsByBuffer is running, latlng:', latlng, 'this.store.state.parcels.pwd:', this.store.state.parcels.pwd);
+    // console.log('getParcelsByBuffer is running, latlng:', latlng, 'this.store.state.parcels.pwd:', this.store.state.parcels.pwd);
 
     // if (this.store.state.parcels.pwd === null) {
     const latLng = L.latLng(latlng.lat, latlng.lng);
@@ -927,7 +927,7 @@ class DataManager {
 
   processParcels(error, featureCollection, parcelLayer, fetch) {
     const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
-    console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
+    // console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
     const mapregStuff = this.config.parcels[parcelLayer].mapregStuff;
 
     if (error || !featureCollection || featureCollection.features.length === 0) {
@@ -960,11 +960,11 @@ class DataManager {
   }
 
   setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff) {
-    console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
+    // console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
     let payload;
     // pwd
     if (!multipleAllowed && !mapregStuff) {
-      console.log('1');
+      // console.log('1');
       payload = {
         parcelLayer,
         multipleAllowed,
@@ -972,7 +972,7 @@ class DataManager {
         data: feature,
       };
     } else if (multipleAllowed && !mapregStuff) {
-      console.log('2');
+      // console.log('2');
       payload = {
         parcelLayer,
         multipleAllowed,
@@ -983,7 +983,7 @@ class DataManager {
 
     // dor
     } else {
-      console.log('3');
+      // console.log('3');
       payload = {
         parcelLayer,
         multipleAllowed,

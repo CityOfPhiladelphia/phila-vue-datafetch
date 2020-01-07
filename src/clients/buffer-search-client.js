@@ -15,7 +15,7 @@ import BaseClient from './base-client';
 class BufferSearchClient extends BaseClient {
 
   fetchBufferShape(error = [], featureCollection = [], response = {}, parcelLayer, latlng) {
-    console.log('fetchBufferShape is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
+    // console.log('fetchBufferShape is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
 
     const projection4326 = utils.projection4326;
     const projection2272 = utils.projection2272;
@@ -23,7 +23,7 @@ class BufferSearchClient extends BaseClient {
     const parcelUrl = this.config.map.featureLayers.pwdParcels;
     // const geometryServerUrl = this.config.map.tools.geometryServer;
     const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
-    console.log('geometryServerUrl:', geometryServerUrl);
+    // console.log('geometryServerUrl:', geometryServerUrl);
     const calculateDistance = true;
     const distances = 250;
 
@@ -34,7 +34,7 @@ class BufferSearchClient extends BaseClient {
 
     // if you do it by parcel
     const parcelGeom = response.features[0].geometry;
-    console.log('parcelGeom:', parcelGeom);
+    // console.log('parcelGeom:', parcelGeom);
 
     let polyCoords2272 = [];
     for (let polyCoord of parcelGeom.coordinates[0]) {
@@ -74,7 +74,7 @@ class BufferSearchClient extends BaseClient {
   }
 
   bufferShapeSuccess(response) {
-    console.log('bufferShapeSuccess, response:', response);
+    // console.log('bufferShapeSuccess, response:', response);
 
     const store = this.store;
     const data = response.data;
@@ -106,11 +106,11 @@ class BufferSearchClient extends BaseClient {
   }
 
   bufferShapeError(error) {
-    console.log('bufferShapeError:', error);
+    // console.log('bufferShapeError:', error);
   }
 
   fetchBySpatialQuery(url, relationship, targetGeom, parameters = {}, calculateDistancePt, options = {}) {
-    console.log('bufferSearch fetch esri spatial query, url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    // console.log('bufferSearch fetch esri spatial query, url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
     const parcelLayer = [];
 
     let query;
@@ -141,7 +141,7 @@ class BufferSearchClient extends BaseClient {
         if (error) {
           reject(error);
         } else {
-          console.log('did get esri spatial query', response, error);
+          // console.log('did get esri spatial query', response, error);
 
           let features = (featureCollection || {}).features;
           const status = error ? 'error' : 'success';
@@ -161,7 +161,7 @@ class BufferSearchClient extends BaseClient {
                   const closestVertex = nearest(from, vertices);
                   dist = distance(from, closestVertex, { units: 'miles' });
                 } catch (e) {
-                  console.log('error in distance to polygon:', e);
+                  // console.log('error in distance to polygon:', e);
                 }
 
               } else {

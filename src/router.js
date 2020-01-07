@@ -2,7 +2,7 @@ import { parse as parseUrl } from 'url';
 
 class Router {
   constructor(opts) {
-    console.log('Router constructor, opts:', opts);
+    // console.log('Router constructor, opts:', opts);
     const config = this.config = opts.config;
     this.store = opts.store;
     this.controller = opts.controller;
@@ -43,7 +43,7 @@ class Router {
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
-    console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
+    // console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
 
     // must have an firstRouteParameter
     if (!firstRouteParameter || firstRouteParameter.length === 0) {
@@ -53,22 +53,22 @@ class Router {
     let hash = `#/${encodeURIComponent(firstRouteParameter)}/`;
     if (secondRouteParameter) {
       if (Array.isArray(secondRouteParameter)) {
-        console.log('secondRouteParameter is an Array');
+        // console.log('secondRouteParameter is an Array');
         if (secondRouteParameter.length > 1) {
-          console.log('secondRouteParameter is an Array and length is greater than 1');
+          // console.log('secondRouteParameter is an Array and length is greater than 1');
           for (let [ index, topicOrService ] of secondRouteParameter.entries()) {
-            console.log('topicOrService:', topicOrService, 'index:', index);
+            // console.log('topicOrService:', topicOrService, 'index:', index);
             hash += `${encodeURIComponent(topicOrService)}`;
             if (index < secondRouteParameter.length - 1) {
               hash += `${encodeURIComponent(',')}`;
             }
           }
         } else {
-          console.log('secondRouteParameter is an Array and length is not greater than 1');
+          // console.log('secondRouteParameter is an Array and length is not greater than 1');
           hash += `${encodeURIComponent(secondRouteParameter)}`;
         }
       } else {
-        console.log('secondRouteParameter is not an array');
+        // console.log('secondRouteParameter is not an array');
         hash += `${secondRouteParameter}`;
       }
     }
@@ -80,7 +80,7 @@ class Router {
     // TODO add an address getter fn to config so this isn't ais-specific
     const geocodeData = this.store.state.geocode.data || {};
     const props = geocodeData.properties || {};
-    console.log('getAddressFromState is running, geocodeData:', geocodeData, 'props:', props);
+    // console.log('getAddressFromState is running, geocodeData:', geocodeData, 'props:', props);
     if (geocodeData.street_address) {
       return geocodeData.street_address;
     } else if (props.street_address) {
@@ -89,7 +89,7 @@ class Router {
   }
 
   hashChanged() {
-    console.log('hashChanged is running, this.store.state.activeTopic:', this.store.state.activeTopic);
+    // console.log('hashChanged is running, this.store.state.activeTopic:', this.store.state.activeTopic);
     const location = window.location;
     const hash = location.hash;
 
@@ -104,7 +104,7 @@ class Router {
     // parse path
     const pathComps = hash.split('/').splice(1);
     const encodedFirstRouteParameter = pathComps[0];
-    console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
+    // console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
 
     // if there's no address, erase it
     if (!encodedFirstRouteParameter) {
@@ -128,7 +128,7 @@ class Router {
       secondRouteParameter = decodeURIComponent(pathComps[1]);
     }
 
-    console.log('in hashChanged, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
+    // console.log('in hashChanged, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
     let nextAddress = firstRouteParameter;
     // let nextKeyword;
     // if (firstRouteParameter.includes('addr ')) {
@@ -147,7 +147,7 @@ class Router {
     }
 
     if (nextAddress && nextAddress !== 'addr noaddress') {
-      console.log('router hashChanged calling controller.handleSearchFormSubmit');
+      // console.log('router hashChanged calling controller.handleSearchFormSubmit');
       // this.routeToAddress(nextAddress);
       this.controller.handleSearchFormSubmit(nextAddress);
     }
@@ -178,7 +178,7 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    console.log('Router.routeToAddress, nextAddress:', nextAddress);
+    // console.log('Router.routeToAddress, nextAddress:', nextAddress);
     if (nextAddress) {
       // nextAddress = nextAddress.replace('addr ', '');
       // check against current address
@@ -209,9 +209,9 @@ class Router {
   }
 
   routeToKeyword(nextKeywords) {
-    console.log('in router.js routeToKeyword, nextKeywords:', nextKeywords);
+    // console.log('in router.js routeToKeyword, nextKeywords:', nextKeywords);
     let values = nextKeywords.split(',');
-    console.log('in routeToKeyword values:', values);
+    // console.log('in routeToKeyword values:', values);
     this.store.commit('setSelectedKeywords', values);
 
     // if (!this.silent) {
@@ -256,13 +256,13 @@ class Router {
   // }
 
   routeToModal(selectedModal) {
-    console.log('routeToModal is running, selectedModal:', selectedModal);
+    // console.log('routeToModal is running, selectedModal:', selectedModal);
     this.store.commit('setDidToggleModal', selectedModal);
   }
 
   // this gets called when you click a topic header.
   routeToTopic(nextTopic, target) {
-    console.log('router.js routeToTopic is running, nextTopic:', nextTopic, 'target:', target);
+    // console.log('router.js routeToTopic is running, nextTopic:', nextTopic, 'target:', target);
     // check against active topic
     const prevTopic = this.store.state.activeTopic;
 
@@ -287,7 +287,7 @@ class Router {
     const geocodeData = this.store.state.geocode.data;
 
     // make hash if there is geocode data
-    console.log('router setRouteByGeocode is running - geocodeData:', geocodeData);
+    // console.log('router setRouteByGeocode is running - geocodeData:', geocodeData);
     if (geocodeData) {
       let address;
 
@@ -309,14 +309,14 @@ class Router {
       // want this to happen all the time, right?
       if (!this.silent) {
         if (this.config.router.type === 'vue') {
-          console.log('in setRouteByGeocode, router type is vue');
+          // console.log('in setRouteByGeocode, router type is vue');
           if (this.store.state.bufferMode) {
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}});
           } else {
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}});
           }
         } else {
-          console.log('in setRouteByGeocode, router type is not vue');
+          // console.log('in setRouteByGeocode, router type is not vue');
           const nextHistoryState = {
             geocode: geocodeData,
           };
@@ -340,9 +340,9 @@ class Router {
   }
 
   setRouteByShapeSearch() {
-    console.log('router.js didShapeSearch is running');
+    // console.log('router.js didShapeSearch is running');
     const shapeInput = this.store.state.shapeSearch.input;
-    console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
+    // console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
     // only run this if the shape is in the store (which it will not be if it is created from the route)
     if (shapeInput) {
       let shape = '[[';

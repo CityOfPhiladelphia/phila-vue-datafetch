@@ -26,7 +26,7 @@ import {
 
 class Controller {
   constructor(opts) {
-    console.log('in Controller constructor, opts:', opts);
+    // console.log('in Controller constructor, opts:', opts);
     const store = this.store = opts.store;
     const config = this.config = opts.config;
     this.history = window.history;
@@ -72,7 +72,7 @@ class Controller {
   }
 
   getMoreRecords(dataSource, highestPageRetrieved) {
-    console.log('controller.js getMoreRecords is running');
+    // console.log('controller.js getMoreRecords is running');
     this.dataManager.fetchMoreData(dataSource, highestPageRetrieved);
   }
 
@@ -100,7 +100,7 @@ class Controller {
   // }
 
   initializeStatuses(input, searchCategory) {
-    console.log('initializeStatuses is running');
+    // console.log('initializeStatuses is running', input);
     this.store.commit('setGeocodeStatus', null);
     if (!searchCategory || searchCategory === 'address') {
       this.store.commit('setGeocodeInput', input);
@@ -124,7 +124,7 @@ class Controller {
       const configForParcelLayer = this.config.parcels[parcelLayer];
       const multipleAllowed = configForParcelLayer.multipleAllowed;
       const mapregStuff = configForParcelLayer.mapregStuff;
-      console.log('in initializeStatuses, mapregStuff:', mapregStuff);
+      // console.log('in initializeStatuses, mapregStuff:', mapregStuff);
       let payload;
       // pwd
       if (!multipleAllowed || !mapregStuff) {
@@ -160,14 +160,14 @@ class Controller {
 
   async runBufferProcess(parcelResponse) {
     let aisResponse = this.store.state.geocode.data;
-    console.log('handleMapClick ran in bufferMode, feature.geometry.coordinates:', aisResponse.geometry.coordinates);
+    // console.log('handleMapClick ran in bufferMode, feature.geometry.coordinates:', aisResponse.geometry.coordinates);
     const latLng = { lat: aisResponse.geometry.coordinates[1], lng: aisResponse.geometry.coordinates[0] };
     // this.store.commit('setMapCenter', aisResponse.geometry.coordinates);
     // let parcelResponse = await this.dataManager.getParcelsByBuffer(latLng, []);
-    console.log('parcelResponse:', parcelResponse);
+    // console.log('parcelResponse:', parcelResponse);
     if (parcelResponse) {
       let bufferShapeResponse = await this.clients.bufferSearch.fetchBufferShape(null, null, parcelResponse, 'pwd', latLng);
-      console.log('bufferShapeResponse:', bufferShapeResponse);
+      // console.log('bufferShapeResponse:', bufferShapeResponse);
 
       const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
       const parameters = {};
@@ -180,7 +180,7 @@ class Controller {
         calculateDistance ? coords : null,
       );
 
-      console.log('spatialResponse:', spatialResponse);
+      // console.log('spatialResponse:', spatialResponse);
 
       if (!spatialResponse) {
         return;
@@ -204,7 +204,7 @@ class Controller {
   }
 
   async handleSearchFormSubmit(value, searchCategory) {
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
 
     this.dataManager.resetData();
@@ -231,7 +231,7 @@ class Controller {
 
     // TODO rename to aisResponse
     let aisResponse = await this.clients.geocode.fetch(value);
-    console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
+    // console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
 
     if (aisResponse && !this.store.state.bufferMode) {
       this.router.setRouteByGeocode();
@@ -264,11 +264,11 @@ class Controller {
       return;
     }
 
-    console.log('right before loop');
+    // console.log('right before loop');
 
     // loop through the parcels, and get them by their ids
     for (let parcelLayer of parcelLayers) {
-      console.log('in loop, parcelLayer:', parcelLayer);
+      // console.log('in loop, parcelLayer:', parcelLayer);
       const configForParcelLayer = this.config.parcels[parcelLayer];
       const parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder;
 
@@ -283,12 +283,12 @@ class Controller {
         ids = ids.filter( id => id != "" );
       }
 
-      console.log('about to get parcels, ids:', ids);
+      // console.log('about to get parcels, ids:', ids);
 
       if (ids && ids.length > 0) {
-        console.log('it has ids');
+        // console.log('it has ids');
         response = await this.dataManager.getParcelsById(ids, parcelLayer);
-        console.log('in handleSearchFormSubmit, response:', response);
+        // console.log('in handleSearchFormSubmit, response:', response);
         // if (response.type === 'FeatureCollection') {
         //   theParcels = response.features;
         // } else {
@@ -299,7 +299,7 @@ class Controller {
       } else {
         if (configForParcelLayer.getByLatLngIfIdFails) {
           // console.log(parcelLayer, 'Id failed - had to get by LatLng')
-          console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
+          // console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
           // TODO update getParcelByLAtLng to return parcels
           const coords = aisResponse.geometry.coordinates;
           let [ lng, lat ] = coords;
@@ -319,11 +319,11 @@ class Controller {
 
       this.dataManager.fetchData();
     }
-    console.log('end of handleSearchFormSubmit');
+    // console.log('end of handleSearchFormSubmit');
   }
 
   async handleMapClick(e) {
-    console.log('handle map click', e, this);
+    // console.log('handle map click', e, this);
 
     // TODO figure out why form submits via enter key are generating a map
     // click event and remove this
@@ -343,7 +343,7 @@ class Controller {
     // console.log('in handleMapClick, latlng:', latLng, 'activeParcelLayer:', activeParcelLayer);
     // this.dataManager.getParcelsByLatLng(latLng, activeParcelLayer);
     let parcelResponse = await this.dataManager.getParcelsByLatLng(latLng, activeParcelLayer);
-    console.log('handleMapClick after getParcelsByLatLng, parcelResponse:', parcelResponse);
+    // console.log('handleMapClick after getParcelsByLatLng, parcelResponse:', parcelResponse);
     let processedParcel = this.dataManager.processParcels(false, parcelResponse, activeParcelLayer);
 
     if (!processedParcel) {
@@ -385,7 +385,7 @@ class Controller {
 
     this.router.setRouteByGeocode();
 
-    console.log('this.store.state.bufferMode:', this.store.state.bufferMode);
+    // console.log('this.store.state.bufferMode:', this.store.state.bufferMode);
 
     // handle if it is in buffer mode
     if (this.store.state.bufferMode) {
@@ -400,7 +400,7 @@ class Controller {
       otherParcelLayers.splice(otherParcelLayers.indexOf(activeParcelLayer), 1);
       for (let otherParcelLayer of otherParcelLayers) {
         const configForOtherParcelLayer = this.config.parcels[otherParcelLayer];
-        console.log('for let otherParcelLayer of otherParcelLayers is running, configForOtherParcelLayer:', configForOtherParcelLayer);
+        // console.log('for let otherParcelLayer of otherParcelLayers is running, configForOtherParcelLayer:', configForOtherParcelLayer);
         const otherMultipleAllowed = configForOtherParcelLayer.multipleAllowed;
         const otherMapregStuff = configForOtherParcelLayer.mapregStuff;
 
@@ -413,12 +413,12 @@ class Controller {
     }
 
     // this.dataManager.resetData();
-    console.log('getting to end of handleMapClick, calling fetchData');
+    // console.log('getting to end of handleMapClick, calling fetchData');
     this.dataManager.fetchData();
   }
 
   async handleDrawnShape(state) {
-    console.log('handleDrawnShape is running');
+    // console.log('handleDrawnShape is running');
     let shape = this.store.state.drawShape;
 
     if (!shape) {
@@ -444,7 +444,7 @@ class Controller {
 
     const parcels = [];
     let response = await this.dataManager.getParcelsByShape(shape, parcels);
-    console.log('handleDrawnShape, response:', response);
+    // console.log('handleDrawnShape, response:', response);
 
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -468,7 +468,7 @@ class Controller {
     if (features.length === 0) {
       return;
     } else if (features.length > 200) {
-      console.log('there are greater than 200 parcels');
+      // console.log('there are greater than 200 parcels');
       this.store.commit('setShapeSearchStatus', 'too many');
       this.resetData();
       this.resetGeocode();
@@ -493,7 +493,7 @@ class Controller {
     this.router.setRouteByShapeSearch();
     // const didShapeSearch = this.didShapeSearch.bind(this);
     let shapeResponse = await this.clients.shapeSearch.fetch(features);
-    console.log('shapeResponse:', shapeResponse);
+    // console.log('shapeResponse:', shapeResponse);
     this.dataManager.fetchData();
   }
 
@@ -543,7 +543,7 @@ class Controller {
 }
 
 function controllerMixin(Vue, opts) {
-  console.log('function controllerMixin is running, opts:', opts);
+  // console.log('function controllerMixin is running, opts:', opts);
   const controller = new Controller(opts);
 
   Vue.mixin({

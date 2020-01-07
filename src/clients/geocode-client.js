@@ -7,7 +7,7 @@ import BaseClient from './base-client';
 class GeocodeClient extends BaseClient {
   // fetch(input, category) {
   async fetch(input) {
-    console.log('geocode client fetch', input);//, 'this.store:', this.store);
+    // console.log('geocode client fetch', input);//, 'this.store:', this.store);
 
     const store = this.store;
     let geocodeConfig;
@@ -19,7 +19,7 @@ class GeocodeClient extends BaseClient {
     const params = geocodeConfig.params;
     // const proxy = geocodeConfig.proxy;
 
-    console.log('url:', url, 'typeof url:', typeof url, 'params:', params);
+    // console.log('url:', url, 'typeof url:', typeof url, 'params:', params);
 
     // update state
     this.store.commit('setGeocodeStatus', 'waiting');
@@ -77,7 +77,7 @@ class GeocodeClient extends BaseClient {
   }
 
   error(error) {
-    console.log('geocode error is running, error:', error);
+    // console.log('geocode error is running, error:', error);
     const store = this.store;
     store.commit('setGeocodeStatus', 'error');
     store.commit('setGeocodeData', null);
