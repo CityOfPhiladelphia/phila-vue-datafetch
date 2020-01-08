@@ -208,6 +208,8 @@ class Controller {
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
 
     this.dataManager.resetData();
+    // Added specifically to reset the condo units not being cleared elsewhere on hash change.
+    this.resetGeocode();
 
     if(value === '' || value === null) {
       console.log('submitting blank value');
