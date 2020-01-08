@@ -209,6 +209,7 @@ class Controller {
 
     this.dataManager.resetData();
     // Added specifically to reset the condo units not being cleared elsewhere on hash change.
+    this.dataManager.resetShape();
     this.resetGeocode();
 
     if(value === '' || value === null) {
