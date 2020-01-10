@@ -103,7 +103,7 @@ class Router {
 
     // parse path
     const pathComps = hash.split('/').splice(1);
-    const encodedFirstRouteParameter = pathComps[0].replace('?address=', '');
+    const encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '');
     // console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
 
     // if there's no address, erase it
@@ -337,6 +337,15 @@ class Router {
         this.history.pushState(null, null, '#');
       }
     }
+  }
+
+  setRouteByOwnerSearch() {
+    // console.log('router.js didShapeSearch is running');
+    const owner = this.store.state.geocode.input;
+
+    this.vueRouter.push({ query: { owner }});
+    // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
+
   }
 
   setRouteByShapeSearch() {

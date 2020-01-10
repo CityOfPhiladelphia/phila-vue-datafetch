@@ -241,6 +241,7 @@ class Controller {
       this.router.setRouteByGeocode();
     } else if (!this.store.state.bufferMode) {
       aisResponse = await this.clients.ownerSearch.fetch(value);
+      this.router.setRouteByOwnerSearch();
     }
 
     // if (!aisResponse) {
