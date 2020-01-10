@@ -716,9 +716,7 @@ class DataManager {
       }
     } else if (this.store.state.geocode.status === 'success') {
       // this.didGeocode(feature);
-      this.store.commit('setOwnerSearchStatus', null);
-      this.store.commit('setOwnerSearchData', null);
-      this.store.commit('setOwnerSearchInput', null);
+      this.clearOwnerSearch();
     }
   }
 
@@ -1007,6 +1005,7 @@ class DataManager {
 
   clearOwnerSearch(){
     // console.log('clearOwnerSearch is running');
+    this.store.commit('setOwnerSearchTotal', null);
     this.store.commit('setOwnerSearchStatus', null);
     this.store.commit('setOwnerSearchData', null);
     this.store.commit('setOwnerSearchInput', null);
