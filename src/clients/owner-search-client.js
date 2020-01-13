@@ -60,6 +60,7 @@ class OwnerSearchClient extends BaseClient {
     //   }
     // }
 
+    store.commit('setOwnerSearchTotal', data.total_size);
     store.commit('setOwnerSearchData', features);
     // store.commit('setOwnerSearchData', data.features);
     // store.commit('setOwnerSearchRelated', relatedFeatures);
