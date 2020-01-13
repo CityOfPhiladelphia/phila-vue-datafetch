@@ -20,6 +20,7 @@ const initialState = {
     status: null,
     data: null,
     input: null,
+    total_size: null,
   },
   activeSearch: {
   },
@@ -294,6 +295,9 @@ const pvdStore = {
       },
       setOwnerSearchStatus(state, payload) {
         state.ownerSearch.status = payload;
+      },
+      setOwnerSearchTotal(state, payload) {
+        state.ownerSearch.total_size = payload;
       },
       setOwnerSearchData(state, payload) {
         state.ownerSearch.data = payload;

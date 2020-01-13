@@ -86,12 +86,12 @@ class BaseClient {
     this.store.commit('setSourceStatus', setSourceStatusOpts);
 
     // try fetching more data
-    console.log('base-client js is calling fetchData()');
+    // console.log('base-client js is calling fetchData()');
     this.fetchData();
   }
 
   evaluateDataForUnits(data) {
-    console.log('base-client evaluateDataForUnits data:', data);
+    // console.log('base-client evaluateDataForUnits data:', data);
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data.rows, a => a.pwd_parcel_id);
