@@ -78,8 +78,8 @@ export default {
   calculateAreaAndPerimeter(feature) {
     let coords = feature.geometry.coordinates;
 
-    // console.log('utils.calculateAreaAndPerimeter, feature:', feature, 'coords.length:', coords.length);
-    if (coords.length > 1) {
+    console.log('utils.calculateAreaAndPerimeter, feature:', feature, 'coords.length:', coords.length);
+    if (coords.length > 1 || feature.geometry.type === 'MultiPolygon') {
       let distances = [];
       let areas = [];
       for (let coordsSet of coords) {
