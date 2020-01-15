@@ -17,7 +17,22 @@ phila-vue-datafetch is a library of functions used for fetching data for an app 
 ## Usage
 Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/wiki) for usage documentation.
 
+## Publishing
+
+To publish a new version of Mapboard to NPM:
+
+1. Commit your changes to `master`.
+2. Bump the NPM version with `npm version major|minor|patch`.
+3. Push with tags: `git push && git push --tags`.
+4. Update wiki docs to reflect new version and/or dependency changes.
+
+
 ## Release Notes
+
+### 1.0.2 - 1/15/2020
+
+* Fix: Clearing shape in edge cases
+* Fix: Regression from previous fix to routing was causing condo button not to work on reverse geocode searches.
 
 ### 0.0.30 - 11/12/2019
 
