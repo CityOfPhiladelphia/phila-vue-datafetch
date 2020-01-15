@@ -528,7 +528,6 @@ class DataManager {
     this.store.commit('setShapeSearchInput', null);
     this.store.commit('setShapeSearchData', null);
     this.store.commit('setShapeSearchStatus', null);
-    this.store.commit('setUnits', null);
   }
 
   resetGeocodeOnly() {
