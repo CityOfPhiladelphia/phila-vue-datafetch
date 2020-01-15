@@ -524,8 +524,6 @@ class DataManager {
   }
 
   resetShape() {
-    console.log('dataManager resetShape is running');
-    this.store.commit('setShapeSearchInput', null);
     this.store.commit('setShapeSearchData', null);
     this.store.commit('setShapeSearchStatus', null);
     this.store.commit('setUnits', null);
