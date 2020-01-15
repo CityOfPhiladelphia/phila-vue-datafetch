@@ -1013,7 +1013,8 @@ class DataManager {
   }
 
   removeShape() {
-    if(this.store.state.editableLayers !== null ){
+    console.log('this.store.state.editableLayers:', this.store.state.editableLayers);
+    if(this.store.state.editableLayers && this.store.state.editableLayers !== null ){
       this.store.state.editableLayers.clearLayers();
     }
   }
