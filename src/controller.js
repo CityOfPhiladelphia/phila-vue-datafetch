@@ -210,6 +210,7 @@ class Controller {
     this.dataManager.resetData();
     // Added specifically to reset the condo units not being cleared elsewhere on hash change.
     this.dataManager.resetShape();
+    this.dataManager.removeShape();
     this.resetGeocode();
 
     if(value === '' || value === null) {
@@ -361,6 +362,7 @@ class Controller {
 
     this.dataManager.resetData();
     this.dataManager.resetShape();
+    this.dataManager.removeShape();
 
     if (this.store.state.lastSearchMethod !== 'buffer search') {
       // console.log('in didGetParcels, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
@@ -423,7 +425,7 @@ class Controller {
   }
 
   async handleDrawnShape(state) {
-    // console.log('handleDrawnShape is running');
+    console.log('handleDrawnShape is running');
     let shape = this.store.state.drawShape;
 
     if (!shape) {
@@ -449,7 +451,7 @@ class Controller {
 
     const parcels = [];
     let response = await this.dataManager.getParcelsByShape(shape, parcels);
-    // console.log('handleDrawnShape, response:', response);
+    console.log('handleDrawnShape, response:', response);
 
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
@@ -475,7 +477,7 @@ class Controller {
     } else if (features.length > 200) {
       // console.log('there are greater than 200 parcels');
       this.store.commit('setShapeSearchStatus', 'too many');
-      this.resetData();
+      this.dataManager.resetData();
       this.resetGeocode();
       this.dataManager.clearOwnerSearch();
       this.store.commit('setShapeSearchData', null);
