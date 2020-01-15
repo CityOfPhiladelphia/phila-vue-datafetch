@@ -1,7 +1,7 @@
 {
   "name": "@philly/vue-datafetch",
   "description": "the infrastructure needed for fetching data for a vue app",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": "City of Philadelphia <maps@phila.gov>",
   "scripts": {
     "serve": "vue-cli-service serve",
