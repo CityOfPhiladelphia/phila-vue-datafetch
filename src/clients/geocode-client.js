@@ -43,7 +43,7 @@ class GeocodeClient extends BaseClient {
 
   // fetch(input, category) {
   async fetch(input) {
-    // console.log('geocode client fetch', input);//, 'this.store:', this.store);
+    console.log('geocode client fetch', input);//, 'this.store:', this.store);
 
     const store = this.store;
     let geocodeConfig;
@@ -166,7 +166,9 @@ class GeocodeClient extends BaseClient {
       }
 
       getPages = getPages.bind(this);
-      return getPages(features);
+      if (this.config.app && this.config.app.title === 'Property Data Explorer') {
+        return getPages(features);
+      }
 
 
     }
