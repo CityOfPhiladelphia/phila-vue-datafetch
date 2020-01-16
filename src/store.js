@@ -199,7 +199,7 @@ const pvdStore = {
         // }
       },
       setSourceData(state, payload) {
-        // console.log('store setSourceData is running, payload:', payload);
+        console.log('store setSourceData is running, payload:', payload);
         const key = payload.key;
         const data = payload.data;
 

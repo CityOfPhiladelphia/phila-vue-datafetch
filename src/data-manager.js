@@ -164,7 +164,7 @@ class DataManager {
     let targets = targetsFn(state);
     let targetIdFn = targetsDef.getTargetId;
 
-    // console.log("Define Targets Starting", targets)
+    // console.log("Define Targets Starting, targets:", targets);
     // check if target objs exist in state.
     let targetIds;
     if ( typeof targets.length != 'undefined'){
@@ -203,8 +203,10 @@ class DataManager {
 
     // this over-rides if the targets are set to "runOnce = true"
     if (targetsDef.runOnce) {
+      // console.log('if targetsDef.runOnce is running');
       let idsOfOwnersOrProps = "";
       for (let target of targets) {
+        // console.log('in for loop, target:', target);
         if(target.properties){
           idsOfOwnersOrProps = idsOfOwnersOrProps + "'" + target.properties.opa_account_num + "',";
         } else {
@@ -302,7 +304,7 @@ class DataManager {
       let targetsFn;
 
       if (targetsDef) {
-        // console.log('in fetchData, IF targetsDef is true');
+        // console.log('in fetchData, IF targetsDef is true, targetsDef:', targetsDef);
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
 
@@ -358,7 +360,8 @@ class DataManager {
       // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
-        // console.log('fetchData, target:', target);
+        // console.log('fetchData, target:', target, 'target.length:', target.length);
+
         // get id of target
         let targetId;
         if (targetIdFn) {
@@ -451,7 +454,7 @@ class DataManager {
   didFetchData(key, status, dataOrNull, targetId, targetIdFn) {
 
     let data = status === 'error' ? null : dataOrNull;
-    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data);
+    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
 
     // assign feature ids
     if (Array.isArray(data)) {
@@ -484,6 +487,7 @@ class DataManager {
 
   // TODO - this is probably completely wasteful
   turnToTargets(key, data, targetIdFn) {
+    // console.log('turnToTargets, key:', key, 'data:', data);
     let newLargeObj = { 'key': key };
     let newSmallObj = {};
     for (let datum of data) {
@@ -524,7 +528,7 @@ class DataManager {
   }
 
   resetShape() {
-    console.log('dataManager resetShape is running');
+    // console.log('dataManager resetShape is running');
     this.store.commit('setShapeSearchInput', null);
     this.store.commit('setShapeSearchData', null);
     this.store.commit('setShapeSearchStatus', null);
@@ -1013,7 +1017,7 @@ class DataManager {
   }
 
   removeShape() {
-    console.log('this.store.state.editableLayers:', this.store.state.editableLayers);
+    // console.log('this.store.state.editableLayers:', this.store.state.editableLayers);
     if(this.store.state.editableLayers && this.store.state.editableLayers !== null ){
       this.store.state.editableLayers.clearLayers();
     }

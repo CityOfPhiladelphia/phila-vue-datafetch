@@ -17,6 +17,8 @@ module.exports = {
     // "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
     // "no-unused-vars": process.env.NODE_ENV === "production" ? "error" : "off",
 
+    "no-inner-declarations": "off",
+
     // Eslint Rules
     "brace-style": "error",
     "nonblock-statement-body-position": [ "error", "below" ],
