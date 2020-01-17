@@ -103,7 +103,10 @@ class Router {
 
     // parse path
     const pathComps = hash.split('/').splice(1);
-    const encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '');
+    let encodedFirstRouteParameter;
+    if (pathComps.length) {
+      encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '');
+    }
     // console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
 
     // if there's no address, erase it
