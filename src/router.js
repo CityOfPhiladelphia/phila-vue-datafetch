@@ -43,7 +43,7 @@ class Router {
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
-    // console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
+    console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
 
     // must have an firstRouteParameter
     if (!firstRouteParameter || firstRouteParameter.length === 0) {
@@ -352,9 +352,9 @@ class Router {
   }
 
   setRouteByShapeSearch() {
-    // console.log('router.js didShapeSearch is running');
+    console.log('router.js didShapeSearch is running');
     const shapeInput = this.store.state.shapeSearch.input;
-    // console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
+    console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
     // only run this if the shape is in the store (which it will not be if it is created from the route)
     if (shapeInput) {
       let shape = '[[';
@@ -364,7 +364,7 @@ class Router {
       }
       shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]';
 
-      // console.log('didShapeSearch is running, shape:', shape);
+      console.log('didShapeSearch is running, shape:', shape);
 
       this.vueRouter.push({ query: { shape }});
     }
