@@ -363,7 +363,7 @@ class Router {
   }
 
   setRouteByOwnerSearch() {
-    // console.log('router.js didShapeSearch is running');
+    // console.log('router.js setRouteByOwnerSearch is running');
     const owner = this.store.state.geocode.input;
 
     this.vueRouter.push({ query: { owner }});

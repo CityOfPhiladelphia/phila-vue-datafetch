@@ -339,7 +339,7 @@ class Controller {
     }
 
     // this.router.setRouteByGeocode()
-    if (this.config.app && this.config.app.title === 'Property Data Explorer') {
+    if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'owner search') {
       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
     }
     // console.log('end of handleSearchFormSubmit');
