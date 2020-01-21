@@ -221,7 +221,7 @@ class DataManager {
   }
 
   fetchData(optionalFeature) {
-    // console.log('\nFETCH DATA');
+    console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
     let ownerSearchObj;
@@ -270,7 +270,7 @@ class DataManager {
     }
 
     let dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
@@ -286,7 +286,7 @@ class DataManager {
       });
     }
 
-    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
@@ -304,7 +304,7 @@ class DataManager {
       let targetsFn;
 
       if (targetsDef) {
-        // console.log('in fetchData, IF targetsDef is true, targetsDef:', targetsDef);
+        console.log('in fetchData, IF targetsDef is true, targetsDef:', targetsDef);
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
 
@@ -321,7 +321,7 @@ class DataManager {
           }
           targets = targetsFn(state);
 
-          // console.log('in fetchData, targets:', targets);
+          console.log('in fetchData, targetsDef is NOT true, targets:', targets);
 
           // check if target objs exist in state.
           const targetIds = targets.map(targetIdFn);
@@ -357,10 +357,10 @@ class DataManager {
         targets = [ geocodeObj ];
       }
 
-      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
+      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
-        // console.log('fetchData, target:', target, 'target.length:', target.length);
+        console.log('fetchData, target:', target, 'target.length:', target.length);
 
         // get id of target
         let targetId;
@@ -372,11 +372,13 @@ class DataManager {
 
         // check if it's ready
         const isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
-        // console.log('isReady:', isReady);
+        console.log('isReady:', isReady);
         if (!isReady) {
           // console.log('not ready');
           continue;
         }
+
+        console.log('still going after isReady test');
 
         // update status to `waiting`
         const setSourceStatusOpts = {
@@ -397,10 +399,12 @@ class DataManager {
           }
         }
 
+        console.log('in FetchData right before switch');
+
         // TODO do this for all targets
         switch(type) {
         case 'http-get':
-          // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+          console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
           if (this.config.app) {
             if (this.config.app.title === 'Property Data Explorer') {
               this.clients.http.fetchPde(target,
@@ -454,7 +458,7 @@ class DataManager {
   didFetchData(key, status, dataOrNull, targetId, targetIdFn) {
 
     let data = status === 'error' ? null : dataOrNull;
-    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
+    console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
 
     // assign feature ids
     if (Array.isArray(data)) {
@@ -625,7 +629,7 @@ class DataManager {
   }
 
   checkDataSourceReady(key, options, targetId) {
-    // console.log(`check data source ready: ${key} ${targetId || ''}`, options);
+    console.log(`check data source ready: ${key} ${targetId || ''}`, options);
 
     const deps = options.deps;
     // console.log('deps', deps);
@@ -640,7 +644,7 @@ class DataManager {
       if (targetId) {
         targetObj = targetObj.targets[targetId];
       }
-      // console.log('checkDataSourceReady, IF depsMet is TRUE, targetObj:', targetObj, '!targetObj.status:', targetObj.status, '!targetObj.status:', !targetObj.status);
+      console.log('checkDataSourceReady, IF depsMet is TRUE, targetObj:', targetObj, '!targetObj.status:', targetObj.status, '!targetObj.status:', !targetObj.status);
 
       // if the target obj has a status of null, this data source is ready.
       isReady = !targetObj.status;
