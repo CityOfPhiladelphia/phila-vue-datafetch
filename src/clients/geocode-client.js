@@ -26,7 +26,7 @@ class GeocodeClient extends BaseClient {
   }
 
   setFeatureProperties(feature, totalUnits) {
-    // console.log('setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
+    console.log('geocode setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
     // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
@@ -76,7 +76,8 @@ class GeocodeClient extends BaseClient {
   }
 
   success(response) {
-    // console.log('geocode success is running');
+    console.log('geocode success is running, response:', response, response.data.features[0].properties.opa_account_num);
+    this.dataManager.resetGeocode();
     const store = this.store;
     const data = response.data;
     const url = response.config.url;
@@ -92,6 +93,7 @@ class GeocodeClient extends BaseClient {
 
     // TODO do some checking here
     let feature = features[0];
+    console.log('geocode success, store.js feature:', feature, 'opa_account_num:', feature.properties.opa_account_num);
     let relatedFeatures = [];
     for (let relatedFeature of features.slice(1)){
       if (feature.properties.address_high) {
@@ -103,6 +105,7 @@ class GeocodeClient extends BaseClient {
       }
     }
     if (relatedFeatures.length > 0) {
+      console.log('if relatedFeatures is running');
       // feature.condo = true;
       // this.store.commit('setUnits', {
       //   [feature.properties.pwd_parcel_id]: features,
@@ -172,7 +175,20 @@ class GeocodeClient extends BaseClient {
 
 
     }
-    // console.log('geocode-client, feature:', feature, 'relatedFeatures:', relatedFeatures);
+    console.log('geocode-client success, feature:', feature, 'opa_account_num:', feature.properties.opa_account_num, 'relatedFeatures:', relatedFeatures);
+    // let creature = {
+    //   type: feature.type,
+    //   ais_feature_type: feature.ais_feature_type,
+    //   match_type: feature.match_type,
+    //   properties: feature.properties,
+    //   geometry: feature.geometry,
+    //   // _featureId: feature._featureId,
+    // };
+
+    // feature.condo = false;
+    // feature['condo'] = false;
+
+    console.log('geocode-client success 2, feature:', feature, feature.condo, 'relatedFeatures:', relatedFeatures);
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');

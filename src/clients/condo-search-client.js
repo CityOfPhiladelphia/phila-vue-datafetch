@@ -25,7 +25,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   setFeatureProperties(feature, totalUnits) {
-    // console.log('setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
+    console.log('condo setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
     // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
@@ -144,7 +144,7 @@ class CondoSearchClient extends BaseClient {
       if(this.store.state.parcels.pwd === null) {
         // this.setFeatureProperties(feature, totalUnits);
 
-        // console.log('getPages else is still running 1');
+        console.log('condo-search-client, getPages else is still running 1');
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
         // console.log('getPages else is still running 2');
@@ -155,7 +155,7 @@ class CondoSearchClient extends BaseClient {
       } else {
         this.setFeatureProperties(feature, totalUnits);
 
-        // console.log('getPages else is still running 1');
+        console.log('condo-search-client getPages else is still running 1');
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
         // console.log('getPages else is still running 2');

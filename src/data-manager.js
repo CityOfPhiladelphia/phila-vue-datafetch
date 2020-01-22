@@ -152,7 +152,7 @@ class DataManager {
 
 
   defineTargets(dataSourceKey, targetsDef) {
-    // console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
+    console.log('defineTargets is running, dataSourceKey:', dataSourceKey, 'targetsDef:', targetsDef);
     const state = this.store.state;
     // targets may cause a looped axios call, or may just call one once and get multiple results
     let targetsFn = targetsDef.get;
@@ -164,7 +164,7 @@ class DataManager {
     let targets = targetsFn(state);
     let targetIdFn = targetsDef.getTargetId;
 
-    // console.log("Define Targets Starting, targets:", targets);
+    console.log("Define Targets Starting, targets:", targets);
     // check if target objs exist in state.
     let targetIds;
     if ( typeof targets.length != 'undefined'){
@@ -676,7 +676,7 @@ class DataManager {
       featuresWithIds.push(feature);
     }
 
-    // console.log(dataSourceKey, features, featuresWithIds);
+    console.log('data-manager assignFeatureIds is running', dataSourceKey, features, featuresWithIds);
     return featuresWithIds;
   }
 

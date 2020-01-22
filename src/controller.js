@@ -399,17 +399,23 @@ class Controller {
     console.log('handleMapClick about to call geocode.fetch, id:', id);
     let aisResponse = await this.clients.geocode.fetch(id);
     // let aisResponse = await this.clients.geocode.fetch(props.ADDRESS);
-    // console.log('after await aisResponse 1:', aisResponse);
+    console.log('after await aisResponse 1:', aisResponse);//, aisResponse.properties.opa_account_num);
+    // if (aisResponse) {
+    //   aisResponse.condo = false;
+    // }
 
     if (!aisResponse) {
       // console.log('if !aisResponse is running, props.ADDRESS:', props.ADDRESS);
       aisResponse = await this.clients.condoSearch.fetch(props.ADDRESS);
+    } else {
+      console.log('after await aisResponse 1.5:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
     }
 
-    // console.log('after await aisResponse 2:', aisResponse);
+    // console.log('after await aisResponse 2:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     this.router.setRouteByGeocode();
 
+    // console.log('after await aisResponse 3:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
     // console.log('this.store.state.bufferMode:', this.store.state.bufferMode);
 
     // handle if it is in buffer mode
@@ -436,9 +442,11 @@ class Controller {
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
       }
     }
+    console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     // this.dataManager.resetData();
-    // console.log('getting to end of handleMapClick, calling fetchData');
+    // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo);
+    // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo, 'aisResponse opa:', aisResponse.properties.opa_account_num,'opa_account_num:', this.store.state.geocode.data.properties.opa_account_num);
     this.dataManager.fetchData();
   }
 
