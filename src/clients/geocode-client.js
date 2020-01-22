@@ -77,7 +77,7 @@ class GeocodeClient extends BaseClient {
 
   success(response) {
     // console.log('geocode success is running, response:', response, response.data.features[0].properties.opa_account_num);
-    this.dataManager.resetGeocode();
+    this.dataManager.resetGeocodeOnly();
     const store = this.store;
     const data = response.data;
     const url = response.config.url;

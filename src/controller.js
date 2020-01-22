@@ -80,6 +80,10 @@ class Controller {
     this.dataManager.resetGeocode();
   }
 
+  resetGeocodeOnly() {
+    this.dataManager.resetGeocodeOnly();
+  }
+
   // filterInputSubmit(value, process, searchCategory) {
   //   console.log('controller filterInputSubmit is running, value:', value, 'process:', process);
   //   if (process === 'mapboard') {
