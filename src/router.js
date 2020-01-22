@@ -152,7 +152,15 @@ class Router {
     if (nextAddress && nextAddress !== 'addr noaddress') {
       // console.log('router hashChanged calling controller.handleSearchFormSubmit');
       // this.routeToAddress(nextAddress);
-      this.controller.handleSearchFormSubmit(nextAddress);
+      if (firstRouteParameter.includes('shape')) {
+        console.log("just added this, need ot coordinate this with resetShape, maybe take the new input from hash over the old in the state.\
+        The mounted handleDrawnShape in app.vue might show a solution for this.");
+        console.log("Maybe reset shape should happen here.");
+        this.dataManager.resetData();
+        this.controller.handleDrawnShape();
+      } else {
+        this.controller.handleSearchFormSubmit(nextAddress);
+      }
     }
 
     // if (nextKeyword) {
