@@ -223,6 +223,7 @@ const pvdStore = {
         state.sources[key].targets = data;
       },
       setSourceDataMore(state, payload) {
+        // console.log('setSourceDataMore is running');
         const key = payload.key;
         const data = payload.data;
         const nextPage = payload.page;
@@ -285,6 +286,7 @@ const pvdStore = {
         state.geocode.status = payload;
       },
       setGeocodeData(state, payload) {
+        // console.log('store.js setGeocodeData is running, payload:', payload);
         state.geocode.data = payload;
       },
       setGeocodeRelated(state, payload) {

@@ -25,7 +25,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   setFeatureProperties(feature, totalUnits) {
-    // console.log('setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
+    console.log('condo setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
     // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
@@ -40,7 +40,6 @@ class CondoSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    // console.log('condo-search-client fetch is running, input', input);
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
     condoConfig.url = this.config.geocoder.url;
@@ -49,6 +48,10 @@ class CondoSearchClient extends BaseClient {
 
     const url = condoConfig.url(input);
     const params = condoConfig.params;
+    if (params.page) {
+      delete params['page'];
+    }
+    console.log('condo-search-client fetch is running, input', input, 'params:', params);
 
     // update state
     // this.store.commit('setGeocodeStatus', 'waiting');
@@ -69,15 +72,15 @@ class CondoSearchClient extends BaseClient {
     let features = data.features;
     const url = response.config.url;
     let params = response.config.params;
-    // console.log('geocode search success', url, 'data:', data, 'params:', params, response.config.params);
     const totalUnits = data.total_size;
+    console.log('condo geocode success, url:', url, 'data:', data, 'params:', params, 'totalUnits:', totalUnits);
 
     if (!data.features || data.features.length < 1) {
       return;
     }
 
     async function getPages(features) {
-      // console.log('still going 2, pages:', );
+      console.log('getPages is running still going 2, pages:' );
 
       let pages = Math.ceil(data.total_size / 100);
 
@@ -141,7 +144,7 @@ class CondoSearchClient extends BaseClient {
       if(this.store.state.parcels.pwd === null) {
         // this.setFeatureProperties(feature, totalUnits);
 
-        // console.log('getPages else is still running 1');
+        console.log('condo-search-client, getPages else is still running 1');
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
         // console.log('getPages else is still running 2');
@@ -152,7 +155,7 @@ class CondoSearchClient extends BaseClient {
       } else {
         this.setFeatureProperties(feature, totalUnits);
 
-        // console.log('getPages else is still running 1');
+        console.log('condo-search-client getPages else is still running 1');
         store.commit('setGeocodeData', feature);
         store.commit('setGeocodeStatus', 'success');
         // console.log('getPages else is still running 2');

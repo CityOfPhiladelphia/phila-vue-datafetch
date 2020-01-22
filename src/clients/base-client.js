@@ -36,9 +36,10 @@ class BaseClient {
     // REVIEW this was not working with Array.map for some reason
     // it was returning an object when fetchJson was used
     // that is now converted to an array in fetchJson
+    let id;
     for (let i = 0; i < features.length; i++) {
       const suffix = (topicId ? topicId + '-' : '') + i;
-      const id = `feat-${dataSourceKey}-${suffix}`;
+      id = `feat-${dataSourceKey}-${suffix}`;
       const feature = features[i];
       // console.log(dataSourceKey, feature);
       try {
@@ -49,7 +50,8 @@ class BaseClient {
       featuresWithIds.push(feature);
     }
 
-    // console.log(dataSourceKey, features, featuresWithIds);
+    // console.log('assignFeatureIds is running, dataSourceKey:', dataSourceKey, 'features:', features, 'featuresWithIds:', featuresWithIds, 'feature[0]._featureId:', feature[0]._featureId);
+    // console.log('base-client assignFeatureIds is running, dataSourceKey:', dataSourceKey, 'id:', id, 'features:', features, 'featuresWithIds:', featuresWithIds);
     return featuresWithIds;
   }
 
