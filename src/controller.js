@@ -224,7 +224,7 @@ class Controller {
       this.store.commit('setParcelData', {});
       this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setBufferShape', null);
-      console.log('handleSearchFormSubmit about to call setRouteByGeocode at the start');
+      // console.log('handleSearchFormSubmit about to call setRouteByGeocode at the start');
       this.router.setRouteByGeocode();
       return;
     }
@@ -313,7 +313,7 @@ class Controller {
         // console.log('theParcels:', theParcels);
         // TODO - catch error before this if necessary
       } else {
-        console.log('ids length is 0');
+        // console.log('ids length is 0');
         if (configForParcelLayer.getByLatLngIfIdFails) {
           // console.log(parcelLayer, 'Id failed - had to get by LatLng')
           // console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
@@ -396,10 +396,10 @@ class Controller {
     // 1. wipe out state data on other parcels
     // 2. attempt to replace
 
-    console.log('handleMapClick about to call geocode.fetch, id:', id);
+    // console.log('handleMapClick about to call geocode.fetch, id:', id);
     let aisResponse = await this.clients.geocode.fetch(id);
     // let aisResponse = await this.clients.geocode.fetch(props.ADDRESS);
-    console.log('after await aisResponse 1:', aisResponse);//, aisResponse.properties.opa_account_num);
+    // console.log('after await aisResponse 1:', aisResponse);//, aisResponse.properties.opa_account_num);
     // if (aisResponse) {
     //   aisResponse.condo = false;
     // }
@@ -408,7 +408,7 @@ class Controller {
       // console.log('if !aisResponse is running, props.ADDRESS:', props.ADDRESS);
       aisResponse = await this.clients.condoSearch.fetch(props.ADDRESS);
     } else {
-      console.log('after await aisResponse 1.5:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
+      // console.log('after await aisResponse 1.5:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
     }
 
     // console.log('after await aisResponse 2:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
@@ -442,7 +442,7 @@ class Controller {
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
       }
     }
-    console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
+    // console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     // this.dataManager.resetData();
     // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo);

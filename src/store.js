@@ -217,13 +217,13 @@ const pvdStore = {
         }
       },
       setSourceDataObject(state, payload) {
-        console.log('store setSourceDataObject is running, payload:', payload);
+        // console.log('store setSourceDataObject is running, payload:', payload);
         const key = payload.key;
         const data = payload.data;
         state.sources[key].targets = data;
       },
       setSourceDataMore(state, payload) {
-        console.log('setSourceDataMore is running');
+        // console.log('setSourceDataMore is running');
         const key = payload.key;
         const data = payload.data;
         const nextPage = payload.page;
@@ -244,7 +244,7 @@ const pvdStore = {
       },
       // this sets empty targets for a data source
       createEmptySourceTargets(state, payload) {
-        console.log('createEmptySourceTargets is running');
+        // console.log('createEmptySourceTargets is running');
         const { key, targetIds } = payload;
         state.sources[key].targets = targetIds.reduce((acc, targetId) => {
           acc[targetId] = {
@@ -286,7 +286,7 @@ const pvdStore = {
         state.geocode.status = payload;
       },
       setGeocodeData(state, payload) {
-        console.log('store.js setGeocodeData is running, payload:', payload);
+        // console.log('store.js setGeocodeData is running, payload:', payload);
         state.geocode.data = payload;
       },
       setGeocodeRelated(state, payload) {
