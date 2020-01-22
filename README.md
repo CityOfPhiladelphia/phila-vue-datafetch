@@ -29,9 +29,14 @@ To publish a new version of Mapboard to NPM:
 
 ## Release Notes
 
+
 ### 1.1.0 - 1/22/2020
 
 * Fixes bug with different numbers of condos found in PDE when using different search methods
+
+### 1.0.3 - 1/17/2020
+
+* Fixes bug with routing that breaks handleMapClick in Atlas
 
 ### 1.0.2 - 1/15/2020
 

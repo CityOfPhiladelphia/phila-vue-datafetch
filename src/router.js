@@ -104,6 +104,7 @@ class Router {
     // parse path
     const pathComps = hash.split('/').splice(1);
     // console.log('pathComps:', pathComps);
+
     let encodedFirstRouteParameter;
     if (pathComps.length) {
       encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '');
