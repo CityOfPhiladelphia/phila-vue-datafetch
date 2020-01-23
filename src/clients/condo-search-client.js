@@ -40,6 +40,8 @@ class CondoSearchClient extends BaseClient {
   }
 
   fetch(input) {
+    console.log('condo-search-client fetch is running');
+    this.store.commit('setCondoUnitsStatus', 'waiting');
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
     condoConfig.url = this.config.geocoder.url;
@@ -165,7 +167,7 @@ class CondoSearchClient extends BaseClient {
         // console.log('feature:', feature);
       }
 
-
+      this.store.commit('setCondoUnitsStatus', 'success');
       return feature;
       // }
     }
@@ -177,6 +179,7 @@ class CondoSearchClient extends BaseClient {
   error(error) {
     const store = this.store;
 
+    store.commit('setCondoUnitsStatus', 'error');
     store.commit('setGeocodeStatus', 'error');
     store.commit('setGeocodeData', null);
     store.commit('setGeocodeRelated', null);
