@@ -457,10 +457,12 @@ class Controller {
   async handleDrawnShape(state) {
     console.log('handleDrawnShape is running');
     let shape = this.store.state.drawShape;
+    let changeCenter;
 
     if (!shape) {
-      let query = this.vueRouter.history.current.query;
-      // console.log('App.vue mounted is running, this.$route.query:', this.$route.query);
+      // let query = this.vueRouter.history.current.query;
+      let query = this.vueRouter.currentRoute.query;
+      // console.log('App.vue mounted is running, window.location.hash:', this.vueRouter);
       // this.introPage = false;
       // this.$store.commit('setIntroPage', false);
       let queryShape = query.shape;
@@ -476,13 +478,16 @@ class Controller {
         _latlngs.push(latlng);
       }
       shape = { _latlngs };
+      changeCenter = true;
     }
 
 
     const parcels = [];
     let response = await this.dataManager.getParcelsByShape(shape, parcels);
-    console.log('handleDrawnShape, response:', response);
-
+    if(changeCenter === true) {
+      // console.log('handleDrawnShape, response:', response.features[0].geometry.coordinates[0][0]);
+      this.store.commit('setMapCenter', response.features[0].geometry.coordinates[0][0]);
+    }
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -518,7 +523,6 @@ class Controller {
     }
 
     this.dataManager.clearOwnerSearch();
-
     // at this point there is definitely a feature or features - put it in state
     this.dataManager.setParcelsInState('pwd', true, null, features, false);
     // this.geocode(features);
