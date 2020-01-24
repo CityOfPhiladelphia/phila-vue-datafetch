@@ -29,6 +29,10 @@ To publish a new version of Mapboard to NPM:
 
 ## Release Notes
 
+### 1.1.3 - 1/24/2020
+
+* builds for push to npm
+
 ### 1.1.2 - 1/24/2020
 
 * Adds message when retrieving condos takes multiple API calls
