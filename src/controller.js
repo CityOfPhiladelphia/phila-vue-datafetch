@@ -80,6 +80,10 @@ class Controller {
     this.dataManager.resetGeocode();
   }
 
+  resetGeocodeOnly() {
+    this.dataManager.resetGeocodeOnly();
+  }
+
   // filterInputSubmit(value, process, searchCategory) {
   //   console.log('controller filterInputSubmit is running, value:', value, 'process:', process);
   //   if (process === 'mapboard') {
@@ -224,6 +228,7 @@ class Controller {
       this.store.commit('setParcelData', {});
       this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setBufferShape', null);
+      // console.log('handleSearchFormSubmit about to call setRouteByGeocode at the start');
       this.router.setRouteByGeocode();
       return;
     }
@@ -236,18 +241,22 @@ class Controller {
 
     // TODO rename to aisResponse
     let aisResponse = await this.clients.geocode.fetch(value);
-    // console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
+    // console.log('after await aisResponse:', aisResponse, 'aisResponse.properties.street_address:', aisResponse.properties.street_address);//, 'this.clients:', this.clients);
 
+    // if (aisResponse.properties.street_address && !this.store.state.bufferMode) {
     if (aisResponse && !this.store.state.bufferMode) {
+      // console.log('handleSearchFormSubmit about to call setRouteByGeocode after geocode');
       this.router.setRouteByGeocode();
     } else if (!this.store.state.bufferMode) {
       aisResponse = await this.clients.ownerSearch.fetch(value);
       this.router.setRouteByOwnerSearch();
     }
-
+    //
     // if (!aisResponse) {
+    // let condoResponse;
+    // if (this.store.state.condoUnits.units.length) {
     //   console.log('if !aisResponse is running, value:', value);
-    //   aisResponse = await this.clients.condoSearch.fetch(value);
+    //   condoResponse = await this.clients.condoSearch.fetch(value);
     //   console.log('aisResponse:', aisResponse);
     // }
 
@@ -278,13 +287,18 @@ class Controller {
       const configForParcelLayer = this.config.parcels[parcelLayer];
       const parcelIdInGeocoder = configForParcelLayer.parcelIdInGeocoder;
 
+      // console.log('in loop, parcelLayer:', parcelLayer, 'parcelIdInGeocoder:', parcelIdInGeocoder, 'configForParcelLayer:', configForParcelLayer);
+
       let ids;
       if (aisResponse.properties) {
+        // console.log('getting ids, first if');
         ids = aisResponse.properties[parcelIdInGeocoder];
       } else if (this.store.state.ownerSearch.data) {
+        // console.log('getting ids, middle if')
         ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id );
         ids = ids.filter( id => id != "" );
       } else {
+        // console.log('getting ids, else');
         ids = aisResponse.map(item => item.properties.pwd_parcel_id );
         ids = ids.filter( id => id != "" );
       }
@@ -303,6 +317,7 @@ class Controller {
         // console.log('theParcels:', theParcels);
         // TODO - catch error before this if necessary
       } else {
+        // console.log('ids length is 0');
         if (configForParcelLayer.getByLatLngIfIdFails) {
           // console.log(parcelLayer, 'Id failed - had to get by LatLng')
           // console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
@@ -323,7 +338,13 @@ class Controller {
         await this.runBufferProcess(response);
       }
 
+      // console.log('still going, parcelResponse:', parcelResponse);
       this.dataManager.fetchData();
+    }
+
+    // this.router.setRouteByGeocode()
+    if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'owner search') {
+      this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
     }
     // console.log('end of handleSearchFormSubmit');
   }
@@ -379,19 +400,26 @@ class Controller {
     // 1. wipe out state data on other parcels
     // 2. attempt to replace
 
+    // console.log('handleMapClick about to call geocode.fetch, id:', id);
     let aisResponse = await this.clients.geocode.fetch(id);
     // let aisResponse = await this.clients.geocode.fetch(props.ADDRESS);
-    // console.log('after await aisResponse 1:', aisResponse);
+    // console.log('after await aisResponse 1:', aisResponse);//, aisResponse.properties.opa_account_num);
+    // if (aisResponse) {
+    //   aisResponse.condo = false;
+    // }
 
     if (!aisResponse) {
       // console.log('if !aisResponse is running, props.ADDRESS:', props.ADDRESS);
       aisResponse = await this.clients.condoSearch.fetch(props.ADDRESS);
+    } else {
+      // console.log('after await aisResponse 1.5:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
     }
 
-    // console.log('after await aisResponse 2:', aisResponse);
+    // console.log('after await aisResponse 2:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     this.router.setRouteByGeocode();
 
+    // console.log('after await aisResponse 3:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
     // console.log('this.store.state.bufferMode:', this.store.state.bufferMode);
 
     // handle if it is in buffer mode
@@ -418,21 +446,21 @@ class Controller {
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
       }
     }
+    // console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     // this.dataManager.resetData();
-    // console.log('getting to end of handleMapClick, calling fetchData');
+    // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo);
+    // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo, 'aisResponse opa:', aisResponse.properties.opa_account_num,'opa_account_num:', this.store.state.geocode.data.properties.opa_account_num);
     this.dataManager.fetchData();
   }
 
   async handleDrawnShape(state) {
     console.log('handleDrawnShape is running');
     let shape = this.store.state.drawShape;
-    let changeCenter;
 
     if (!shape) {
-      // let query = this.vueRouter.history.current.query;
-      let query = this.vueRouter.currentRoute.query;
-      // console.log('App.vue mounted is running, window.location.hash:', this.vueRouter);
+      let query = this.vueRouter.history.current.query;
+      // console.log('App.vue mounted is running, this.$route.query:', this.$route.query);
       // this.introPage = false;
       // this.$store.commit('setIntroPage', false);
       let queryShape = query.shape;
@@ -448,16 +476,13 @@ class Controller {
         _latlngs.push(latlng);
       }
       shape = { _latlngs };
-      changeCenter = true;
     }
 
 
     const parcels = [];
     let response = await this.dataManager.getParcelsByShape(shape, parcels);
-    if(changeCenter === true) {
-      // console.log('handleDrawnShape, response:', response.features[0].geometry.coordinates[0][0]);
-      this.store.commit('setMapCenter', response.features[0].geometry.coordinates[0][0]);
-    }
+    console.log('handleDrawnShape, response:', response);
+
     const configForParcelLayer = this.config.parcels.pwd;
     const geocodeField = configForParcelLayer.geocodeField;
     const otherParcelLayers = Object.keys(this.config.parcels || {});
@@ -491,7 +516,9 @@ class Controller {
       this.store.commit('setBufferShape', null);
       return;
     }
+
     this.dataManager.clearOwnerSearch();
+
     // at this point there is definitely a feature or features - put it in state
     this.dataManager.setParcelsInState('pwd', true, null, features, false);
     // this.geocode(features);

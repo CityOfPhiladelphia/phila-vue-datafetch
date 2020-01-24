@@ -30,6 +30,7 @@ const initialState = {
     input: null,
   },
   condoUnits: {
+    status: null,
     units: null,
   },
   searchType: 'address',
@@ -223,6 +224,7 @@ const pvdStore = {
         state.sources[key].targets = data;
       },
       setSourceDataMore(state, payload) {
+        // console.log('setSourceDataMore is running');
         const key = payload.key;
         const data = payload.data;
         const nextPage = payload.page;
@@ -285,6 +287,7 @@ const pvdStore = {
         state.geocode.status = payload;
       },
       setGeocodeData(state, payload) {
+        // console.log('store.js setGeocodeData is running, payload:', payload);
         state.geocode.data = payload;
       },
       setGeocodeRelated(state, payload) {
@@ -315,6 +318,9 @@ const pvdStore = {
       setUnits(state, payload) {
         // console.log("setShapeSearchUnits: ", payload)
         state.condoUnits.units = payload;
+      },
+      setCondoUnitsStatus(state, payload) {
+        state.condoUnits.status = payload;
       },
       setActiveSearchStatus(state, payload) {
         let key = payload.activeSearchKey;

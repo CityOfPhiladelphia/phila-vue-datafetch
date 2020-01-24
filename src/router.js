@@ -43,7 +43,7 @@ class Router {
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
-    console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
+    // console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
 
     // must have an firstRouteParameter
     if (!firstRouteParameter || firstRouteParameter.length === 0) {
@@ -103,6 +103,8 @@ class Router {
 
     // parse path
     const pathComps = hash.split('/').splice(1);
+    // console.log('pathComps:', pathComps);
+
     let encodedFirstRouteParameter;
     if (pathComps.length) {
       encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '');
@@ -152,15 +154,7 @@ class Router {
     if (nextAddress && nextAddress !== 'addr noaddress') {
       // console.log('router hashChanged calling controller.handleSearchFormSubmit');
       // this.routeToAddress(nextAddress);
-      if (firstRouteParameter.includes('shape')) {
-        console.log("just added this, need ot coordinate this with resetShape, maybe take the new input from hash over the old in the state.\
-        The mounted handleDrawnShape in app.vue might show a solution for this.");
-        console.log("Maybe reset shape should happen here.");
-        this.dataManager.resetData();
-        this.controller.handleDrawnShape();
-      } else {
-        this.controller.handleSearchFormSubmit(nextAddress);
-      }
+      this.controller.handleSearchFormSubmit(nextAddress);
     }
 
     // if (nextKeyword) {
@@ -294,11 +288,25 @@ class Router {
   // this is almost just the same thing as any of the routeTo... functions above
   // TODO this could have a name that is more declarative like "changeURL" (used to be called "didGeocode")
 
-  setRouteByGeocode() {
-    const geocodeData = this.store.state.geocode.data;
+  setRouteByGeocode(testAddress) {
+    let geocodeData;
+    // if (this.store.state.geocode.data.properties.street_address) {
+    if (testAddress) {
+      geocodeData = {
+        properties: {
+          street_address: testAddress,
+        },
+      };
+    } else {
+      geocodeData = this.store.state.geocode.data;
+    }
+    // } else {
+    //   geocodeData = this.store.state.parcels.pwd[0];//.properties.ADDRESS;
+    // }
+
 
     // make hash if there is geocode data
-    // console.log('router setRouteByGeocode is running - geocodeData:', geocodeData);
+    // console.log('router setRouteByGeocode is running - geocodeData:', geocodeData, 'geocodeData.properties.street_address:', geocodeData.properties.street_address);
     if (geocodeData) {
       let address;
 
@@ -306,7 +314,11 @@ class Router {
         address = geocodeData.street_address;
       } else if (geocodeData.properties.street_address) {
         address = geocodeData.properties.street_address;
-      }
+      } //else if (geocodeData.properties.ADDRESS) {
+      //   address = geocodeData.properties.ADDRESS;
+      // }
+
+      // console.log('setRouteByGeocode, address:', address);
 
       // TODO - datafetch should not know topics are a thing
       if (this.config.router.returnToDefaultTopicOnGeocode) {
@@ -320,10 +332,11 @@ class Router {
       // want this to happen all the time, right?
       if (!this.silent) {
         if (this.config.router.type === 'vue') {
-          // console.log('in setRouteByGeocode, router type is vue');
+          // console.log('in setRouteByGeocode, router type is vue, address:', address);
           if (this.store.state.bufferMode) {
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}});
           } else {
+            // console.log('setRouteByGeocode else is running');
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}});
           }
         } else {
@@ -351,7 +364,7 @@ class Router {
   }
 
   setRouteByOwnerSearch() {
-    // console.log('router.js didShapeSearch is running');
+    // console.log('router.js setRouteByOwnerSearch is running');
     const owner = this.store.state.geocode.input;
 
     this.vueRouter.push({ query: { owner }});
@@ -360,9 +373,9 @@ class Router {
   }
 
   setRouteByShapeSearch() {
-    console.log('router.js didShapeSearch is running');
+    // console.log('router.js setRouteByShapeSearch is running');
     const shapeInput = this.store.state.shapeSearch.input;
-    console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
+    // console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
     // only run this if the shape is in the store (which it will not be if it is created from the route)
     if (shapeInput) {
       let shape = '[[';
@@ -372,7 +385,7 @@ class Router {
       }
       shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]';
 
-      console.log('didShapeSearch is running, shape:', shape);
+      // console.log('didShapeSearch is running, shape:', shape);
 
       this.vueRouter.push({ query: { shape }});
     }
