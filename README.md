@@ -29,6 +29,10 @@ To publish a new version of Mapboard to NPM:
 
 ## Release Notes
 
+### 1.1.4, 1.1.5 - 1/24/2020
+
+* Changes to fix routing changes using broswer nav to load and zoom with shape searches.
+
 ### 1.1.3 - 1/24/2020
 
 * builds for push to npm
