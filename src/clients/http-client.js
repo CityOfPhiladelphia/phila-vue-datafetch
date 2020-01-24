@@ -5,7 +5,7 @@ import BaseClient from './base-client';
 class HttpClient extends BaseClient {
 
   fetchDataInSegments(feature, dataSource, dataSourceKey, targetIdFn, params) {
-    // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    // console.log('http-client fetchDataInSegments, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
 
     let featureArr = feature.split(',');
     // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length)
@@ -55,6 +55,7 @@ class HttpClient extends BaseClient {
 
       let promisesFinished = await Promise.all(allFeaturesReturned);
 
+      // console.log('http-client is calling didFetchData');
       this.dataManager.didFetchData(dataSourceKey, 'success', data, targetId, targetIdFn);
     }
 
