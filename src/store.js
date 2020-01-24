@@ -30,6 +30,7 @@ const initialState = {
     input: null,
   },
   condoUnits: {
+    status: null,
     units: null,
   },
   searchType: 'address',
@@ -317,6 +318,9 @@ const pvdStore = {
       setUnits(state, payload) {
         // console.log("setShapeSearchUnits: ", payload)
         state.condoUnits.units = payload;
+      },
+      setCondoUnitsStatus(state, payload) {
+        state.condoUnits.status = payload;
       },
       setActiveSearchStatus(state, payload) {
         let key = payload.activeSearchKey;
