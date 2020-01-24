@@ -43,7 +43,7 @@ class Router {
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
-    // console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
+    console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
 
     // must have an firstRouteParameter
     if (!firstRouteParameter || firstRouteParameter.length === 0) {
@@ -154,7 +154,15 @@ class Router {
     if (nextAddress && nextAddress !== 'addr noaddress') {
       // console.log('router hashChanged calling controller.handleSearchFormSubmit');
       // this.routeToAddress(nextAddress);
-      this.controller.handleSearchFormSubmit(nextAddress);
+      if (firstRouteParameter.includes('shape')) {
+        console.log("just added this, need ot coordinate this with resetShape, maybe take the new input from hash over the old in the state.\
+        The mounted handleDrawnShape in app.vue might show a solution for this.");
+        console.log("Maybe reset shape should happen here.");
+        this.dataManager.resetData();
+        this.controller.handleDrawnShape();
+      } else {
+        this.controller.handleSearchFormSubmit(nextAddress);
+      }
     }
 
     // if (nextKeyword) {
@@ -375,7 +383,7 @@ class Router {
   setRouteByShapeSearch() {
     // console.log('router.js setRouteByShapeSearch is running');
     const shapeInput = this.store.state.shapeSearch.input;
-    // console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
+    console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
     // only run this if the shape is in the store (which it will not be if it is created from the route)
     if (shapeInput) {
       let shape = '[[';
@@ -385,7 +393,7 @@ class Router {
       }
       shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]';
 
-      // console.log('didShapeSearch is running, shape:', shape);
+      console.log('didShapeSearch is running, shape:', shape);
 
       this.vueRouter.push({ query: { shape }});
     }
