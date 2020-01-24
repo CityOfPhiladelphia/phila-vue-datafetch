@@ -491,7 +491,7 @@ class Controller {
       this.store.commit('setBufferShape', null);
       return;
     }
-
+    this.dataManager.clearOwnerSearch();
     // at this point there is definitely a feature or features - put it in state
     this.dataManager.setParcelsInState('pwd', true, null, features, false);
     // this.geocode(features);
