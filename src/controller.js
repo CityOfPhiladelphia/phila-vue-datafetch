@@ -508,6 +508,14 @@ class Controller {
     const features = response.features;
 
     if (features.length === 0) {
+      this.dataManager.resetData();
+      this.resetGeocode();
+      this.dataManager.clearOwnerSearch();
+      this.store.commit('setShapeSearchData', null);
+      this.store.commit('setParcelData', {});
+      this.store.commit('setLastSearchMethod', 'geocode');
+      this.store.commit('setBufferShape', null);
+      this.store.commit('setShapeSearchStatus', 'error');
       return;
     } else if (features.length > 200) {
       // console.log('there are greater than 200 parcels');
