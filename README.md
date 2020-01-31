@@ -29,6 +29,12 @@ To publish a new version of Mapboard to NPM:
 
 ## Release Notes
 
+### 1.1.7 - 1/31/2020
+
+* pushes to @phila/vue-datafetch instead of @philly/vue-datafetch
+
+### 1.1.6 - 1/24/2020
+
 ### 1.1.4, 1.1.5 - 1/24/2020
 
 * Changes to fix routing changes using broswer nav to load and zoom with shape searches.
