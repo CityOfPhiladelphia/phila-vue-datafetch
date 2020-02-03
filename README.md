@@ -1,4 +1,4 @@
-# phila-vue-datafetch ([@philly/vue-datafetch](https://www.npmjs.com/package/@philly/vue-datafetch) in [npmjs.com](https://npmjs.com))
+# phila-vue-datafetch ([@phila/vue-datafetch](https://www.npmjs.com/package/@phila/vue-datafetch) in [npmjs.com](https://npmjs.com))
 
 phila-vue-datafetch is a library of functions used for fetching data for an app which uses [Vue.js](https://vuejs.org/v2/guide/) and [Vuex](https://vuex.vuejs.org/).  The functions included are designed to geocode addresses, and fetch data from any REST APIs input, and to return the data in a structured way into the Vuex store, so that data can be efficiently used in an app.
 
@@ -7,11 +7,11 @@ phila-vue-datafetch is a library of functions used for fetching data for an app 
 ## To Include The Library In Your App
 * in a bundled app, use npm:
 
-    `npm install @philly/vue-datafetch`
+    `npm install @phila/vue-datafetch`
 
 * in an html file, use the CDN:
 
-    `<script src="//unpkg.com/@philly/vue-datafetch@0.0.14/dist/phila-vue-datafetch.js"></script>`
+    `<script src="//unpkg.com/@phila/vue-datafetch@1.1.7/dist/phila-vue-datafetch.js"></script>`
 
 
 ## Usage
