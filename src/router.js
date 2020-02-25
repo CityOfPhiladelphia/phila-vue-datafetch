@@ -89,9 +89,9 @@ class Router {
   }
 
   hashChanged() {
-    // console.log('hashChanged is running, this.store.state.activeTopic:', this.store.state.activeTopic);
     const location = window.location;
     const hash = location.hash;
+    console.log('hashChanged is running, location:', location, 'hash:', hash, 'this.store.state.activeTopic:', this.store.state.activeTopic);
 
     // parse url
     const comps = parseUrl(location.href);
@@ -103,13 +103,18 @@ class Router {
 
     // parse path
     const pathComps = hash.split('/').splice(1);
-    // console.log('pathComps:', pathComps);
+    console.log('pathComps:', pathComps);
 
     let encodedFirstRouteParameter;
     if (pathComps.length) {
       encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '');
     }
-    // console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
+    console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
+
+    if (encodedFirstRouteParameter === 'maintenance') {
+      // this.routeToMaintenance();
+      return;
+    }
 
     // if there's no address, erase it
     if (!encodedFirstRouteParameter) {
@@ -267,6 +272,10 @@ class Router {
   //     this.history.replaceState(lastHistoryState, null, nextHash);
   //   }
   // }
+
+  routeToMaintenance() {
+    console.log('routeToMaintenance is running');
+  }
 
   routeToModal(selectedModal) {
     // console.log('routeToModal is running, selectedModal:', selectedModal);
