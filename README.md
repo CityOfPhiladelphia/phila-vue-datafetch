@@ -19,7 +19,7 @@ Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/w
 
 ## Publishing
 
-To publish a new version of Mapboard to NPM:
+To publish a new version of @phila/vue-datafetch to NPM:
 
 1. Commit your changes to `master`.
 2. Bump the NPM version with `npm version major|minor|patch`.
