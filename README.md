@@ -29,6 +29,12 @@ To publish a new version of Mapboard to NPM:
 
 ## Release Notes
 
+### 1.2.0 - 5/5/2020
+
+* merges changes for use in pinboard and viewerboard
+
+### 1.1.8 - 3/2/2020
+
 ### 1.1.7 - 1/31/2020
 
 * pushes to @phila/vue-datafetch instead of @philly/vue-datafetch
