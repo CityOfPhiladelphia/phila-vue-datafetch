@@ -462,9 +462,15 @@ class DataManager {
 
     // assign feature ids
     if (Array.isArray(data)) {
+      // console.log('didFetchData if is running');
       data = this.assignFeatureIds(data, key, targetId);
     } else if (data) {
-      data.rows = this.assignFeatureIds(data.rows, key, targetId);
+      // console.log('didFetchData else if is running, data:', data, 'key:', key, 'targetId:', targetId);
+      if (data.rows && data.rows.length) {
+        data.rows = this.assignFeatureIds(data.rows, key, targetId);
+      } else {
+        data.features = this.assignFeatureIds(data.features, key, targetId);
+      }
     }
 
     const setSourceStatusOpts = { key, status };
@@ -667,7 +673,7 @@ class DataManager {
       const suffix = (topicId ? topicId + '-' : '') + i;
       const id = `feat-${dataSourceKey}-${suffix}`;
       const feature = features[i];
-      // console.log(dataSourceKey, feature);
+      // console.log('data-manager.js assignFeatureIds is running, dataSourceKey:', dataSourceKey, 'feature:', feature);
       try {
         feature._featureId = id;
       } catch (e) {
