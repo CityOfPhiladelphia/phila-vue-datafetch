@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.2.1 - 5/27/2020
+
+* upgrades all packages
+
 ### 1.2.0 - 5/5/2020
 
 * merges changes for use in pinboard and viewerboard
