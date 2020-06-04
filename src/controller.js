@@ -354,12 +354,25 @@ class Controller {
 
     // TODO figure out why form submits via enter key are generating a map
     // click event and remove this
-    if (e.originalEvent.keyCode === 13) {
-      return;
+    if (e.originalEvent) {
+      if (e.originalEvent.keyCode === 13) {
+        return;
+      }
     }
 
     // get parcels that intersect map click xy
-    const latLng = e.latlng;
+    let latLng;
+
+    if (e.latlng) {
+      latLng = e.latlng;
+    } else if (e.mapboxEvent) {
+      if (e.mapboxEvent.lngLat) {
+        latLng = {
+          lat: e.mapboxEvent.lngLat.lat,
+          lng: e.mapboxEvent.lngLat.lng,
+        };
+      }
+    }
 
     // if click is on a topic with pwd parcels, you do not want to find dor parcels unless the
     // click was actually on a pwd parcel that could be geocoded, because just running
