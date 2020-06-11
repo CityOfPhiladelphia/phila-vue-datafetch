@@ -21,6 +21,7 @@ import {
   HttpClient,
   EsriClient,
   CondoSearchClient,
+  AirtableClient,
 } from './clients';
 
 class DataManager {
@@ -42,6 +43,7 @@ class DataManager {
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
+    this.clients.airtable = new AirtableClient(clientOpts);
   }
 
   /* STATE HELPERS */
@@ -446,6 +448,13 @@ class DataManager {
           this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
           break;
 
+        case 'airtable':
+          this.clients.airtable.fetch(target,
+            dataSource,
+            dataSourceKey,
+            targetIdFn);
+          break;
+          
         default:
           throw `Unknown data source type: ${type}`;
         }  // end of switch

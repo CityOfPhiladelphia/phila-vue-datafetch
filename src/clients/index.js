@@ -6,6 +6,7 @@ import EsriClient from './esri-client';
 import CondoSearchClient from './condo-search-client';
 import ShapeSearchClient from './shape-search-client';
 import BufferSearchClient from './buffer-search-client';
+import AirtableClient from './airtable-client';
 
 export {
   GeocodeClient,
@@ -16,4 +17,5 @@ export {
   CondoSearchClient,
   ShapeSearchClient,
   BufferSearchClient,
+  AirtableClient,
 };
