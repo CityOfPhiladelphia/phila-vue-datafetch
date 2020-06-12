@@ -550,7 +550,7 @@ class Controller {
     // this.geocode(features);
     this.store.commit('setLastSearchMethod', 'shape search');
     this.dataManager.removeShape();
-    // this.clearShapeSearch()
+    this.store.commit('setShapeSearchData', null);
     this.dataManager.resetGeocodeOnly();
 
     this.router.setRouteByShapeSearch();
