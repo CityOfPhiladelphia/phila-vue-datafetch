@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.2.2 - 6/14/2020
+
+* adds airtable as a possible source
+
 ### 1.2.1 - 5/27/2020
 
 * upgrades all packages
