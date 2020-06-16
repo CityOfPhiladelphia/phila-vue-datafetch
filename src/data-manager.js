@@ -785,20 +785,24 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
-    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
-    const latLng = L.latLng(latlng.lat, latlng.lng);
-    const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
-    const parcelQuery = Query({ url });
-    parcelQuery.contains(latLng);
-    return new Promise(function(resolve, reject) {
-      parcelQuery.run((function(error, featureCollection, response) {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(response);
-        }
-      }));
-    });
+    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    if( latlng != null) {
+      const latLng = L.latLng(latlng.lat, latlng.lng);
+      const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
+      const parcelQuery = Query({ url });
+      parcelQuery.contains(latLng);
+      return new Promise(function(resolve, reject) {
+        parcelQuery.run((function(error, featureCollection, response) {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(response);
+          }
+        }));
+      });
+    } 
+    return;
+     
   }
 
   getParcelsByShape(latlng, parcelLayer) {
