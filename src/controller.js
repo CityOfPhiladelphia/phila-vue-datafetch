@@ -15,6 +15,7 @@ import { query as Query } from 'esri-leaflet';
 import {
   GeocodeClient,
   OwnerSearchClient,
+  BlockSearchClient,
   HttpClient,
   EsriClient,
   CondoSearchClient,
@@ -50,6 +51,7 @@ class Controller {
     const clientOpts = { config, store, dataManager: this };
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
+    this.clients.blockSearch = new BlockSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
@@ -233,6 +235,9 @@ class Controller {
       return;
     }
 
+    let blockTerms = [ "block", "block:", "blk" ];
+    let blockSearchCheck = null;
+    blockTerms.map( x=> value.trim().toLowerCase().startsWith(x)? blockSearchCheck = true : "");
     this.initializeStatuses(value, searchCategory);
     if(searchCategory === "keyword") {
       return;
@@ -247,6 +252,10 @@ class Controller {
     if (aisResponse && !this.store.state.bufferMode) {
       // console.log('handleSearchFormSubmit about to call setRouteByGeocode after geocode');
       this.router.setRouteByGeocode();
+    } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
+      console.log("block search is true");
+      aisResponse = await this.clients.blockSearch.fetch(value);
+      this.router.setRouteByOwnerSearch();
     } else if (!this.store.state.bufferMode) {
       aisResponse = await this.clients.ownerSearch.fetch(value);
       this.router.setRouteByOwnerSearch();

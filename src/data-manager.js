@@ -18,6 +18,7 @@ import {
   GeocodeClient,
   ActiveSearchClient,
   OwnerSearchClient,
+  BlockSearchClient,
   HttpClient,
   EsriClient,
   CondoSearchClient,
@@ -40,6 +41,7 @@ class DataManager {
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.activeSearch = new ActiveSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
+    this.clients.blockSearch = new BlockSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
@@ -718,6 +720,11 @@ class DataManager {
 
   didTryGeocode(feature) {
     // console.log('didTryGeocode is running, feature:', feature);
+    let blockTerms = [ "block", "block:", "blk" ];
+    let blockSearchCheck;
+    blockTerms.map( x=> this.store.state.geocode.input.trim().toLowerCase().startsWith(x)? blockSearchCheck = true : "");
+    console.log("input: ", input, "blockSearchCheck: ", blockSearchCheck);
+
     if (this.store.state.geocode.status === 'error') {
 
       // this was added to allow fetchData to run even without a geocode result
@@ -733,6 +740,11 @@ class DataManager {
         this.resetShape();
         this.fetchData(feature);
 
+      } else if(blockSearchCheck === true){
+        console.log("block search is true");
+        const input = this.store.state.geocode.input;
+        const didOwnerSearch = this.didOwnerSearch.bind(this);
+        return this.clients.blockSearch.fetch(input);
       } else {
         const input = this.store.state.geocode.input;
         const didOwnerSearch = this.didOwnerSearch.bind(this);
