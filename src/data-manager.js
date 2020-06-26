@@ -74,7 +74,7 @@ class DataManager {
 
     var state = this.store.state;
     let input = [];
-    if (state.lastSearchMethod === 'owner search') {
+    if (state.lastSearchMethod === 'owner search' ||state.lastSearchMethod === 'block search') {
       input = state.ownerSearch.data.filter(object => {
         return object._featureId === state.activeFeature.featureId;
       });
@@ -743,7 +743,6 @@ class DataManager {
       } else if(blockSearchCheck === true){
         console.log("block search is true");
         const input = this.store.state.geocode.input;
-        const didOwnerSearch = this.didOwnerSearch.bind(this);
         return this.clients.blockSearch.fetch(input);
       } else {
         const input = this.store.state.geocode.input;
@@ -753,6 +752,7 @@ class DataManager {
     } else if (this.store.state.geocode.status === 'success') {
       // this.didGeocode(feature);
       this.clearOwnerSearch();
+      this.clearBlockSearch();
     }
   }
 
@@ -1039,6 +1039,14 @@ class DataManager {
     this.store.commit('setParcelData', payload);
   }
 
+  clearBlockSearch(){
+    // console.log('clearOwnerSearch is running');
+    this.store.commit('setBlockSearchTotal', null);
+    this.store.commit('setBlockSearchStatus', null);
+    this.store.commit('setBlockSearchData', null);
+    this.store.commit('setBlockSearchInput', null);
+  }
+  
   clearOwnerSearch(){
     // console.log('clearOwnerSearch is running');
     this.store.commit('setOwnerSearchTotal', null);

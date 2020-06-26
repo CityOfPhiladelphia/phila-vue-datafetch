@@ -15,9 +15,10 @@ class BlockSearchClient extends BaseClient {
     const params = blockSearchConfig.params;
 
     // update state
-    this.store.commit('etOwnerSearchStatus', 'waiting');
+    this.store.commit('setBlockSearchStatus', 'waiting');
+    this.store.commit('setOwnerSearchStatus', 'waiting');
     // console.log('block SEARCH CLIENT setting last search method to block search');
-    this.store.commit('setLastSearchMethod', 'owner search');
+    this.store.commit('setLastSearchMethod', 'block search');
 
     const success = this.success.bind(this);
     const error = this.error.bind(this);
@@ -42,9 +43,13 @@ class BlockSearchClient extends BaseClient {
     }
 
     let features = data.features;
-    features = this.assignFeatureIds(features, 'owner');
+    features = this.assignFeatureIds(features, 'block');
 
  
+    store.commit('setBlockSearchTotal', data.total_size);
+    store.commit('setBlockSearchData', features);
+    store.commit('setBlockSearchStatus', 'success');
+
     store.commit('setOwnerSearchTotal', data.total_size);
     store.commit('setOwnerSearchData', features);
     // store.commit('setOwnerSearchData', data.features);
@@ -58,6 +63,8 @@ class BlockSearchClient extends BaseClient {
     // console.log('block search error', error);
 
     const store = this.store;
+    store.commit('setBlockSearchStatus', 'error');
+    store.commit('setBlockSearchData', null);
     store.commit('setOwnerSearchStatus', 'error');
     store.commit('setOwnerSearchData', null);
   }

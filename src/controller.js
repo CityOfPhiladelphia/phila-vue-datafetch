@@ -355,6 +355,9 @@ class Controller {
     if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'owner search') {
       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
     }
+    // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
+    //   this.router.setRouteByGeocode(this.store.state.blockSearch.input);
+    // }
     // console.log('end of handleSearchFormSubmit');
   }
 
