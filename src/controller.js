@@ -255,7 +255,7 @@ class Controller {
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       console.log("block search is true");
       aisResponse = await this.clients.blockSearch.fetch(value);
-      this.router.setRouteByOwnerSearch();
+      this.router.setRouteByBlockSearch();
     } else if (!this.store.state.bufferMode) {
       aisResponse = await this.clients.ownerSearch.fetch(value);
       this.router.setRouteByOwnerSearch();

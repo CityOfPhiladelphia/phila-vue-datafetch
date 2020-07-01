@@ -380,6 +380,15 @@ class Router {
     }
   }
 
+  setRouteByBlockSearch() {
+    console.log('router.js setRouteByBlockSearch is running');
+    // const owner = this.store.state.geocode.input;
+
+    // this.vueRouter.push({ query: { owner }});
+    // // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
+
+  }
+
   setRouteByOwnerSearch() {
     // console.log('router.js setRouteByOwnerSearch is running');
     const owner = this.store.state.geocode.input;
