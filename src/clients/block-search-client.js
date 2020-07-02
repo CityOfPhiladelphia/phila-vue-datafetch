@@ -94,29 +94,25 @@ class BlockSearchClient extends BaseClient {
       // this.store.commit('setCondoUnitsStatus', 'success');
       // return feature;
       // }
+      
+      features = this.assignFeatureIds(features, 'block');
+  
+   
+      store.commit('setBlockSearchTotal', data.total_size);
+      store.commit('setBlockSearchData', features);
+      store.commit('setBlockSearchStatus', 'success');
+      return features;
     }
     
     let features = data.features;
 
     let pages = Math.ceil(data.total_size / 100);
     console.log("pages: ", pages);
-    features =  (pages > 1 ? features = getPages.bind(this) : features);
-
     console.log("block features: ", features);
-    features = this.assignFeatureIds(features, 'block');
-
- 
-    store.commit('setBlockSearchTotal', data.total_size);
-    store.commit('setBlockSearchData', features);
-    store.commit('setBlockSearchStatus', 'success');
-
-    store.commit('setOwnerSearchTotal', data.total_size);
-    store.commit('setOwnerSearchData', features);
-    // store.commit('setOwnerSearchData', data.features);
-    // store.commit('setOwnerSearchRelated', relatedFeatures);
-    store.commit('setOwnerSearchStatus', 'success');
-
-    return features;
+    console.log("pages: ", pages, features);
+    getPages = getPages.bind(this); 
+    console.log("line before loop");
+    return features = getPages(features);
   }
 
   error(error) {
@@ -125,8 +121,6 @@ class BlockSearchClient extends BaseClient {
     const store = this.store;
     store.commit('setBlockSearchStatus', 'error');
     store.commit('setBlockSearchData', null);
-    store.commit('setOwnerSearchStatus', 'error');
-    store.commit('setOwnerSearchData', null);
   }
 }
 
