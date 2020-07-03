@@ -10,9 +10,9 @@ class BlockSearchClient extends BaseClient {
     const store = this.store;
 
     const blockSearchConfig = this.config.blockSearch;
-    // console.log('block search-client, blockSearchConfig:', blockSearchConfig);
     const url = blockSearchConfig.url(input);
     const params = blockSearchConfig.params;
+    console.log('block search-client, blockSearchConfig:', blockSearchConfig, params);
 
     // update state
     this.store.commit('setBlockSearchStatus', 'waiting');
@@ -29,7 +29,7 @@ class BlockSearchClient extends BaseClient {
   }
 
   success(response) {
-    // console.log('block search success', response.config.url);
+    console.log('block search success', this, response);
 
     const store = this.store;
     const data = response.data;
@@ -45,12 +45,12 @@ class BlockSearchClient extends BaseClient {
 
     async function getPages(features) {
       console.log('getPages is running still going 2, pages:', this, features);
-      console.log(blockSearchConfig);
 
       let pages = Math.ceil(data.total_size / 100);
 
       if (pages > 1) {
         for (let counter = 2; counter<=pages; counter++) {
+          console.log(counter);
           params.page = counter;
           console.log('in loop, counter:', counter, this, params.page);
           let pageResponse = await axios.get(url, { params });
@@ -94,7 +94,8 @@ class BlockSearchClient extends BaseClient {
       // this.store.commit('setCondoUnitsStatus', 'success');
       // return feature;
       // }
-      
+      console.log("finished loop");
+      params.page = 1;
       features = this.assignFeatureIds(features, 'block');
   
    
@@ -107,8 +108,6 @@ class BlockSearchClient extends BaseClient {
     let features = data.features;
 
     let pages = Math.ceil(data.total_size / 100);
-    console.log("pages: ", pages);
-    console.log("block features: ", features);
     console.log("pages: ", pages, features);
     getPages = getPages.bind(this); 
     console.log("line before loop");
