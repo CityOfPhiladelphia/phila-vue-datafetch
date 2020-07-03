@@ -230,6 +230,7 @@ class DataManager {
     let geocodeObj;
     let ownerSearchObj;
     let shapeSearchObj;
+    let blockSearchObj;
     if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true && this.store.state.condoUnits.units.length) {
     // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
 
@@ -247,6 +248,7 @@ class DataManager {
       // console.log('fetchData, in else, setting geocodeObj');
       geocodeObj = this.store.state.geocode.data;
       ownerSearchObj = this.store.state.ownerSearch.data;
+      blockSearchObj = this.store.state.blockSearch.data;
       if (this.store.state.shapeSearch.data) {
         shapeSearchObj = this.store.state.shapeSearch.data.rows;
       }
@@ -279,7 +281,7 @@ class DataManager {
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
     // even if the property is not in OPA and AIS
-    if (!geocodeObj && !ownerSearchObj && !shapeSearchObj) {
+    if (!geocodeObj && !ownerSearchObj && !blockSearchObj  && !shapeSearchObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
         // console.log('dataSourceKey:', dataSourceKey);
         if (dataSourceKey[1].dependent) {
@@ -743,8 +745,10 @@ class DataManager {
       } else if(blockSearchCheck === true){
         console.log("block search is true");
         const input = this.store.state.geocode.input;
+        this.clearOwnerSearch();
         return this.clients.blockSearch.fetch(input);
       } else {
+        this.clearBlockSearch();
         const input = this.store.state.geocode.input;
         const didOwnerSearch = this.didOwnerSearch.bind(this);
         return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);

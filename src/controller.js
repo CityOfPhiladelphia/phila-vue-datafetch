@@ -231,7 +231,7 @@ class Controller {
       this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setBufferShape', null);
       // console.log('handleSearchFormSubmit about to call setRouteByGeocode at the start');
-      this.router.setRouteByGeocode();
+      // this.router.setRouteByGeocode();
       return;
     }
 
@@ -253,10 +253,12 @@ class Controller {
       // console.log('handleSearchFormSubmit about to call setRouteByGeocode after geocode');
       this.router.setRouteByGeocode();
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
+      this.dataManager.clearOwnerSearch();
       console.log("block search is true");
       aisResponse = await this.clients.blockSearch.fetch(value);
       this.router.setRouteByBlockSearch();
     } else if (!this.store.state.bufferMode) {
+      this.dataManager.clearBlockSearch();
       aisResponse = await this.clients.ownerSearch.fetch(value);
       this.router.setRouteByOwnerSearch();
     }
@@ -306,6 +308,9 @@ class Controller {
         // console.log('getting ids, middle if')
         ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id );
         ids = ids.filter( id => id != "" );
+      } else if (this.store.state.blockSearch.data) {
+        ids = this.store.state.blockSearch.data.map(item => item.properties.pwd_parcel_id );
+        ids = ids.filter( id => id != "" );
       } else {
         // console.log('getting ids, else');
         ids = aisResponse.map(item => item.properties.pwd_parcel_id );
@@ -352,7 +357,9 @@ class Controller {
     }
 
     // this.router.setRouteByGeocode()
-    if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'owner search') {
+    if (this.config.app && this.config.app.title === 'Property Data Explorer' 
+        && this.store.state.lastSearchMethod !== 'owner search'
+        && this.store.state.lastSearchMethod !== 'block search') {
       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
     }
     // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
@@ -535,6 +542,7 @@ class Controller {
     if (features.length === 0) {
       this.dataManager.resetData();
       this.resetGeocode();
+      this.dataManager.clearblockSearch();
       this.dataManager.clearOwnerSearch();
       this.store.commit('setShapeSearchData', null);
       this.store.commit('setParcelData', {});
@@ -547,6 +555,7 @@ class Controller {
       this.store.commit('setShapeSearchStatus', 'too many');
       this.dataManager.resetData();
       this.resetGeocode();
+      this.dataManager.clearBlockSearch();
       this.dataManager.clearOwnerSearch();
       this.store.commit('setShapeSearchData', null);
       this.store.commit('setParcelData', {});
@@ -555,6 +564,7 @@ class Controller {
       return;
     }
 
+    this.dataManager.clearBlockSearch();
     this.dataManager.clearOwnerSearch();
     this.dataManager.resetData();
     // at this point there is definitely a feature or features - put it in state
