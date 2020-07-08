@@ -4,10 +4,75 @@ import BaseClient from './base-client';
 // the high-level purpose of this is: take a person, search AIS for them, and put
 // the result in state.
 class BlockSearchClient extends BaseClient {
+
+
+
+  evaluateDataForUnits(data, features) {
+    console.log('base-client evaluateDataForUnits data:', data);
+
+    var units = [], filteredData, dataList = [];
+    let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
+    console.log("grouped data:", groupedData);
+
+    for (let item in groupedData){
+      groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) : dataList.push(groupedData[item][0]);
+    }
+
+    console.log("evaluating data for units, units: ", units, units.length);
+
+    // let bldgRecord = JSON.parse(JSON.stringify(data.rows[0]));
+
+    if(units.length > 0) {
+      units = _.groupBy(units, a => a.properties.pwd_parcel_id);
+      features = features.filter(a => !Object.keys(units).includes(a.properties.pwd_parcel_id));
+    }
+
+    console.log("Units List: ", units, "Data: ", data, "features: ", features );
+
+    let bldgRecord = JSON.parse(JSON.stringify(data[0]));
+    console.log(bldgRecord);
+
+    for (let unit in units) {
+      console.log(unit);
+      for (let i in bldgRecord.properties) {
+        bldgRecord.properties[i] = "";
+      }
+      console.log(bldgRecord);
+      let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
+      bldgRecordPush.properties.opa_owners = "Condominium (" + units[unit].length + " Units)";
+      console.log(units[unit]);
+      // if(this.store.state.parcels.pwd !== null) {
+      //   console.log("pwd parcels: ", this.store.state.parcels.pwd);
+      // }
+      let record = units[unit][0].properties;
+      bldgRecordPush.properties.opa_address = 
+        ( record.address_high === null ? record.address_low :
+          record.address_low === null ? record.address_high :
+            record.address_high + "-" + record.address_low ) +
+        " " + record.street_full
+      ;
+      console.log(bldgRecordPush);
+      bldgRecordPush.condo = true;
+      bldgRecordPush.properties.pwd_parcel_id = record.pwd_parcel_id;
+      bldgRecordPush._featureId = record.pwd_parcel_id;
+      features.push(bldgRecordPush);
+      this.store.commit('setUnits', units);
+      this.store.commit('setCondoUnitsStatus', 'success');
+    }
+
+    console.log("Units List: ", units, "Data: ", data, "features: ", features );
+
+    return features;
+  }
+
+
+
+
   fetch(input) {
     // console.log('block search client fetch', input);
 
     const store = this.store;
+    console.log(store.state.parcels.pwd);
 
     const blockSearchConfig = this.config.blockSearch;
     const url = blockSearchConfig.url(input);
@@ -59,47 +124,26 @@ class BlockSearchClient extends BaseClient {
           console.log('response:', pageResponse, 'features:', features);
         }
       }
+      
 
       console.log(features);
 
-      // let units = features.filter(a => a.properties.unit_num != "");
-      // units = this.evaluateDataForUnits(units);
-
-      // var feature = JSON.parse(JSON.stringify(units[0]));
-      // for (let i in feature.properties) {
-      //   feature.properties[i] = "";
-      // }
-
-      // if(this.store.state.parcels.pwd === null) {
-      //   // this.setFeatureProperties(feature, totalUnits);
-
-      //   console.log('condo-search-client, getPages else is still running 1');
-      //   store.commit('setGeocodeData', feature);
-      //   store.commit('setGeocodeStatus', 'success');
-      //   // console.log('getPages else is still running 2');
-      //   if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
-      //     this.store.commit('setLastSearchMethod', 'geocode');
-      //   }
-      //   // console.log('feature:', feature);
-      // } else {
-      //   this.setFeatureProperties(feature, totalUnits);
-
-      //   console.log('condo-search-client getPages else is still running 1');
-      //   store.commit('setGeocodeData', feature);
-      //   store.commit('setGeocodeStatus', 'success');
-      // console.log('getPages else is still running 2');
-      // console.log('feature:', feature);
-      // }
 
       // this.store.commit('setCondoUnitsStatus', 'success');
       // return feature;
       // }
       console.log("finished loop");
       params.page = 1;
-      features = this.assignFeatureIds(features, 'block');
-  
-   
-      store.commit('setBlockSearchTotal', data.total_size);
+
+
+      let units = features.filter(a => a.properties.unit_num != "");
+      features = this.evaluateDataForUnits(units, features);
+
+
+
+      features = this.assignFeatureIds(features);
+
+      // store.commit('setBlockSearchTotal', data.total_size);
       store.commit('setBlockSearchData', features);
       store.commit('setBlockSearchStatus', 'success');
       return features;
