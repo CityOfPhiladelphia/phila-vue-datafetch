@@ -75,7 +75,7 @@ class DataManager {
     var state = this.store.state;
     let input = [];
     if (state.lastSearchMethod === 'owner search' ||state.lastSearchMethod === 'block search') {
-      input = state.ownerSearch.data.filter(object => {
+      input = state.blockSearch.data.filter(object => {
         return object._featureId === state.activeFeature.featureId;
       });
     } else if (state.lastSearchMethod === 'shape search' || state.lastSearchMethod === 'buffer search') {
