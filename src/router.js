@@ -384,7 +384,7 @@ class Router {
     console.log('router.js setRouteByBlockSearch is running');
     // const owner = this.store.state.geocode.input;
 
-    // this.vueRouter.push({ query: { owner }});
+    this.vueRouter.push({ query: { block }});
     // // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
 
   }
