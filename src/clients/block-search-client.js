@@ -29,40 +29,35 @@ class BlockSearchClient extends BaseClient {
 
     console.log("Units List: ", units, "Data: ", data, "features: ", features );
 
-    if (data.length > 0 ) {
-      let bldgRecord = JSON.parse(JSON.stringify(data[0]));
-      console.log(bldgRecord);
-    }
+    let bldgRecord = data.length > 0 ? JSON.parse(JSON.stringify(data[0])) : [];
+    console.log(bldgRecord);
 
-    if( units.length > 1) {
-      for (let unit in units) {
-        console.log(unit);
-        for (let i in bldgRecord.properties) {
-          bldgRecord.properties[i] = "";
-        }
-        // console.log(bldgRecord);
-        let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
-        bldgRecordPush.properties.opa_owners = "Condominium (" + units[unit].length + " Units)";
-        // console.log(units[unit]);
-        // if(this.store.state.parcels.pwd !== null) {
-        //   console.log("pwd parcels: ", this.store.state.parcels.pwd);
-        // }
-        let record = units[unit][0].properties;
-        bldgRecordPush.properties.opa_address = 
-          ( record.address_high === null ? record.address_low :
-            record.address_low === null ? record.address_high :
-              record.address_high + "-" + record.address_low ) +
-          " " + record.street_full
-        ;
-        // console.log(bldgRecordPush);
-        bldgRecordPush.condo = true;
-        bldgRecordPush.properties.pwd_parcel_id = record.pwd_parcel_id;
-        bldgRecordPush._featureId = record.pwd_parcel_id;
-        features.push(bldgRecordPush);
-        this.store.commit('setUnits', units);
-        this.store.commit('setCondoUnitsStatus', 'success');
+    for (let unit in units) {
+      console.log(unit);
+      for (let i in bldgRecord.properties) {
+        bldgRecord.properties[i] = "";
       }
-
+      console.log(bldgRecord);
+      let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
+      bldgRecordPush.properties.opa_owners = "Condominium (" + units[unit].length + " Units)";
+      // console.log(units[unit]);
+      // if(this.store.state.parcels.pwd !== null) {
+      //   console.log("pwd parcels: ", this.store.state.parcels.pwd);
+      // }
+      let record = units[unit][0].properties;
+      bldgRecordPush.properties.opa_address = 
+        ( record.address_high === null ? record.address_low :
+          record.address_low === null ? record.address_high :
+            record.address_high + "-" + record.address_low ) +
+        " " + record.street_full
+      ;
+      console.log(bldgRecordPush);
+      bldgRecordPush.condo = true;
+      bldgRecordPush.properties.pwd_parcel_id = record.pwd_parcel_id;
+      bldgRecordPush._featureId = record.pwd_parcel_id;
+      features.push(bldgRecordPush);
+      this.store.commit('setUnits', units);
+      this.store.commit('setCondoUnitsStatus', 'success');
     }
 
     console.log("Units List: ", units, "Data: ", data, "features: ", features );
