@@ -112,6 +112,8 @@ class Controller {
       this.store.commit('setGeocodeInput', input);
     } else if (searchCategory === 'owner') {
       this.store.commit('setOwnerSearchInput', input);
+    } else if (searchCategory === 'block') {
+      this.store.commit('setBlockSearchInput', input);
     } else if (searchCategory === 'keyword') {
       // console.log('initializeStatuses with searchCategory keyword');
       this.router.routeToKeyword(input);

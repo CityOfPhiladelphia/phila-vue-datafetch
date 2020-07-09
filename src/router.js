@@ -107,7 +107,7 @@ class Router {
 
     let encodedFirstRouteParameter;
     if (pathComps.length) {
-      encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '');
+      encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '').replace('?block=', '');
     }
     console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
 
