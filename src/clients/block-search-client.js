@@ -29,35 +29,40 @@ class BlockSearchClient extends BaseClient {
 
     console.log("Units List: ", units, "Data: ", data, "features: ", features );
 
-    let bldgRecord = JSON.parse(JSON.stringify(data[0]));
-    console.log(bldgRecord);
-
-    for (let unit in units) {
-      console.log(unit);
-      for (let i in bldgRecord.properties) {
-        bldgRecord.properties[i] = "";
-      }
+    if (data.length > 0 ) {
+      let bldgRecord = JSON.parse(JSON.stringify(data[0]));
       console.log(bldgRecord);
-      let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
-      bldgRecordPush.properties.opa_owners = "Condominium (" + units[unit].length + " Units)";
-      console.log(units[unit]);
-      // if(this.store.state.parcels.pwd !== null) {
-      //   console.log("pwd parcels: ", this.store.state.parcels.pwd);
-      // }
-      let record = units[unit][0].properties;
-      bldgRecordPush.properties.opa_address = 
-        ( record.address_high === null ? record.address_low :
-          record.address_low === null ? record.address_high :
-            record.address_high + "-" + record.address_low ) +
-        " " + record.street_full
-      ;
-      console.log(bldgRecordPush);
-      bldgRecordPush.condo = true;
-      bldgRecordPush.properties.pwd_parcel_id = record.pwd_parcel_id;
-      bldgRecordPush._featureId = record.pwd_parcel_id;
-      features.push(bldgRecordPush);
-      this.store.commit('setUnits', units);
-      this.store.commit('setCondoUnitsStatus', 'success');
+    }
+
+    if( units.length > 1) {
+      for (let unit in units) {
+        console.log(unit);
+        for (let i in bldgRecord.properties) {
+          bldgRecord.properties[i] = "";
+        }
+        // console.log(bldgRecord);
+        let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
+        bldgRecordPush.properties.opa_owners = "Condominium (" + units[unit].length + " Units)";
+        // console.log(units[unit]);
+        // if(this.store.state.parcels.pwd !== null) {
+        //   console.log("pwd parcels: ", this.store.state.parcels.pwd);
+        // }
+        let record = units[unit][0].properties;
+        bldgRecordPush.properties.opa_address = 
+          ( record.address_high === null ? record.address_low :
+            record.address_low === null ? record.address_high :
+              record.address_high + "-" + record.address_low ) +
+          " " + record.street_full
+        ;
+        // console.log(bldgRecordPush);
+        bldgRecordPush.condo = true;
+        bldgRecordPush.properties.pwd_parcel_id = record.pwd_parcel_id;
+        bldgRecordPush._featureId = record.pwd_parcel_id;
+        features.push(bldgRecordPush);
+        this.store.commit('setUnits', units);
+        this.store.commit('setCondoUnitsStatus', 'success');
+      }
+
     }
 
     console.log("Units List: ", units, "Data: ", data, "features: ", features );
@@ -69,7 +74,7 @@ class BlockSearchClient extends BaseClient {
 
 
   fetch(input) {
-    // console.log('block search client fetch', input);
+    console.log('block search client fetch', input);
 
     const store = this.store;
     console.log(store.state.parcels.pwd);
@@ -109,17 +114,17 @@ class BlockSearchClient extends BaseClient {
     }
 
     async function getPages(features) {
-      console.log('getPages is running still going 2, pages:', this, features);
+      // console.log('getPages is running still going 2, pages:', this, features);
 
       let pages = Math.ceil(data.total_size / 100);
 
       if (pages > 1) {
         for (let counter = 2; counter<=pages; counter++) {
-          console.log(counter);
+          // console.log(counter);
           params.page = counter;
-          console.log('in loop, counter:', counter, this, params.page);
+          // console.log('in loop, counter:', counter, this, params.page);
           let pageResponse = await axios.get(url, { params });
-          console.log("page response: ", pageResponse);
+          // console.log("page response: ", pageResponse);
           features = await features.concat(pageResponse.data.features);
           console.log('response:', pageResponse, 'features:', features);
         }
@@ -127,18 +132,19 @@ class BlockSearchClient extends BaseClient {
       
 
       console.log(features);
-
-
+      
+      
       // this.store.commit('setCondoUnitsStatus', 'success');
       // return feature;
       // }
       console.log("finished loop");
       params.page = 1;
-
-
+      
+      
       let units = features.filter(a => a.properties.unit_num != "");
       features = this.evaluateDataForUnits(units, features);
-
+      
+      console.log(features);
 
 
       features = this.assignFeatureIds(features);
@@ -154,7 +160,7 @@ class BlockSearchClient extends BaseClient {
     let pages = Math.ceil(data.total_size / 100);
     console.log("pages: ", pages, features);
     getPages = getPages.bind(this); 
-    console.log("line before loop");
+    // console.log("line before loop");
     return features = getPages(features);
   }
 
