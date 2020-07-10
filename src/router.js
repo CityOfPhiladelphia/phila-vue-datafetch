@@ -382,7 +382,7 @@ class Router {
 
   setRouteByBlockSearch() {
     console.log('router.js setRouteByBlockSearch is running');
-    // const owner = this.store.state.geocode.input;
+    const block = this.store.state.geocode.input;
 
     this.vueRouter.push({ query: { block }});
     // // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
