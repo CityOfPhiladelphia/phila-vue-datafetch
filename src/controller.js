@@ -363,6 +363,9 @@ class Controller {
         && this.store.state.lastSearchMethod !== 'owner search'
         && this.store.state.lastSearchMethod !== 'block search') {
       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
+    } else if(this.store.state.lastSearchMethod === 'block search') {
+      // console.log(this.store.state.parcels.pwd[0].geometry.coordinates[0][0]);
+      this.store.commit('setMapCenter', this.store.state.parcels.pwd[0].geometry.coordinates[0][0]);
     }
     // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
     //   this.router.setRouteByGeocode(this.store.state.blockSearch.input);
