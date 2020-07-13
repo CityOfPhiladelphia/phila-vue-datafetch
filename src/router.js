@@ -274,7 +274,7 @@ class Router {
   // }
 
   routeToMaintenance() {
-    console.log('routeToMaintenance is running');
+    // console.log('routeToMaintenance is running');
   }
 
   routeToModal(selectedModal) {
@@ -381,7 +381,7 @@ class Router {
   }
 
   setRouteByBlockSearch() {
-    console.log('router.js setRouteByBlockSearch is running');
+    // console.log('router.js setRouteByBlockSearch is running');
     const block = this.store.state.geocode.input;
 
     this.vueRouter.push({ query: { block }});

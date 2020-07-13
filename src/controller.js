@@ -256,7 +256,7 @@ class Controller {
       this.router.setRouteByGeocode();
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
-      console.log("block search is true");
+      // console.log("block search is true");
       aisResponse = await this.clients.blockSearch.fetch(value);
       this.router.setRouteByBlockSearch();
     } else if (!this.store.state.bufferMode) {

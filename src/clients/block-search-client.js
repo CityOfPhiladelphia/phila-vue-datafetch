@@ -8,17 +8,17 @@ class BlockSearchClient extends BaseClient {
 
 
   evaluateDataForUnits(data, features) {
-    console.log('base-client evaluateDataForUnits data:', data);
+    // console.log('base-client evaluateDataForUnits data:', data);
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
-    console.log("grouped data:", groupedData);
+    // console.log("grouped data:", groupedData);
 
     for (let item in groupedData){
       groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) : dataList.push(groupedData[item][0]);
     }
 
-    console.log("evaluating data for units, units: ", units, units.length);
+    // console.log("evaluating data for units, units: ", units, units.length);
 
     // let bldgRecord = JSON.parse(JSON.stringify(data.rows[0]));
 
@@ -27,17 +27,17 @@ class BlockSearchClient extends BaseClient {
       features = features.filter(a => !Object.keys(units).includes(a.properties.pwd_parcel_id));
     }
 
-    console.log("Units List: ", units, "Data: ", data, "features: ", features );
+    // console.log("Units List: ", units, "Data: ", data, "features: ", features );
 
     let bldgRecord = data.length > 0 ? JSON.parse(JSON.stringify(data[0])) : [];
-    console.log(bldgRecord);
+    // console.log(bldgRecord);
 
     for (let unit in units) {
-      console.log(unit);
+      // console.log(unit);
       for (let i in bldgRecord.properties) {
         bldgRecord.properties[i] = "";
       }
-      console.log(bldgRecord);
+      // console.log(bldgRecord);
       let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
       bldgRecordPush.properties.opa_owners = "Condominium (" + units[unit].length + " Units)";
       // console.log(units[unit]);
@@ -51,7 +51,7 @@ class BlockSearchClient extends BaseClient {
             record.address_high + "-" + record.address_low ) +
         " " + record.street_full
       ;
-      console.log(bldgRecordPush);
+      // console.log(bldgRecordPush);
       bldgRecordPush.condo = true;
       bldgRecordPush.properties.pwd_parcel_id = record.pwd_parcel_id;
       bldgRecordPush._featureId = record.pwd_parcel_id;
@@ -60,7 +60,7 @@ class BlockSearchClient extends BaseClient {
       this.store.commit('setCondoUnitsStatus', 'success');
     }
 
-    console.log("Units List: ", units, "Data: ", data, "features: ", features );
+    // console.log("Units List: ", units, "Data: ", data, "features: ", features );
 
     return features;
   }
@@ -69,15 +69,15 @@ class BlockSearchClient extends BaseClient {
 
 
   fetch(input) {
-    console.log('block search client fetch', input);
+    // console.log('block search client fetch', input);
 
     const store = this.store;
-    console.log(store.state.parcels.pwd);
+    // console.log(store.state.parcels.pwd);
 
     const blockSearchConfig = this.config.blockSearch;
     const url = blockSearchConfig.url(input);
     const params = blockSearchConfig.params;
-    console.log('block search-client, blockSearchConfig:', blockSearchConfig, params);
+    // console.log('block search-client, blockSearchConfig:', blockSearchConfig, params);
 
     // update state
     this.store.commit('setBlockSearchStatus', 'waiting');
@@ -94,7 +94,7 @@ class BlockSearchClient extends BaseClient {
   }
 
   success(response) {
-    console.log('block search success', this, response);
+    // console.log('block search success', this, response);
 
     const store = this.store;
     const data = response.data;
@@ -121,25 +121,25 @@ class BlockSearchClient extends BaseClient {
           let pageResponse = await axios.get(url, { params });
           // console.log("page response: ", pageResponse);
           features = await features.concat(pageResponse.data.features);
-          console.log('response:', pageResponse, 'features:', features);
+          // console.log('response:', pageResponse, 'features:', features);
         }
       }
       
 
-      console.log(features);
+      // console.log(features);
       
       
       // this.store.commit('setCondoUnitsStatus', 'success');
       // return feature;
       // }
-      console.log("finished loop");
+      // console.log("finished loop");
       params.page = 1;
       
       
       let units = features.filter(a => a.properties.unit_num != "");
       features = this.evaluateDataForUnits(units, features);
       
-      console.log(features);
+      // console.log(features);
 
 
       features = this.assignFeatureIds(features);
@@ -153,7 +153,7 @@ class BlockSearchClient extends BaseClient {
     let features = data.features;
 
     let pages = Math.ceil(data.total_size / 100);
-    console.log("pages: ", pages, features);
+    // console.log("pages: ", pages, features);
     getPages = getPages.bind(this); 
     // console.log("line before loop");
     return features = getPages(features);
