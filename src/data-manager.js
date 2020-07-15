@@ -11,15 +11,15 @@ import axios from 'axios';
 import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
 
-import * as L from 'leaflet';
-import { query as Query } from 'esri-leaflet';
+// import * as L from 'leaflet';
+// import { query as Query } from 'esri-leaflet';
 import utils from './utils.js';
 import {
   GeocodeClient,
   ActiveSearchClient,
   OwnerSearchClient,
   HttpClient,
-  EsriClient,
+  // EsriClient,
   CondoSearchClient,
   AirtableClient,
 } from './clients';
@@ -41,7 +41,7 @@ class DataManager {
     this.clients.activeSearch = new ActiveSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
-    this.clients.esri = new EsriClient(clientOpts);
+    // this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.airtable = new AirtableClient(clientOpts);
   }
@@ -454,7 +454,7 @@ class DataManager {
             dataSourceKey,
             targetIdFn);
           break;
-          
+
         default:
           throw `Unknown data source type: ${type}`;
         }  // end of switch

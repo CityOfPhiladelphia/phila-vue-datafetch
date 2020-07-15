@@ -9,17 +9,17 @@ import Router from './router';
 import DataManager from './data-manager';
 import utils from './utils.js';
 
-import * as L from 'leaflet';
-import { query as Query } from 'esri-leaflet';
+// import * as L from 'leaflet';
+// import { query as Query } from 'esri-leaflet';
 
 import {
   GeocodeClient,
   OwnerSearchClient,
   HttpClient,
-  EsriClient,
+  // EsriClient,
   CondoSearchClient,
   ShapeSearchClient,
-  BufferSearchClient,
+  // BufferSearchClient,
 } from './clients';
 
 // console.log('controller.js is being read')
@@ -51,10 +51,10 @@ class Controller {
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
-    this.clients.esri = new EsriClient(clientOpts);
+    // this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
-    this.clients.bufferSearch = new BufferSearchClient(clientOpts);
+    // this.clients.bufferSearch = new BufferSearchClient(clientOpts);
   }
 
   /*
