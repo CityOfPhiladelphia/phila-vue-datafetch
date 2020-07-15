@@ -2,7 +2,7 @@ import proj4 from 'proj4';
 import axios from 'axios';
 import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
-import { query as Query } from 'esri-leaflet';
+// import { query as Query } from 'esri-leaflet';
 import { point, polygon, isNumber } from '@turf/helpers';
 import distance from '@turf/distance';
 import area from '@turf/area';

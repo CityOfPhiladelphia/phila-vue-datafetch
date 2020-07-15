@@ -10,8 +10,8 @@ import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
 
 import proj4 from 'proj4';
-import * as L from 'leaflet';
-import { query as Query } from 'esri-leaflet';
+// import * as L from 'leaflet';
+// import { query as Query } from 'esri-leaflet';
 import BaseClient from './base-client';
 
 class EsriClient extends BaseClient {
