@@ -561,6 +561,7 @@ class DataManager {
   resetGeocodeOnly() {
     // console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
     // reset geocode
+    this.store.commit('setClickCoords', null);
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
@@ -573,6 +574,7 @@ class DataManager {
   resetGeocode() {
     // console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
     // reset geocode
+    this.store.commit('setClickCoords', null);
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
