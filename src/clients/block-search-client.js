@@ -142,7 +142,7 @@ class BlockSearchClient extends BaseClient {
       // console.log(features);
 
 
-      features = this.assignFeatureIds(features);
+      features = this.assignFeatureIds(features, 'block');
 
       // store.commit('setBlockSearchTotal', data.total_size);
       store.commit('setBlockSearchData', features);
