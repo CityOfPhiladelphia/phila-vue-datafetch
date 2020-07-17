@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.3.0 - 7/17
+
+* adds block search client
+
 ### 1.2.2 - 6/14/2020
 
 * adds airtable as a possible source
