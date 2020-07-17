@@ -29,7 +29,7 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
-### 1.3.0 - 7/17
+### 1.3.0 - 7/17/2020
 
 * adds block search client
 
