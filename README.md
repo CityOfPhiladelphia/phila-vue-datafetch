@@ -22,7 +22,7 @@ Check out [the wiki](https://github.com/CityOfPhiladelphia/phila-vue-datafetch/w
 To publish a new version of @phila/vue-datafetch to NPM:
 
 1. Commit your changes to `master`.
-2. Bump the NPM version with `npm version major|minor|patch`.
+2. Bump the NPM version with `npm version major|minor|patch`. (Double check this is done from 'master')
 3. Push with tags: `git push && git push --tags`.
 4. Update wiki docs to reflect new version and/or dependency changes.
 
