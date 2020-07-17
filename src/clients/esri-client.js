@@ -10,6 +10,16 @@ import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
 
 import proj4 from 'proj4';
+
+let L;
+if (1 === 1) {
+  import('leaflet')
+    .then((module) => {
+    // Do something with the module.
+      L = module;
+    });
+}
+
 // import * as L from 'leaflet';
 // import { query as Query } from 'esri-leaflet';
 import BaseClient from './base-client';
@@ -61,7 +71,7 @@ class EsriClient extends BaseClient {
   }
 
   fetchNearby(feature, dataSource, dataSourceKey) {
-    // console.log('esri fetchNearby running, dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
+    console.log('esri fetchNearby running, dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
     const projection4326 = utils.projection4326;
     const projection2272 = utils.projection2272;
 
