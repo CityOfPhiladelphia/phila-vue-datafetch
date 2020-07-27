@@ -18,6 +18,7 @@ import {
   GeocodeClient,
   ActiveSearchClient,
   OwnerSearchClient,
+  BlockSearchClient,
   HttpClient,
   // EsriClient,
   CondoSearchClient,
@@ -40,6 +41,7 @@ class DataManager {
     this.clients.geocode = new GeocodeClient(clientOpts);
     this.clients.activeSearch = new ActiveSearchClient(clientOpts);
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
+    this.clients.blockSearch = new BlockSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
     // this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
@@ -72,8 +74,9 @@ class DataManager {
 
     var state = this.store.state;
     let input = [];
-    if (state.lastSearchMethod === 'owner search') {
-      input = state.ownerSearch.data.filter(object => {
+    if (state.lastSearchMethod === 'owner search' ||state.lastSearchMethod === 'block search') {
+      let searchType = state.lastSearchMethod === 'owner search'? 'ownerSearch' : 'blockSearch';
+      input = state[searchType].data.filter(object => {
         return object._featureId === state.activeFeature.featureId;
       });
     } else if (state.lastSearchMethod === 'shape search' || state.lastSearchMethod === 'buffer search') {
@@ -228,6 +231,7 @@ class DataManager {
     let geocodeObj;
     let ownerSearchObj;
     let shapeSearchObj;
+    let blockSearchObj;
     if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true && this.store.state.condoUnits.units.length) {
     // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
 
@@ -245,6 +249,7 @@ class DataManager {
       // console.log('fetchData, in else, setting geocodeObj');
       geocodeObj = this.store.state.geocode.data;
       ownerSearchObj = this.store.state.ownerSearch.data;
+      blockSearchObj = this.store.state.blockSearch.data;
       if (this.store.state.shapeSearch.data) {
         shapeSearchObj = this.store.state.shapeSearch.data.rows;
       }
@@ -277,7 +282,7 @@ class DataManager {
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
     // even if the property is not in OPA and AIS
-    if (!geocodeObj && !ownerSearchObj && !shapeSearchObj) {
+    if (!geocodeObj && !ownerSearchObj && !blockSearchObj  && !shapeSearchObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
         // console.log('dataSourceKey:', dataSourceKey);
         if (dataSourceKey[1].dependent) {
@@ -556,6 +561,7 @@ class DataManager {
   resetGeocodeOnly() {
     // console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
     // reset geocode
+    this.store.commit('setClickCoords', null);
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
@@ -568,6 +574,7 @@ class DataManager {
   resetGeocode() {
     // console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
     // reset geocode
+    this.store.commit('setClickCoords', null);
     this.store.commit('setGeocodeStatus', null);
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
@@ -718,6 +725,11 @@ class DataManager {
 
   didTryGeocode(feature) {
     // console.log('didTryGeocode is running, feature:', feature);
+    let blockTerms = [ "block", "block:", "blk" ];
+    let blockSearchCheck;
+    blockTerms.map( x=> this.store.state.geocode.input.trim().toLowerCase().startsWith(x)? blockSearchCheck = true : "");
+    console.log("input: ", input, "blockSearchCheck: ", blockSearchCheck);
+
     if (this.store.state.geocode.status === 'error') {
 
       // this was added to allow fetchData to run even without a geocode result
@@ -733,7 +745,13 @@ class DataManager {
         this.resetShape();
         this.fetchData(feature);
 
+      } else if(blockSearchCheck === true){
+        console.log("block search is true");
+        const input = this.store.state.geocode.input;
+        this.clearOwnerSearch();
+        return this.clients.blockSearch.fetch(input);
       } else {
+        this.clearBlockSearch();
         const input = this.store.state.geocode.input;
         const didOwnerSearch = this.didOwnerSearch.bind(this);
         return this.clients.ownerSearch.fetch(input).then(didOwnerSearch);
@@ -741,6 +759,7 @@ class DataManager {
     } else if (this.store.state.geocode.status === 'success') {
       // this.didGeocode(feature);
       this.clearOwnerSearch();
+      this.clearBlockSearch();
     }
   }
 
@@ -785,20 +804,24 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
-    // console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
-    const latLng = L.latLng(latlng.lat, latlng.lng);
-    const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
-    const parcelQuery = Query({ url });
-    parcelQuery.contains(latLng);
-    return new Promise(function(resolve, reject) {
-      parcelQuery.run((function(error, featureCollection, response) {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(response);
-        }
-      }));
-    });
+    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    if( latlng != null) {
+      const latLng = L.latLng(latlng.lat, latlng.lng);
+      const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
+      const parcelQuery = Query({ url });
+      parcelQuery.contains(latLng);
+      return new Promise(function(resolve, reject) {
+        parcelQuery.run((function(error, featureCollection, response) {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(response);
+          }
+        }));
+      });
+    } 
+    return;
+     
   }
 
   getParcelsByShape(latlng, parcelLayer) {
@@ -1027,6 +1050,14 @@ class DataManager {
     this.store.commit('setParcelData', payload);
   }
 
+  clearBlockSearch(){
+    // console.log('clearOwnerSearch is running');
+    this.store.commit('setBlockSearchTotal', null);
+    this.store.commit('setBlockSearchStatus', null);
+    this.store.commit('setBlockSearchData', null);
+    this.store.commit('setBlockSearchInput', null);
+  }
+  
   clearOwnerSearch(){
     // console.log('clearOwnerSearch is running');
     this.store.commit('setOwnerSearchTotal', null);

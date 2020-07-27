@@ -24,6 +24,12 @@ const initialState = {
   },
   activeSearch: {
   },
+  blockSearch: {
+    status: null,
+    data: null,
+    input: null,
+    total_size: null,
+  },
   shapeSearch: {
     status: null,
     data: null,
@@ -332,6 +338,25 @@ const pvdStore = {
         state.activeSearch[key].data = data;
       },
 
+      setBlockSearchStatus(state, payload) {
+        //console.log('setShapeSearchStatus is running, payload:', payload);
+        state.blockSearch.status = payload;
+      },
+      setBlockSearchInput(state, payload) {
+        state.blockSearch.input = payload;
+      },
+      setBlockSearchData(state, payload) {
+        state.blockSearch.data = payload;
+      },
+      setBlockSearchTotal(state, payload) {
+        state.blockSearch.total_size = payload;
+      },
+      setBlockSearchDataPush(state, payload) {
+        console.log('store.js, setBlockSearchDataPush is running, payload:', payload);
+        let objIndex = parseInt(payload.objIndex);
+        delete payload.objIndex;
+        state.blockSearch.data.splice(objIndex + 1, 0, ...payload);
+      },
       setShapeSearchStatus(state, payload) {
         //console.log('setShapeSearchStatus is running, payload:', payload);
         state.shapeSearch.status = payload;

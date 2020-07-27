@@ -107,7 +107,7 @@ class Router {
 
     let encodedFirstRouteParameter;
     if (pathComps.length) {
-      encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '');
+      encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '').replace('?block=', '');
     }
     // console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
 
@@ -274,7 +274,7 @@ class Router {
   // }
 
   routeToMaintenance() {
-    console.log('routeToMaintenance is running');
+    // console.log('routeToMaintenance is running');
   }
 
   routeToModal(selectedModal) {
@@ -378,6 +378,15 @@ class Router {
         this.history.pushState(null, null, '#');
       }
     }
+  }
+
+  setRouteByBlockSearch() {
+    // console.log('router.js setRouteByBlockSearch is running');
+    const block = this.store.state.geocode.input;
+
+    this.vueRouter.push({ query: { block }});
+    // // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
+
   }
 
   setRouteByOwnerSearch() {
