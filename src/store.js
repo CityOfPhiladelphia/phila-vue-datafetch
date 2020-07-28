@@ -183,7 +183,7 @@ const pvdStore = {
         // if a target id was passed in, set the status for that target
         const targetId = payload.targetId;
 
-        if (targetId) {
+        if (targetId && state.sources[key].targets[targetId]) {
           // console.log('store.js setSourceStatus, key:', key, 'status:', status, 'targetId:', targetId);
           state.sources[key].targets[targetId].status = status;
         } else if (Object.keys(state.sources).includes(payload.key)) {
