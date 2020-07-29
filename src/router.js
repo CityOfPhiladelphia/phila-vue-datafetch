@@ -335,7 +335,6 @@ class Router {
       //   address = geocodeData.properties.ADDRESS;
       // }
 
-      // console.log('setRouteByGeocode, address:', address);
 
       // TODO - datafetch should not know topics are a thing
       if (this.config.router.returnToDefaultTopicOnGeocode) {
@@ -343,6 +342,7 @@ class Router {
       }
 
       const topic = this.store.state.activeTopic;
+      // console.log('setRouteByGeocode is running, address:', address, 'topic:', topic);
       // const selectedServices = this.store.state.selectedServices;
 
       // REVIEW this is only pushing state when routing is turned on. but maybe we
