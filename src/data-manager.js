@@ -606,12 +606,14 @@ class DataManager {
 
     // reset other topic and map state
     // if (this.config.topics.length) {
-    if (this.config.topics != undefined) {
-      if (this.config.defaultTopic || this.config.defaultTopic === null) {
-        this.store.commit('setActiveTopic', this.config.defaultTopic);
-      } else {
-        // console.log('about to setActiveTopic, config:', this.config.topics[0].key);
-        this.store.commit('setActiveTopic', this.config.topics[0].key);
+    if (this.config.router.returnToDefaultTopicOnGeocode) {
+      if (this.config.topics != undefined) {
+        if (this.config.defaultTopic || this.config.defaultTopic === null) {
+          this.store.commit('setActiveTopic', this.config.defaultTopic);
+        } else {
+          // console.log('about to setActiveTopic, config:', this.config.topics[0].key);
+          this.store.commit('setActiveTopic', this.config.topics[0].key);
+        }
       }
     }
 
@@ -819,9 +821,9 @@ class DataManager {
           }
         }));
       });
-    } 
+    }
     return;
-     
+
   }
 
   getParcelsByShape(latlng, parcelLayer) {
@@ -1057,7 +1059,7 @@ class DataManager {
     this.store.commit('setBlockSearchData', null);
     this.store.commit('setBlockSearchInput', null);
   }
-  
+
   clearOwnerSearch(){
     // console.log('clearOwnerSearch is running');
     this.store.commit('setOwnerSearchTotal', null);

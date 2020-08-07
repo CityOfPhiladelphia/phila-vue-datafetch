@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.3.1 - 7/29/2020
+
+* small fixes for routing in atlas, datafetching in layerboard
+
 ### 1.3.0 - 7/17/2020
 
 * adds block search client
