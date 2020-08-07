@@ -12,13 +12,13 @@ import nearest from '@turf/nearest-point';
 import proj4 from 'proj4';
 
 let L;
-if (1 === 1) {
-  import('leaflet')
-    .then((module) => {
-    // Do something with the module.
-      L = module;
-    });
-}
+// if (1 === 1) {
+//   import('leaflet')
+//     .then((module) => {
+//     // Do something with the module.
+//       L = module;
+//     });
+// }
 
 // import * as L from 'leaflet';
 // import { query as Query } from 'esri-leaflet';
