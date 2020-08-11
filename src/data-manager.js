@@ -20,7 +20,7 @@ import {
   OwnerSearchClient,
   BlockSearchClient,
   HttpClient,
-  // EsriClient,
+  EsriClient,
   CondoSearchClient,
   AirtableClient,
 } from './clients';
@@ -43,7 +43,7 @@ class DataManager {
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.blockSearch = new BlockSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
-    // this.clients.esri = new EsriClient(clientOpts);
+    this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.airtable = new AirtableClient(clientOpts);
   }
@@ -766,11 +766,13 @@ class DataManager {
   }
 
   getParcelsById(id, parcelLayer) {
-    // console.log('data-manager.js getParcelsById', parcelLayer, 'id:', id);
-    const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
+    console.log('data-manager.js getParcelsById', parcelLayer, 'id:', id);
+    const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
-    const parcelQuery = Query({ url });
+    console.log('url:', url);
+    let parcelQuery;
+    // const parcelQuery = Query({ url });
     // console.log('geocodeField:', geocodeField);
 
     if (id.includes('|')) {
@@ -783,25 +785,47 @@ class DataManager {
           queryString = queryString + " or " + geocodeField + " = '";
         }
       }
+
       // console.log('there is a pipe, queryString:', queryString);
-      parcelQuery.where(queryString);
+      // parcelQuery.where(queryString);
+      parcelQuery = url + '?where=' + queryString;
+
     } else if (Array.isArray(id)) {
-      parcelQuery.where(geocodeField + " IN (" + id + ")");
+      // parcelQuery.where(geocodeField + " IN (" + id + ")");
+      parcelQuery = url + '?where=' + geocodeField + ' IN (' + id + ')';
     } else {
       // console.log('there is not a pipe');
-      parcelQuery.where(geocodeField + " = '" + id + "'");
+      // parcelQuery.where(geocodeField + " = '" + id + "'");
+      parcelQuery = url + '?where=' + geocodeField + "='" + id + "'";
     }
+    console.log('parcelQuery:', parcelQuery);
 
     // parcelQuery.where(geocodeField + " = '" + id + "'");
     return new Promise(function(resolve, reject) {
-      parcelQuery.run((function(error, featureCollection, response) {
-        // console.log('end of getParcelsById response:', response, 'featureCollection:', featureCollection);
+
+      let params = {
+        'outSR': 4326,
+        'f': 'geojson',
+        'outFields': '*',
+        'returnGeometry': true,
+      };
+
+      axios.get(parcelQuery, { params }).then(function(response, error) {
+        console.log('end of getParcelsById response:', response);//, 'featureCollection:', featureCollection);
         if (error) {
           reject(error);
         } else {
-          resolve(response);
+          resolve(response.data);
         }
-      }));
+      });
+      // parcelQuery.run((function(error, featureCollection, response) {
+      //   // console.log('end of getParcelsById response:', response, 'featureCollection:', featureCollection);
+      //   if (error) {
+      //     reject(error);
+      //   } else {
+      //     resolve(response);
+      //   }
+      // }));
     });
   }
 
@@ -977,7 +1001,7 @@ class DataManager {
 
   processParcels(error, featureCollection, parcelLayer, fetch) {
     const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
-    // console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
+    console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
     const mapregStuff = this.config.parcels[parcelLayer].mapregStuff;
 
     if (error || !featureCollection || featureCollection.features.length === 0) {
@@ -999,6 +1023,7 @@ class DataManager {
 
     // use turf to get area and perimeter of all parcels returned
     for (let featureSorted of featuresSorted) {
+      console.log('featureSorted:', featureSorted);
       const geometry = utils.calculateAreaAndPerimeter(featureSorted);
       featureSorted.properties.TURF_PERIMETER = geometry.perimeter;
       featureSorted.properties.TURF_AREA = geometry.area;

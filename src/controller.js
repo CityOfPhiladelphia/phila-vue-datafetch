@@ -322,9 +322,9 @@ class Controller {
       // console.log('about to get parcels, ids:', ids);
 
       if (ids && ids.length > 0) {
-        // console.log('it has ids');
+        console.log('it has ids');
         response = await this.dataManager.getParcelsById(ids, parcelLayer);
-        // console.log('in handleSearchFormSubmit, response:', response);
+        console.log('in handleSearchFormSubmit, response:', response);
         // if (response.type === 'FeatureCollection') {
         //   theParcels = response.features;
         // } else {
@@ -346,6 +346,7 @@ class Controller {
         }
       }
 
+      console.log('about to call processParcels, response:', response);
       this.dataManager.processParcels(false, response, parcelLayer);
       // this.dataManager.resetData();
       let parcelResponse = response;
@@ -359,11 +360,11 @@ class Controller {
     }
 
     // this.router.setRouteByGeocode()
-    if (this.config.app && this.config.app.title === 'Property Data Explorer' 
+    if (this.config.app && this.config.app.title === 'Property Data Explorer'
         && this.store.state.lastSearchMethod !== 'owner search'
         && this.store.state.lastSearchMethod !== 'block search') {
       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
-    } 
+    }
     // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
     //   this.router.setRouteByGeocode(this.store.state.blockSearch.input);
     // }
