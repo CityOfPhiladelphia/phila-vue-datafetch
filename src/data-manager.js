@@ -832,18 +832,40 @@ class DataManager {
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
     console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     if( latlng != null) {
-      const latLng = L.latLng(latlng.lat, latlng.lng);
+      // const latLng = L.latLng(latlng.lat, latlng.lng);
       const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
-      const parcelQuery = Query({ url });
-      parcelQuery.contains(latLng);
+      // const parcelQuery = Query({ url });
+      const parcelQuery = url + '/query';
+      // parcelQuery.contains(latLng);
       return new Promise(function(resolve, reject) {
-        parcelQuery.run((function(error, featureCollection, response) {
+
+        let params = {
+          'where': '1=1',
+          'outSR': 4326,
+          'f': 'geojson',
+          'outFields': '*',
+          'returnGeometry': true,
+          'geometry': { "x": latlng.lng, "y": latlng.lat, "spatialReference":{ "wkid":4326 }},
+          'geometryType': 'esriGeometryPoint',
+          'spatialRel': 'esriSpatialRelWithin',
+        };
+
+        axios.get(parcelQuery, { params }).then(function(response, error) {
+          console.log('end of getParcelsById response:', response);//, 'featureCollection:', featureCollection);
           if (error) {
             reject(error);
           } else {
-            resolve(response);
+            resolve(response.data);
           }
-        }));
+        });
+
+        // parcelQuery.run((function(error, featureCollection, response) {
+        //   if (error) {
+        //     reject(error);
+        //   } else {
+        //     resolve(response);
+        //   }
+        // }));
       });
     }
     return;
