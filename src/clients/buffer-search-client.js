@@ -2,11 +2,12 @@ import proj4 from 'proj4';
 import axios from 'axios';
 import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
-// import { query as Query } from 'esri-leaflet';
 import { point, polygon, isNumber } from '@turf/helpers';
 import distance from '@turf/distance';
 import area from '@turf/area';
 import utils from '../utils.js';
+
+// import { query as Query } from 'esri-leaflet';
 
 import BaseClient from './base-client';
 // require('lodash');
@@ -15,7 +16,7 @@ import BaseClient from './base-client';
 class BufferSearchClient extends BaseClient {
 
   fetchBufferShape(error = [], featureCollection = [], response = {}, parcelLayer, latlng) {
-    // console.log('fetchBufferShape is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
+    console.log('fetchBufferShape is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
 
     const projection4326 = utils.projection4326;
     const projection2272 = utils.projection2272;
@@ -74,7 +75,7 @@ class BufferSearchClient extends BaseClient {
   }
 
   bufferShapeSuccess(response) {
-    // console.log('bufferShapeSuccess, response:', response);
+    console.log('bufferShapeSuccess, response:', response);
 
     const store = this.store;
     const data = response.data;
@@ -97,52 +98,86 @@ class BufferSearchClient extends BaseClient {
     const latLngCoords = xyCoords.map(xyCoord => [ ...xyCoord ].reverse());
 
     // get nearby features using buffer
-    const buffer = L.polygon(latLngCoords);
+    // const buffer = L.polygon(latLngCoords);
     const map = store.state.map.map;
 
     // DEBUG
     store.commit('setBufferShape', latLngCoords);
-    return buffer;
+    return xyCoords;
   }
 
   bufferShapeError(error) {
     // console.log('bufferShapeError:', error);
   }
 
-  fetchBySpatialQuery(url, relationship, targetGeom, parameters = {}, calculateDistancePt, options = {}) {
-    // console.log('bufferSearch fetch esri spatial query, url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+  fetchBySpatialQuery(url, relationship, xyCoords, parameters = {}, calculateDistancePt, options = {}) {
+    console.log('bufferSearch fetch esri spatial query, url:', url, 'relationship:', relationship, 'xyCoords:', xyCoords, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
     const parcelLayer = [];
 
-    let query;
-    if (relationship === 'where') {
-      query = Query({ url })[relationship](parameters.targetField + "='" + parameters.sourceValue + "'");
-    } else {
-      query = Query({ url })[relationship](targetGeom);
-    }
+    // let query;
+    // if (relationship === 'where') {
+    //   query = Query({ url })[relationship](parameters.targetField + "='" + parameters.sourceValue + "'");
+    // } else {
+    //   query = Query({ url })[relationship](targetGeom);
+    // }
+    //
+    // console.log('query place 1:', query);
+    //
+    // // apply options by chaining esri leaflet option methods
+    // const optionsKeys = Object.keys(options) || [];
+    // query = optionsKeys.reduce((acc, optionsKey) => {
+    //   const optionsVal = options[optionsKey];
+    //   let optionsMethod;
+    //
+    //   try {
+    //     acc = acc[optionsKey](optionsVal);
+    //   } catch (e) {
+    //     throw new Error(`esri-leaflet query task does not support option:
+    //                      ${optionsKey}`);
+    //   }
+    //
+    //   return acc;
+    // }, query);
 
-    // apply options by chaining esri leaflet option methods
-    const optionsKeys = Object.keys(options) || [];
-    query = optionsKeys.reduce((acc, optionsKey) => {
-      const optionsVal = options[optionsKey];
-      let optionsMethod;
-
-      try {
-        acc = acc[optionsKey](optionsVal);
-      } catch (e) {
-        throw new Error(`esri-leaflet query task does not support option:
-                         ${optionsKey}`);
+    let xyCoords2 = [[ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]];
+    var i;
+    console.log('xyCoords:', xyCoords, 'xyCoords.length:', xyCoords.length);
+    for (i = 0; i < xyCoords.length; i++) {
+      if (i%3 == 0) {
+        console.log('i:', i);
+        let xyCoord2 = [ parseFloat(xyCoords[i][0].toFixed(6)), parseFloat(xyCoords[i][1].toFixed(6)) ];
+        xyCoords2.push(xyCoord2);
       }
+    }
+    xyCoords2.push([ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]);
+    // const buffer = polygon([ xyCoords2 ]).geometry;
 
-      return acc;
-    }, query);
+    console.log('xyCoords2:', xyCoords2);
+
+    let theGeom = { "rings": [ xyCoords2 ], "spatialReference": { "wkid": 4326 }};
 
     return new Promise(function(resolve, reject) {
-      query.run((function(error, featureCollection, response) {
+
+      let params = {
+        'returnGeometry': true,
+        'where': '1=1',
+        'outSR': 4326,
+        'outFields': '*',
+        'inSr': 4326,
+        'geometryType': 'esriGeometryPolygon',
+        'spatialRel': 'esriSpatialRelIntersects',
+        'f': 'geojson',
+        'geometry': theGeom,
+      };
+
+      axios.get(url, { params }).then(function(response, error) {
+      // query.run((function(error, featureCollection, response) {
         if (error) {
           reject(error);
         } else {
-          // console.log('did get esri spatial query', response, error);
+          console.log('did get esri spatial query, response:', response);
 
+          let featureCollection = response.data;
           let features = (featureCollection || {}).features;
           const status = error ? 'error' : 'success';
 
@@ -178,9 +213,9 @@ class BufferSearchClient extends BaseClient {
               return feature;
             });
           }
-          resolve(response);
+          resolve(response.data);
         }
-      }));
+      });
     });
   }
 

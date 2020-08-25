@@ -20,7 +20,7 @@ import {
   // EsriClient,
   CondoSearchClient,
   ShapeSearchClient,
-  // BufferSearchClient,
+  BufferSearchClient,
 } from './clients';
 
 // console.log('controller.js is being read')
@@ -56,7 +56,7 @@ class Controller {
     // this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
-    // this.clients.bufferSearch = new BufferSearchClient(clientOpts);
+    this.clients.bufferSearch = new BufferSearchClient(clientOpts);
   }
 
   /*
@@ -175,9 +175,9 @@ class Controller {
     // console.log('parcelResponse:', parcelResponse);
     if (parcelResponse) {
       let bufferShapeResponse = await this.clients.bufferSearch.fetchBufferShape(null, null, parcelResponse, 'pwd', latLng);
-      // console.log('bufferShapeResponse:', bufferShapeResponse);
+      console.log('runBufferProcess bufferShapeResponse:', bufferShapeResponse);
 
-      const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
+      const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0/query';
       const parameters = {};
       const calculateDistance = true;
       const coords = aisResponse.geometry.coordinates;
@@ -188,7 +188,7 @@ class Controller {
         calculateDistance ? coords : null,
       );
 
-      // console.log('spatialResponse:', spatialResponse);
+      console.log('spatialResponse:', spatialResponse);
 
       if (!spatialResponse) {
         return;
@@ -540,6 +540,7 @@ class Controller {
       return;
     }
 
+    console.log('response:', response);
     const features = response.features;
 
     if (features.length === 0) {
