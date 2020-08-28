@@ -9,15 +9,12 @@ import Router from './router';
 import DataManager from './data-manager';
 import utils from './utils.js';
 
-// import * as L from 'leaflet';
-// import { query as Query } from 'esri-leaflet';
-
 import {
   GeocodeClient,
   OwnerSearchClient,
   BlockSearchClient,
   HttpClient,
-  // EsriClient,
+  EsriClient,
   CondoSearchClient,
   ShapeSearchClient,
   BufferSearchClient,
@@ -53,7 +50,7 @@ class Controller {
     this.clients.ownerSearch = new OwnerSearchClient(clientOpts);
     this.clients.blockSearch = new BlockSearchClient(clientOpts);
     this.clients.http = new HttpClient(clientOpts);
-    // this.clients.esri = new EsriClient(clientOpts);
+    this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
     this.clients.bufferSearch = new BufferSearchClient(clientOpts);
@@ -340,7 +337,11 @@ class Controller {
           // TODO update getParcelByLAtLng to return parcels
           const coords = aisResponse.geometry.coordinates;
           let [ lng, lat ] = coords;
-          const latlng = L.latLng(lat, lng);
+          // const latlng = L.latLng(lat, lng);
+          const latlng = {
+            lat: lat,
+            lng: lng,
+          };
           response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
           // theParcels.push(response);
         }
@@ -490,8 +491,8 @@ class Controller {
   }
 
   async handleDrawnShape(state) {
-    console.log('handleDrawnShape is running');
     let shape = this.store.state.drawShape;
+    console.log('handleDrawnShape is running, shape:', shape);
     let changeCenter;
 
     if (!shape) {
@@ -507,10 +508,14 @@ class Controller {
       for (let point of queryShape) {
         test.push(point.split(','));
       }
-      let _latlngs = [];
+      let _latlngs = [[]];
       for (let item of test) {
-        let latlng = new L.LatLng(parseFloat(item[0]), parseFloat(item[1]));
-        _latlngs.push(latlng);
+        // let latlng = new L.LatLng(parseFloat(item[0]), parseFloat(item[1]));
+        let latlng = {
+          lat: parseFloat(item[0]),
+          lng: parseFloat(item[1]),
+        };
+        _latlngs[0].push(latlng);
       }
       shape = { _latlngs };
       changeCenter = true;
@@ -518,6 +523,7 @@ class Controller {
 
 
     const parcels = [];
+    console.log('controller handleDrawnShape is calling dataManager.getParcelsByShape, shape:', shape);
     let response = await this.dataManager.getParcelsByShape(shape, parcels);
     if(changeCenter === true) {
       // console.log('handleDrawnShape, response:', response.features[0].geometry.coordinates[0][0]);
@@ -587,6 +593,7 @@ class Controller {
   }
 
   getParcelsByPoints(points) {
+    console.log('controller getParcelsByPoints is running');
     this.dataManager.getParcelsByShape(points);
   }
 

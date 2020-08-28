@@ -12,8 +12,6 @@ import { point, polygon, lineString } from '@turf/helpers';
 import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
 
-// import * as L from 'leaflet';
-// import { query as Query } from 'esri-leaflet';
 import utils from './utils.js';
 import {
   GeocodeClient,

@@ -7,11 +7,7 @@ import distance from '@turf/distance';
 import area from '@turf/area';
 import utils from '../utils.js';
 
-// import { query as Query } from 'esri-leaflet';
-
 import BaseClient from './base-client';
-// require('lodash');
-
 
 class BufferSearchClient extends BaseClient {
 
@@ -114,31 +110,6 @@ class BufferSearchClient extends BaseClient {
     console.log('bufferSearch fetch esri spatial query, url:', url, 'relationship:', relationship, 'xyCoords:', xyCoords, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
     const parcelLayer = [];
 
-    // let query;
-    // if (relationship === 'where') {
-    //   query = Query({ url })[relationship](parameters.targetField + "='" + parameters.sourceValue + "'");
-    // } else {
-    //   query = Query({ url })[relationship](targetGeom);
-    // }
-    //
-    // console.log('query place 1:', query);
-    //
-    // // apply options by chaining esri leaflet option methods
-    // const optionsKeys = Object.keys(options) || [];
-    // query = optionsKeys.reduce((acc, optionsKey) => {
-    //   const optionsVal = options[optionsKey];
-    //   let optionsMethod;
-    //
-    //   try {
-    //     acc = acc[optionsKey](optionsVal);
-    //   } catch (e) {
-    //     throw new Error(`esri-leaflet query task does not support option:
-    //                      ${optionsKey}`);
-    //   }
-    //
-    //   return acc;
-    // }, query);
-
     let xyCoords2 = [[ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]];
     var i;
     console.log('xyCoords:', xyCoords, 'xyCoords.length:', xyCoords.length);
@@ -150,7 +121,6 @@ class BufferSearchClient extends BaseClient {
       }
     }
     xyCoords2.push([ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]);
-    // const buffer = polygon([ xyCoords2 ]).geometry;
 
     console.log('xyCoords2:', xyCoords2);
 
