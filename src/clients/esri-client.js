@@ -1,25 +1,22 @@
 import axios from 'axios';
 import utils from '../utils.js';
 
-// import * as turf from '@turf/turf';
-// import { point, polygon, distance, explode, nearest-point } from '@turf/turf';
-// import distance from '@turf/turf';
 import { point, polygon, lineString } from '@turf/helpers';
 import distance from '@turf/distance';
 import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
 
 import proj4 from 'proj4';
-import * as L from 'leaflet';
-import { query as Query } from 'esri-leaflet';
+
 import BaseClient from './base-client';
 
 class EsriClient extends BaseClient {
   async fetch(feature, dataSource, dataSourceKey) {
-    // console.log('esriclient fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
+    console.log('esri-client fetch is running');
 
     const url = dataSource.url;
     const { relationship, targetGeometry, ...options } = dataSource.options;
+    console.log('esriclient fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'relationship:', relationship);
     const parameters = dataSource.parameters;
     if (parameters) {
       if (feature) {
@@ -30,11 +27,9 @@ class EsriClient extends BaseClient {
     // check if a target geometry fn was specified. otherwise, use geocode feat
     let geom;
     if (targetGeometry) {
+      console.log('esri-client fetch if targetGeometry:', targetGeometry);
       const state = this.store.state;
-      // pass leaflet to the targetgeom function so it can construct a custom
-      // geometry (such as the lat lng bounds of a set of parcels) if it needs
-      // to. use case: fetching regmaps.
-      geom = targetGeometry(state, L);
+      geom = targetGeometry(state);
     } else if (feature) {
       geom = feature.geometry;
     } else {
@@ -57,11 +52,12 @@ class EsriClient extends BaseClient {
       }
     }
 
+    console.log('end of esri-client fetch, geom:', geom);
     this.fetchBySpatialQuery(dataSourceKey, url, relationship, geom, parameters, options);
   }
 
   fetchNearby(feature, dataSource, dataSourceKey) {
-    // console.log('esri fetchNearby running, dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
+    console.log('esri fetchNearby running, dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
     const projection4326 = utils.projection4326;
     const projection2272 = utils.projection2272;
 
@@ -101,6 +97,8 @@ class EsriClient extends BaseClient {
     const bufferUrl = geometryServerUrl.replace(/\/$/, '') + '/buffer';
     // console.log('bufferUrl:', bufferUrl);
 
+    let dataManager = this.dataManager;
+
     axios.get(bufferUrl, { params }).then(response => {
       const data = response.data;
       // console.log('axios in esri fetchNearby is running, data:', data);
@@ -115,18 +113,27 @@ class EsriClient extends BaseClient {
       // check for xy coords
       if (!xyCoords) {
         // we can't do anything without coords, so bail out
-        this.dataManager.didFetchData(dataSourceKey, 'error');
+        dataManager.didFetchData(dataSourceKey, 'error');
         return;
       }
 
       const latLngCoords = xyCoords.map(xyCoord => [ ...xyCoord ].reverse());
+      let xyCoords2 = [[ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]];
+      var i;
+      // console.log('xyCoords:', xyCoords, 'xyCoords.length:', xyCoords.length);
+      for (i = 0; i < xyCoords.length; i++) {
+        if (i%3 == 0) {
+          // console.log('i:', i);
+          let xyCoord2 = [ parseFloat(xyCoords[i][0].toFixed(6)), parseFloat(xyCoords[i][1].toFixed(6)) ];
+          xyCoords2.push(xyCoord2);
+        }
+      }
+      xyCoords2.push([ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]);
+      // console.log('after for, xyCoords2:', xyCoords2);
 
       // get nearby features using buffer
-      const buffer = L.polygon(latLngCoords);
-      // const map = this.dataManager.store.state.map.map;
-
-      // DEBUG
-      // buffer.addTo(map);
+      const buffer = polygon([ xyCoords2 ]).geometry;
+      // console.log('buffer:', buffer, 'xyCoords2:', xyCoords2, 'xyCoords:', xyCoords, 'latLngCoords:', latLngCoords);
 
       //this is a space holder
       const parameters = {};
@@ -141,44 +148,46 @@ class EsriClient extends BaseClient {
       );
     }, response => {
       // console.log('did fetch esri nearby error', response);
-
-      this.dataManager.didFetchData(dataSourceKey, 'error');
+      dataManager.didFetchData(dataSourceKey, 'error');
     });
   }
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
-    // console.log('fetch esri spatial query, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'typeof(parameters.sourceValue):', typeof(parameters.sourceValue), 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    console.log('esri-client fetchBySpatialQuery, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'typeof(parameters.sourceValue):', typeof(parameters.sourceValue), 'options:', options, 'calculateDistancePt:', calculateDistancePt);
 
-    let query;
-    if (relationship === 'where') {
-      if (typeof(parameters.sourceValue) === 'number') {
-        query = Query({ url })[relationship](parameters.targetField + "=" + parameters.sourceValue);
-      } else {
-        query = Query({ url })[relationship](parameters.targetField + "='" + parameters.sourceValue + "'");
-      }
+    let query = url + '/query'; //+ [relationship](targetGeom);
+    let theGeom, theGeomType, theSpatialRel;
+
+    if (relationship === 'intersects') {
+      theGeom = { "xmin": targetGeom.coordinates[0][0][0], "ymin": targetGeom.coordinates[0][0][1], "xmax": targetGeom.coordinates[0][2][0], "ymax": targetGeom.coordinates[0][2][1], "spatialReference": { "wkid":4326 }};
+      theGeomType = 'esriGeometryEnvelope';
+      theSpatialRel = 'esriSpatialRelIntersects';
+    } else if (targetGeom.type === 'Polygon'){
+      theGeom = { "rings": targetGeom.coordinates, "spatialReference": { "wkid": 4326 }};
+      theGeomType = 'esriGeometryPolygon';
+      theSpatialRel = 'esriSpatialRelContains';
     } else {
-      query = Query({ url })[relationship](targetGeom);
+      theGeom = { "x": targetGeom.coordinates[0], "y": targetGeom.coordinates[1], "spatialReference": { "wkid": 4326 }};
+      theGeomType = 'esriGeometryPoint';
+      theSpatialRel = 'esriSpatialRelWithin';
     }
 
-    // apply options by chaining esri leaflet option methods
-    const optionsKeys = Object.keys(options) || [];
-    query = optionsKeys.reduce((acc, optionsKey) => {
-      const optionsVal = options[optionsKey];
-      let optionsMethod;
+    let params = {
+      'returnGeometry': true,
+      'where': '1=1',
+      'outSR': 4326,
+      'outFields': '*',
+      'inSr': 4326,
+      'geometryType': theGeomType,
+      'spatialRel': theSpatialRel,
+      'f': 'geojson',
+      'geometry': theGeom,
+    };
 
-      try {
-        acc = acc[optionsKey](optionsVal);
-      } catch (e) {
-        throw new Error(`esri-leaflet query task does not support option:
-                         ${optionsKey}`);
-      }
+    let dataManager = this.dataManager;
 
-      return acc;
-    }, query);
-
-    query.run((error, featureCollection, response) => {
-      // console.log('did get esri spatial query', response, error);
-
+    axios.get(query, { params }).then(function(response, error) {
+      let featureCollection = response.data;
       let features = (featureCollection || {}).features;
       const status = error ? 'error' : 'success';
 
@@ -216,7 +225,8 @@ class EsriClient extends BaseClient {
         });
       }
 
-      this.dataManager.didFetchData(dataSourceKey, status, features);
+      // this.dataManager.didFetchData(dataSourceKey, status, features);
+      dataManager.didFetchData(dataSourceKey, status, features);
     });
   }
 

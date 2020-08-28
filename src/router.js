@@ -91,7 +91,7 @@ class Router {
   hashChanged() {
     const location = window.location;
     const hash = location.hash;
-    console.log('hashChanged is running, location:', location, 'hash:', hash, 'this.store.state.activeTopic:', this.store.state.activeTopic);
+    // console.log('hashChanged is running, location:', location, 'hash:', hash, 'this.store.state.activeTopic:', this.store.state.activeTopic);
 
     // parse url
     const comps = parseUrl(location.href);
@@ -103,13 +103,13 @@ class Router {
 
     // parse path
     const pathComps = hash.split('/').splice(1);
-    console.log('pathComps:', pathComps);
+    // console.log('pathComps:', pathComps);
 
     let encodedFirstRouteParameter;
     if (pathComps.length) {
       encodedFirstRouteParameter = pathComps[0].replace('?address=', '').replace('?owner=', '').replace('?block=', '');
     }
-    console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
+    // console.log('hash:', hash, 'pathComps:', pathComps, 'encodedFirstRouteParameter:', encodedFirstRouteParameter);
 
     if (encodedFirstRouteParameter === 'maintenance') {
       // this.routeToMaintenance();

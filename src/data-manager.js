@@ -8,11 +8,10 @@ navigation events.
 
 import proj4 from 'proj4';
 import axios from 'axios';
+import { point, polygon, lineString } from '@turf/helpers';
 import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
 
-import * as L from 'leaflet';
-import { query as Query } from 'esri-leaflet';
 import utils from './utils.js';
 import {
   GeocodeClient,
@@ -766,12 +765,12 @@ class DataManager {
   }
 
   getParcelsById(id, parcelLayer) {
-    // console.log('data-manager.js getParcelsById', parcelLayer, 'id:', id);
-    const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
+    console.log('data-manager.js getParcelsById', parcelLayer, 'id:', id);
+    const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
-    const parcelQuery = Query({ url });
-    // console.log('geocodeField:', geocodeField);
+    console.log('url:', url);
+    let parcelQuery;
 
     if (id.includes('|')) {
       const idSplit = id.split('|');
@@ -783,43 +782,59 @@ class DataManager {
           queryString = queryString + " or " + geocodeField + " = '";
         }
       }
-      // console.log('there is a pipe, queryString:', queryString);
-      parcelQuery.where(queryString);
-    } else if (Array.isArray(id)) {
-      parcelQuery.where(geocodeField + " IN (" + id + ")");
-    } else {
-      // console.log('there is not a pipe');
-      parcelQuery.where(geocodeField + " = '" + id + "'");
-    }
 
-    // parcelQuery.where(geocodeField + " = '" + id + "'");
+      parcelQuery = url + '?where=' + queryString;
+
+    } else if (Array.isArray(id)) {
+      parcelQuery = url + '?where=' + geocodeField + ' IN (' + id + ')';
+    } else {
+      parcelQuery = url + '?where=' + geocodeField + "='" + id + "'";
+    }
+    console.log('parcelQuery:', parcelQuery);
+
     return new Promise(function(resolve, reject) {
-      parcelQuery.run((function(error, featureCollection, response) {
-        // console.log('end of getParcelsById response:', response, 'featureCollection:', featureCollection);
+      let params = {
+        'outSR': 4326,
+        'f': 'geojson',
+        'outFields': '*',
+        'returnGeometry': true,
+      };
+
+      axios.get(parcelQuery, { params }).then(function(response, error) {
+        console.log('end of getParcelsById response:', response);//, 'featureCollection:', featureCollection);
         if (error) {
           reject(error);
         } else {
-          resolve(response);
+          resolve(response.data);
         }
-      }));
+      });
     });
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
-    console.log('getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    console.log('data-manager.js getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     if( latlng != null) {
-      const latLng = L.latLng(latlng.lat, latlng.lng);
-      const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url;
-      const parcelQuery = Query({ url });
-      parcelQuery.contains(latLng);
+      const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
       return new Promise(function(resolve, reject) {
-        parcelQuery.run((function(error, featureCollection, response) {
+        let params = {
+          'where': '1=1',
+          'outSR': 4326,
+          'f': 'geojson',
+          'outFields': '*',
+          'returnGeometry': true,
+          'geometry': { "x": latlng.lng, "y": latlng.lat, "spatialReference":{ "wkid":4326 }},
+          'geometryType': 'esriGeometryPoint',
+          'spatialRel': 'esriSpatialRelWithin',
+        };
+
+        axios.get(url, { params }).then(function(response, error) {
+          console.log('end of getParcelsById response:', response);//, 'featureCollection:', featureCollection);
           if (error) {
             reject(error);
           } else {
-            resolve(response);
+            resolve(response.data);
           }
-        }));
+        });
       });
     }
     return;
@@ -827,51 +842,162 @@ class DataManager {
   }
 
   getParcelsByShape(latlng, parcelLayer) {
-    // console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer);
-    const latLng = L.polygon(latlng._latlngs, latlng.options);
-    const url = this.config.map.featureLayers.pwdParcels.url;
+    console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer);
+    let theLatLngs = [];
+    for (let latLng of latlng._latlngs[0]) {
+      theLatLngs.push([ latLng.lng, latLng.lat ]);
+    }
+    theLatLngs.push([ latlng._latlngs[0][0].lng, latlng._latlngs[0][0].lat ]);
+    const url = this.config.map.featureLayers.pwdParcels.url + '/query?';
 
-    const parcelQuery = Query({ url });
-    parcelQuery.intersects(latLng);
+    let theGeom = { "rings": [ theLatLngs ], "spatialReference": { "wkid": 4326 }};
+    let parcelQuery = url + '?';
 
     return new Promise(function(resolve, reject) {
-      parcelQuery.run((function(error, featureCollection, response) {
+      let params = {
+        'where': '1=1',
+        'inSr': 4326,
+        'outSR': 4326,
+        'f': 'geojson',
+        'outFields': '*',
+        'returnGeometry': true,
+        'geometryType': 'esriGeometryPolygon',
+        'spatialRel': 'esriSpatialRelIntersects',
+        'geometry': theGeom,
+      };
+
+      axios.get(url, { params }).then(function(response, error) {
         if (error) {
           reject(error);
         } else {
-          resolve(response);
+          resolve(response.data);
         }
-      }));
+      });
     });
   }
 
-  getParcelsByBuffer(latlng, parcelLayer) {
-    // console.log('getParcelsByBuffer is running, latlng:', latlng, 'this.store.state.parcels.pwd:', this.store.state.parcels.pwd);
+  processParcels(error, featureCollection, parcelLayer, fetch) {
+    const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
+    console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
+    const mapregStuff = this.config.parcels[parcelLayer].mapregStuff;
 
-    // if (this.store.state.parcels.pwd === null) {
-    const latLng = L.latLng(latlng.lat, latlng.lng);
-    const url = this.config.map.featureLayers.pwdParcels.url;
-    const parcelQuery = Query({ url });
-    // console.log(parcelQuery);
-    parcelQuery.contains(latLng);
+    if (error || !featureCollection || featureCollection.features.length === 0) {
+      return;
+    }
 
-    return new Promise(function(resolve, reject) {
-      parcelQuery.run((function(error, featureCollection, response) {
-        if (error) {
-          reject(error);
-        } else {
-          resolve(response);
-        }
-      }));
-    });
-    //   parcelQuery.run((function(error, featureCollection, response) {
-    //     // console.log('in getParcelsByLatLng, featureCollection:', featureCollection);
-    //     this.finishParcelsByBuffer(error, featureCollection, response, parcelLayer, latlng);
-    //   }).bind(this))
-    // } else {
-    //   this.finishParcelsByBuffer(null, null, latlng, parcelLayer, latlng);
-    // }
+    const features = featureCollection.features;
+
+    const featuresSorted = utils.sortDorParcelFeatures(features);
+    let feature;
+
+    // this is for figuring out which parcel address to keep at the top
+    if (!multipleAllowed) {
+      feature = features[0];
+    // dor
+    } else {
+      feature = featuresSorted[0];
+    }
+
+    // use turf to get area and perimeter of all parcels returned
+    for (let featureSorted of featuresSorted) {
+      console.log('featureSorted:', featureSorted);
+      const geometry = utils.calculateAreaAndPerimeter(featureSorted);
+      featureSorted.properties.TURF_PERIMETER = geometry.perimeter;
+      featureSorted.properties.TURF_AREA = geometry.area;
+    }
+
+    // at this point there is definitely a feature or features - put it in state
+    this.setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff);
+    return feature;
   }
+
+  setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff) {
+    // console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
+    let payload;
+    // pwd
+    if (!multipleAllowed && !mapregStuff) {
+      // console.log('1');
+      payload = {
+        parcelLayer,
+        multipleAllowed,
+        mapregStuff,
+        data: feature,
+      };
+    } else if (multipleAllowed && !mapregStuff) {
+      // console.log('2');
+      payload = {
+        parcelLayer,
+        multipleAllowed,
+        mapregStuff,
+        data: featuresSorted,
+        status: 'success',
+      };
+
+    // dor
+    } else {
+      // console.log('3');
+      payload = {
+        parcelLayer,
+        multipleAllowed,
+        mapregStuff,
+        data: featuresSorted,
+        status: 'success',
+        activeParcel: feature ? feature.id : null,
+        // TODO apply concatDorAddress in client config - this global is no
+        // longer available
+        // activeAddress: feature ? concatDorAddress(feature) : null,
+        activeAddress: null,
+        activeMapreg: feature ? feature.properties.MAPREG : null,
+      };
+    }
+    // update state
+    this.store.commit('setParcelData', payload);
+  }
+
+  clearBlockSearch(){
+    // console.log('clearOwnerSearch is running');
+    this.store.commit('setBlockSearchTotal', null);
+    this.store.commit('setBlockSearchStatus', null);
+    this.store.commit('setBlockSearchData', null);
+    this.store.commit('setBlockSearchInput', null);
+  }
+
+  clearOwnerSearch(){
+    // console.log('clearOwnerSearch is running');
+    this.store.commit('setOwnerSearchTotal', null);
+    this.store.commit('setOwnerSearchStatus', null);
+    this.store.commit('setOwnerSearchData', null);
+    this.store.commit('setOwnerSearchInput', null);
+  }
+
+  removeShape() {
+    // console.log('this.store.state.editableLayers:', this.store.state.editableLayers);
+    if(this.store.state.editableLayers && this.store.state.editableLayers !== null ){
+      this.store.state.editableLayers.clearLayers();
+    }
+  }
+
+
+  // getParcelsByBuffer(latlng, parcelLayer) {
+  //   console.log('getParcelsByBuffer is running, latlng:', latlng, 'this.store.state.parcels.pwd:', this.store.state.parcels.pwd);
+  //
+  //   // if (this.store.state.parcels.pwd === null) {
+  //   const latLng = L.latLng(latlng.lat, latlng.lng);
+  //   const url = this.config.map.featureLayers.pwdParcels.url;
+  //   const parcelQuery = Query({ url });
+  //   // console.log(parcelQuery);
+  //   parcelQuery.contains(latLng);
+  //
+  //   return new Promise(function(resolve, reject) {
+  //     parcelQuery.run((function(error, featureCollection, response) {
+  //       if (error) {
+  //         reject(error);
+  //       } else {
+  //         resolve(response);
+  //       }
+  //     }));
+  //   });
+  // }
 
   // finishParcelsByBuffer(error = [], featureCollection = [], response = {}, parcelLayer, latlng) {
   //   console.log('finishParcelsByBuffer is running, error:', error, 'featureCollection:', featureCollection, 'response:', response, 'parcelLayer', parcelLayer, 'latlng:', latlng);
@@ -974,106 +1100,6 @@ class DataManager {
   //     // this.dataManager.didFetchData(dataSourceKey, 'error');
   //   });
   // }
-
-  processParcels(error, featureCollection, parcelLayer, fetch) {
-    const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
-    // console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
-    const mapregStuff = this.config.parcels[parcelLayer].mapregStuff;
-
-    if (error || !featureCollection || featureCollection.features.length === 0) {
-      return;
-    }
-
-    const features = featureCollection.features;
-
-    const featuresSorted = utils.sortDorParcelFeatures(features);
-    let feature;
-
-    // this is for figuring out which parcel address to keep at the top
-    if (!multipleAllowed) {
-      feature = features[0];
-    // dor
-    } else {
-      feature = featuresSorted[0];
-    }
-
-    // use turf to get area and perimeter of all parcels returned
-    for (let featureSorted of featuresSorted) {
-      const geometry = utils.calculateAreaAndPerimeter(featureSorted);
-      featureSorted.properties.TURF_PERIMETER = geometry.perimeter;
-      featureSorted.properties.TURF_AREA = geometry.area;
-    }
-
-    // at this point there is definitely a feature or features - put it in state
-    this.setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff);
-    return feature;
-  }
-
-  setParcelsInState(parcelLayer, multipleAllowed, feature, featuresSorted, mapregStuff) {
-    // console.log('setParcelsInState is running, parcelLayer:', parcelLayer, 'multipleAllowed:', multipleAllowed, 'feature:', feature, 'featuresSorted:', featuresSorted, 'mapregStuff:', mapregStuff);
-    let payload;
-    // pwd
-    if (!multipleAllowed && !mapregStuff) {
-      // console.log('1');
-      payload = {
-        parcelLayer,
-        multipleAllowed,
-        mapregStuff,
-        data: feature,
-      };
-    } else if (multipleAllowed && !mapregStuff) {
-      // console.log('2');
-      payload = {
-        parcelLayer,
-        multipleAllowed,
-        mapregStuff,
-        data: featuresSorted,
-        status: 'success',
-      };
-
-    // dor
-    } else {
-      // console.log('3');
-      payload = {
-        parcelLayer,
-        multipleAllowed,
-        mapregStuff,
-        data: featuresSorted,
-        status: 'success',
-        activeParcel: feature ? feature.id : null,
-        // TODO apply concatDorAddress in client config - this global is no
-        // longer available
-        // activeAddress: feature ? concatDorAddress(feature) : null,
-        activeAddress: null,
-        activeMapreg: feature ? feature.properties.MAPREG : null,
-      };
-    }
-    // update state
-    this.store.commit('setParcelData', payload);
-  }
-
-  clearBlockSearch(){
-    // console.log('clearOwnerSearch is running');
-    this.store.commit('setBlockSearchTotal', null);
-    this.store.commit('setBlockSearchStatus', null);
-    this.store.commit('setBlockSearchData', null);
-    this.store.commit('setBlockSearchInput', null);
-  }
-
-  clearOwnerSearch(){
-    // console.log('clearOwnerSearch is running');
-    this.store.commit('setOwnerSearchTotal', null);
-    this.store.commit('setOwnerSearchStatus', null);
-    this.store.commit('setOwnerSearchData', null);
-    this.store.commit('setOwnerSearchInput', null);
-  }
-
-  removeShape() {
-    // console.log('this.store.state.editableLayers:', this.store.state.editableLayers);
-    if(this.store.state.editableLayers && this.store.state.editableLayers !== null ){
-      this.store.state.editableLayers.clearLayers();
-    }
-  }
 
   // didGeocode(feature) {
   //   let geocodeZoom = 19;

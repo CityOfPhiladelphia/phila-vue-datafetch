@@ -9,9 +9,6 @@ import Router from './router';
 import DataManager from './data-manager';
 import utils from './utils.js';
 
-import * as L from 'leaflet';
-import { query as Query } from 'esri-leaflet';
-
 import {
   GeocodeClient,
   OwnerSearchClient,
@@ -175,9 +172,9 @@ class Controller {
     // console.log('parcelResponse:', parcelResponse);
     if (parcelResponse) {
       let bufferShapeResponse = await this.clients.bufferSearch.fetchBufferShape(null, null, parcelResponse, 'pwd', latLng);
-      // console.log('bufferShapeResponse:', bufferShapeResponse);
+      console.log('runBufferProcess bufferShapeResponse:', bufferShapeResponse);
 
-      const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0';
+      const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0/query';
       const parameters = {};
       const calculateDistance = true;
       const coords = aisResponse.geometry.coordinates;
@@ -188,7 +185,7 @@ class Controller {
         calculateDistance ? coords : null,
       );
 
-      // console.log('spatialResponse:', spatialResponse);
+      console.log('spatialResponse:', spatialResponse);
 
       if (!spatialResponse) {
         return;
@@ -322,9 +319,9 @@ class Controller {
       // console.log('about to get parcels, ids:', ids);
 
       if (ids && ids.length > 0) {
-        // console.log('it has ids');
+        console.log('it has ids');
         response = await this.dataManager.getParcelsById(ids, parcelLayer);
-        // console.log('in handleSearchFormSubmit, response:', response);
+        console.log('in handleSearchFormSubmit, response:', response);
         // if (response.type === 'FeatureCollection') {
         //   theParcels = response.features;
         // } else {
@@ -340,12 +337,17 @@ class Controller {
           // TODO update getParcelByLAtLng to return parcels
           const coords = aisResponse.geometry.coordinates;
           let [ lng, lat ] = coords;
-          const latlng = L.latLng(lat, lng);
+          // const latlng = L.latLng(lat, lng);
+          const latlng = {
+            lat: lat,
+            lng: lng,
+          };
           response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
           // theParcels.push(response);
         }
       }
 
+      console.log('about to call processParcels, response:', response);
       this.dataManager.processParcels(false, response, parcelLayer);
       // this.dataManager.resetData();
       let parcelResponse = response;
@@ -359,11 +361,11 @@ class Controller {
     }
 
     // this.router.setRouteByGeocode()
-    if (this.config.app && this.config.app.title === 'Property Data Explorer' 
+    if (this.config.app && this.config.app.title === 'Property Data Explorer'
         && this.store.state.lastSearchMethod !== 'owner search'
         && this.store.state.lastSearchMethod !== 'block search') {
       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
-    } 
+    }
     // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
     //   this.router.setRouteByGeocode(this.store.state.blockSearch.input);
     // }
@@ -489,8 +491,8 @@ class Controller {
   }
 
   async handleDrawnShape(state) {
-    console.log('handleDrawnShape is running');
     let shape = this.store.state.drawShape;
+    console.log('handleDrawnShape is running, shape:', shape);
     let changeCenter;
 
     if (!shape) {
@@ -506,10 +508,14 @@ class Controller {
       for (let point of queryShape) {
         test.push(point.split(','));
       }
-      let _latlngs = [];
+      let _latlngs = [[]];
       for (let item of test) {
-        let latlng = new L.LatLng(parseFloat(item[0]), parseFloat(item[1]));
-        _latlngs.push(latlng);
+        // let latlng = new L.LatLng(parseFloat(item[0]), parseFloat(item[1]));
+        let latlng = {
+          lat: parseFloat(item[0]),
+          lng: parseFloat(item[1]),
+        };
+        _latlngs[0].push(latlng);
       }
       shape = { _latlngs };
       changeCenter = true;
@@ -517,6 +523,7 @@ class Controller {
 
 
     const parcels = [];
+    console.log('controller handleDrawnShape is calling dataManager.getParcelsByShape, shape:', shape);
     let response = await this.dataManager.getParcelsByShape(shape, parcels);
     if(changeCenter === true) {
       // console.log('handleDrawnShape, response:', response.features[0].geometry.coordinates[0][0]);
@@ -539,6 +546,7 @@ class Controller {
       return;
     }
 
+    console.log('response:', response);
     const features = response.features;
 
     if (features.length === 0) {
@@ -585,6 +593,7 @@ class Controller {
   }
 
   getParcelsByPoints(points) {
+    console.log('controller getParcelsByPoints is running');
     this.dataManager.getParcelsByShape(points);
   }
 
