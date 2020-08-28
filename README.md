@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.4.0 - 8/28/2020
+
+* removes all imports of leaflet and esri-leaflet
+
 ### 1.3.1 - 7/29/2020
 
 * small fixes for routing in atlas, datafetching in layerboard
