@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.4.1 - 9/15/2020
+
+* allows real estate tax to use input in tips if geocode fails
+
 ### 1.4.0 - 8/28/2020
 
 * removes all imports of leaflet and esri-leaflet

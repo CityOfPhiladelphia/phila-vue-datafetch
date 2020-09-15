@@ -258,8 +258,17 @@ class Controller {
       this.router.setRouteByBlockSearch();
     } else if (!this.store.state.bufferMode) {
       this.dataManager.clearBlockSearch();
-      aisResponse = await this.clients.ownerSearch.fetch(value);
-      this.router.setRouteByOwnerSearch();
+      if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
+        // console.log('onGeocodeFail exists');
+        let feature = {
+          properties: {},
+        };
+        feature.properties.opa_account_num = this.store.state.geocode.input;
+        this.dataManager.fetchData(feature);
+      } else {
+        aisResponse = await this.clients.ownerSearch.fetch(value);
+        this.router.setRouteByOwnerSearch();
+      }
     }
     //
     // if (!aisResponse) {

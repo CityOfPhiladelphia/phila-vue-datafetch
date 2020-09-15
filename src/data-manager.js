@@ -725,7 +725,7 @@ class DataManager {
   }
 
   didTryGeocode(feature) {
-    // console.log('didTryGeocode is running, feature:', feature);
+    console.log('didTryGeocode is running, feature:', feature);
     let blockTerms = [ "block", "block:", "blk" ];
     let blockSearchCheck;
     blockTerms.map( x=> this.store.state.geocode.input.trim().toLowerCase().startsWith(x)? blockSearchCheck = true : "");
