@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.4.2 - 9/16/2020
+
+* fixes issue with esri search in layerboard
+
 ### 1.4.1 - 9/15/2020
 
 * allows real estate tax to use input in tips if geocode fails

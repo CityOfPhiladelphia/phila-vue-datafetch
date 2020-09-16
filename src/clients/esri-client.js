@@ -157,32 +157,42 @@ class EsriClient extends BaseClient {
 
     let query = url + '/query'; //+ [relationship](targetGeom);
     let theGeom, theGeomType, theSpatialRel;
+    let params;
 
-    if (relationship === 'intersects') {
-      theGeom = { "xmin": targetGeom.coordinates[0][0][0], "ymin": targetGeom.coordinates[0][0][1], "xmax": targetGeom.coordinates[0][2][0], "ymax": targetGeom.coordinates[0][2][1], "spatialReference": { "wkid":4326 }};
-      theGeomType = 'esriGeometryEnvelope';
-      theSpatialRel = 'esriSpatialRelIntersects';
-    } else if (targetGeom.type === 'Polygon'){
-      theGeom = { "rings": targetGeom.coordinates, "spatialReference": { "wkid": 4326 }};
-      theGeomType = 'esriGeometryPolygon';
-      theSpatialRel = 'esriSpatialRelContains';
+    if (relationship === 'where') {
+      params = {
+        'where': '1=1',
+        'outFields': '*',
+        'f': 'geojson',
+      };
+
     } else {
-      theGeom = { "x": targetGeom.coordinates[0], "y": targetGeom.coordinates[1], "spatialReference": { "wkid": 4326 }};
-      theGeomType = 'esriGeometryPoint';
-      theSpatialRel = 'esriSpatialRelWithin';
-    }
+      if (relationship === 'intersects') {
+        theGeom = { "xmin": targetGeom.coordinates[0][0][0], "ymin": targetGeom.coordinates[0][0][1], "xmax": targetGeom.coordinates[0][2][0], "ymax": targetGeom.coordinates[0][2][1], "spatialReference": { "wkid":4326 }};
+        theGeomType = 'esriGeometryEnvelope';
+        theSpatialRel = 'esriSpatialRelIntersects';
+      } else if (targetGeom.type === 'Polygon'){
+        theGeom = { "rings": targetGeom.coordinates, "spatialReference": { "wkid": 4326 }};
+        theGeomType = 'esriGeometryPolygon';
+        theSpatialRel = 'esriSpatialRelContains';
+      } else {
+        theGeom = { "x": targetGeom.coordinates[0], "y": targetGeom.coordinates[1], "spatialReference": { "wkid": 4326 }};
+        theGeomType = 'esriGeometryPoint';
+        theSpatialRel = 'esriSpatialRelWithin';
+      }
 
-    let params = {
-      'returnGeometry': true,
-      'where': '1=1',
-      'outSR': 4326,
-      'outFields': '*',
-      'inSr': 4326,
-      'geometryType': theGeomType,
-      'spatialRel': theSpatialRel,
-      'f': 'geojson',
-      'geometry': theGeom,
-    };
+      params = {
+        'returnGeometry': true,
+        'where': '1=1',
+        'outSR': 4326,
+        'outFields': '*',
+        'inSr': 4326,
+        'geometryType': theGeomType,
+        'spatialRel': theSpatialRel,
+        'f': 'geojson',
+        'geometry': theGeom,
+      };
+    }
 
     let dataManager = this.dataManager;
 
