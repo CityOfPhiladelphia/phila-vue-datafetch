@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.4.3 - 10/6/2020
+
+* ran yarn upgrades
+
 ### 1.4.2 - 9/16/2020
 
 * fixes issue with esri search in layerboard
