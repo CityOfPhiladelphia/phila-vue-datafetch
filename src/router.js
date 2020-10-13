@@ -91,7 +91,7 @@ class Router {
   hashChanged() {
     const location = window.location;
     const hash = location.hash;
-    // console.log('hashChanged is running, location:', location, 'hash:', hash, 'this.store.state.activeTopic:', this.store.state.activeTopic);
+    console.log('hashChanged is running, location:', location, 'hash:', hash, 'this.store.state.activeTopic:', this.store.state.activeTopic);
 
     // parse url
     const comps = parseUrl(location.href);
@@ -352,8 +352,11 @@ class Router {
           // console.log('in setRouteByGeocode, router type is vue, address:', address);
           if (this.store.state.bufferMode) {
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}});
+          } else if (this.config.router.pattern === 'address-and-topic') {
+            let currentParams = this.vueRouter.history.current.params;
+            console.log('setRouteByGeocode else if is running, this.vueRouter:', this.vueRouter, 'currentParams:', currentParams);
+            this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: topic }});
           } else {
-            // console.log('setRouteByGeocode else is running');
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}});
           }
         } else {
