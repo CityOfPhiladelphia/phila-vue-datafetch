@@ -404,8 +404,12 @@ class Router {
           } else if (this.config.router.pattern === 'address-and-topic') {
             let currentParams = this.vueRouter.history.current.params;
             console.log('setRouteByGeocode else if is running, currentParams:', currentParams, 'address:', address, 'topic:', topic);
-            // console.log('setRouteByGeocode else if is running, this.vueRouter:', this.vueRouter, 'currentParams:', currentParams);
-            this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: topic }});
+            if (!topic) {
+              this.vueRouter.push({ name: 'address-only', params: { address: address }});
+            } else {
+              // console.log('setRouteByGeocode else if is running, this.vueRouter:', this.vueRouter, 'currentParams:', currentParams);
+              this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: topic }});
+            }
           } else {
             console.log('vueRouter push is being called with query');
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}});

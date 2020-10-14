@@ -617,7 +617,8 @@ class Controller {
   // it calls this, so that this handles topic routing
   handleTopicHeaderClick(topic) {
     // console.log('Controller.handleTopicHeaderClick', topic);
-    this.router.routeToTopic(topic);//.then(function(targetExists) {
+    let address = this.router.getAddressFromState();
+    this.router.routeToTopic(topic, address);//.then(function(targetExists) {
 
     // scroll to top of topic header
 
