@@ -12,11 +12,11 @@ import BaseClient from './base-client';
 
 class EsriClient extends BaseClient {
   async fetch(feature, dataSource, dataSourceKey) {
-    console.log('esri-client fetch is running');
+    // console.log('esri-client fetch is running');
 
     const url = dataSource.url;
     const { relationship, targetGeometry, ...options } = dataSource.options;
-    console.log('esriclient fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'relationship:', relationship);
+    // console.log('esriclient fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'relationship:', relationship);
     const parameters = dataSource.parameters;
     if (parameters) {
       if (feature) {
@@ -27,7 +27,7 @@ class EsriClient extends BaseClient {
     // check if a target geometry fn was specified. otherwise, use geocode feat
     let geom;
     if (targetGeometry) {
-      console.log('esri-client fetch if targetGeometry:', targetGeometry);
+      // console.log('esri-client fetch if targetGeometry:', targetGeometry);
       const state = this.store.state;
       geom = targetGeometry(state);
     } else if (feature) {
@@ -52,12 +52,12 @@ class EsriClient extends BaseClient {
       }
     }
 
-    console.log('end of esri-client fetch, geom:', geom);
+    // console.log('end of esri-client fetch, geom:', geom);
     this.fetchBySpatialQuery(dataSourceKey, url, relationship, geom, parameters, options);
   }
 
   fetchNearby(feature, dataSource, dataSourceKey) {
-    console.log('esri fetchNearby running, dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
+    // console.log('esri fetchNearby running, dataSource:', dataSource, 'dataSourceKey:', dataSourceKey);
     const projection4326 = utils.projection4326;
     const projection2272 = utils.projection2272;
 
@@ -153,7 +153,7 @@ class EsriClient extends BaseClient {
   }
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
-    console.log('esri-client fetchBySpatialQuery, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'typeof(parameters.sourceValue):', typeof(parameters.sourceValue), 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    // console.log('esri-client fetchBySpatialQuery, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'typeof(parameters.sourceValue):', typeof(parameters.sourceValue), 'options:', options, 'calculateDistancePt:', calculateDistancePt);
 
     let query = url + '/query'; //+ [relationship](targetGeom);
     let theGeom, theGeomType, theSpatialRel;

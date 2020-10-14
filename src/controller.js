@@ -249,7 +249,7 @@ class Controller {
 
     // if (aisResponse.properties.street_address && !this.store.state.bufferMode) {
     if (aisResponse && !this.store.state.bufferMode) {
-      // console.log('handleSearchFormSubmit about to call setRouteByGeocode after geocode');
+      console.log('handleSearchFormSubmit has aisResponse, about to call setRouteByGeocode with no parameters');
       this.router.setRouteByGeocode();
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
@@ -328,9 +328,9 @@ class Controller {
       // console.log('about to get parcels, ids:', ids);
 
       if (ids && ids.length > 0) {
-        console.log('it has ids');
+        // console.log('it has ids');
         response = await this.dataManager.getParcelsById(ids, parcelLayer);
-        console.log('in handleSearchFormSubmit, response:', response);
+        // console.log('in handleSearchFormSubmit, response:', response);
         // if (response.type === 'FeatureCollection') {
         //   theParcels = response.features;
         // } else {
@@ -356,7 +356,7 @@ class Controller {
         }
       }
 
-      console.log('about to call processParcels, response:', response);
+      // console.log('about to call processParcels, response:', response);
       this.dataManager.processParcels(false, response, parcelLayer);
       // this.dataManager.resetData();
       let parcelResponse = response;
@@ -462,6 +462,7 @@ class Controller {
 
     // console.log('after await aisResponse 2:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
+    console.log('handleMapClick is calling setRouteByGeocode with no parameters');
     this.router.setRouteByGeocode();
 
     // console.log('after await aisResponse 3:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);

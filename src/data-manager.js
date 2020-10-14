@@ -765,11 +765,11 @@ class DataManager {
   }
 
   getParcelsById(id, parcelLayer) {
-    console.log('data-manager.js getParcelsById', parcelLayer, 'id:', id);
+    // console.log('data-manager.js getParcelsById', parcelLayer, 'id:', id);
     const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
-    console.log('url:', url);
+    // console.log('url:', url);
     let parcelQuery;
 
     if (id.includes('|')) {
@@ -790,7 +790,7 @@ class DataManager {
     } else {
       parcelQuery = url + '?where=' + geocodeField + "='" + id + "'";
     }
-    console.log('parcelQuery:', parcelQuery);
+    // console.log('parcelQuery:', parcelQuery);
 
     return new Promise(function(resolve, reject) {
       let params = {
@@ -801,7 +801,7 @@ class DataManager {
       };
 
       axios.get(parcelQuery, { params }).then(function(response, error) {
-        console.log('end of getParcelsById response:', response);//, 'featureCollection:', featureCollection);
+        // console.log('end of getParcelsById response:', response);//, 'featureCollection:', featureCollection);
         if (error) {
           reject(error);
         } else {
@@ -878,7 +878,7 @@ class DataManager {
 
   processParcels(error, featureCollection, parcelLayer, fetch) {
     const multipleAllowed = this.config.parcels[parcelLayer].multipleAllowed;
-    console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
+    // console.log('data-manager.js processParcels is running parcelLayer', parcelLayer, 'fetch', fetch, 'featureCollection:', featureCollection, 'multipleAllowed:', multipleAllowed);
     const mapregStuff = this.config.parcels[parcelLayer].mapregStuff;
 
     if (error || !featureCollection || featureCollection.features.length === 0) {
@@ -900,7 +900,7 @@ class DataManager {
 
     // use turf to get area and perimeter of all parcels returned
     for (let featureSorted of featuresSorted) {
-      console.log('featureSorted:', featureSorted);
+      // console.log('featureSorted:', featureSorted);
       const geometry = utils.calculateAreaAndPerimeter(featureSorted);
       featureSorted.properties.TURF_PERIMETER = geometry.perimeter;
       featureSorted.properties.TURF_AREA = geometry.area;

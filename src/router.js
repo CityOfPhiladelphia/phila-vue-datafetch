@@ -2,13 +2,18 @@ import { parse as parseUrl } from 'url';
 
 class Router {
   constructor(opts) {
-    // console.log('Router constructor, opts:', opts);
+    console.log('Router constructor, opts:', opts);
     const config = this.config = opts.config;
     this.store = opts.store;
     this.controller = opts.controller;
     this.dataManager = opts.dataManager;
     this.history = window.history;
     this.vueRouter = opts.router;
+
+    this.topics = [];
+    for (let topic of this.config.topics) {
+      this.topics.push(topic.key);
+    }
 
     // check if the router should be silent (i.e. not update the url or listen
     // for hash changes)
@@ -43,7 +48,7 @@ class Router {
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
-    // console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
+    console.log('make hash, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
 
     // must have an firstRouteParameter
     if (!firstRouteParameter || firstRouteParameter.length === 0) {
@@ -80,12 +85,14 @@ class Router {
     // TODO add an address getter fn to config so this isn't ais-specific
     const geocodeData = this.store.state.geocode.data || {};
     const props = geocodeData.properties || {};
-    // console.log('getAddressFromState is running, geocodeData:', geocodeData, 'props:', props);
+    let address;
     if (geocodeData.street_address) {
-      return geocodeData.street_address;
+      address = geocodeData.street_address;
     } else if (props.street_address) {
-      return props.street_address;
+      address = props.street_address;
     }
+    console.log('getAddressFromState is running, address:', address, 'geocodeData:', geocodeData, 'props:', props);
+    return address;
   }
 
   hashChanged() {
@@ -138,8 +145,28 @@ class Router {
       secondRouteParameter = decodeURIComponent(pathComps[1]);
     }
 
+    if (secondRouteParameter !== "undefined") {
+      if (!this.store.state.activeTopic) {
+        this.store.commit('setActiveTopic', secondRouteParameter);
+      }
+    }
+
     // console.log('in hashChanged, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
-    let nextAddress = firstRouteParameter;
+    // let topics = [];
+    // for (let topic of this.config.topics) {
+    //   topics.push(topic.key);
+    // }
+
+    let nextAddress;
+    let nextTopic;
+    if (this.topics.includes(firstRouteParameter)) {
+      nextTopic = firstRouteParameter;
+    } else {
+      nextAddress = firstRouteParameter;
+    }
+
+    console.log('hashChanged is running, nextAddress:', nextAddress, 'nextTopic:', nextTopic);
+
     // let nextKeyword;
     // if (firstRouteParameter.includes('addr ')) {
     //   console.log('in hashChanged, includes addr')
@@ -157,7 +184,7 @@ class Router {
     }
 
     if (nextAddress && nextAddress !== 'addr noaddress') {
-      // console.log('router hashChanged calling controller.handleSearchFormSubmit');
+      console.log('router hashChanged calling controller.handleSearchFormSubmit');
       // this.routeToAddress(nextAddress);
       if (firstRouteParameter.includes('shape')) {
         console.log("just added this, need ot coordinate this with resetShape, maybe take the new input from hash over the old in the state.\
@@ -170,18 +197,26 @@ class Router {
       }
     }
 
+    if (nextTopic) {
+      console.log('router.js if(nextTopic) is running, nextTopic:', nextTopic);
+      this.dataManager.resetGeocode();
+      this.store.commit('setActiveTopic', nextTopic);
+      this.routeToTopic(nextTopic);
+    }
+
     // if (nextKeyword) {
     //   // console.log('hashChanged sending keyWords to store, values:', values);
     //   this.routeToKeyword(nextKeyword);
     // }
 
-    if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
-      if (this.config.topics) {
-        if (this.config.topics.length) {
-          this.routeToTopic(secondRouteParameter);
-        }
-      }
-    }
+    // if (this.store.state.activeTopic || this.store.state.activeTopic === "") {
+    //   if (this.config.topics) {
+    //     if (this.config.topics.length) {
+    //       console.log('hashChanged is calling routeToTopic, secondRouteParameter:', secondRouteParameter);
+    //       this.routeToTopic(secondRouteParameter);
+    //     }
+    //   }
+    // }
 
     // if (this.store.state.selectedServices) {
     //   let secondRouteParameterArray;
@@ -196,7 +231,7 @@ class Router {
   }
 
   routeToAddress(nextAddress, searchCategory) {
-    // console.log('Router.routeToAddress, nextAddress:', nextAddress);
+    console.log('Router.routeToAddress, nextAddress:', nextAddress);
     if (nextAddress) {
       // nextAddress = nextAddress.replace('addr ', '');
       // check against current address
@@ -283,8 +318,8 @@ class Router {
   }
 
   // this gets called when you click a topic header.
-  routeToTopic(nextTopic, target) {
-    // console.log('router.js routeToTopic is running, nextTopic:', nextTopic, 'target:', target);
+  routeToTopic(nextTopic, address, target) {
+    console.log('routeToTopic is running, nextTopic:', nextTopic, 'address:', address);
     // check against active topic
     const prevTopic = this.store.state.activeTopic;
 
@@ -294,11 +329,24 @@ class Router {
     }
 
     if (!this.silent) {
-      let address = this.getAddressFromState();
+      // let address = this.getAddressFromState();
       // address = 'addr ' + address;
-      const nextHash = this.makeHash(address, nextTopic);
-      const lastHistoryState = this.history.state;
-      this.history.replaceState(lastHistoryState, null, nextHash);
+
+      // let topics = [];
+      // for (let topic of this.config.topics) {
+      //   topics.push(topic.key);
+      // }
+      // console.log('router.js routeToTopic is running, topics:', topics, 'address:', address, 'nextTopic:', nextTopic, 'target:', target);
+
+      if (address) {
+        this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: nextTopic }});
+      } else if (this.topics.includes(nextTopic)) {
+        this.vueRouter.push({ name: 'topic-only', params: { topic: nextTopic }});
+      }
+
+      // const nextHash = this.makeHash(address, nextTopic);
+      // const lastHistoryState = this.history.state;
+      // this.history.replaceState(lastHistoryState, null, nextHash);
     }
   }
 
@@ -306,6 +354,7 @@ class Router {
   // TODO this could have a name that is more declarative like "changeURL" (used to be called "didGeocode")
 
   setRouteByGeocode(testAddress) {
+    console.log('setRouteByGeocode is starting');
     let geocodeData;
     // if (this.store.state.geocode.data.properties.street_address) {
     if (testAddress) {
@@ -354,9 +403,11 @@ class Router {
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}});
           } else if (this.config.router.pattern === 'address-and-topic') {
             let currentParams = this.vueRouter.history.current.params;
-            console.log('setRouteByGeocode else if is running, this.vueRouter:', this.vueRouter, 'currentParams:', currentParams);
+            console.log('setRouteByGeocode else if is running, currentParams:', currentParams, 'address:', address, 'topic:', topic);
+            // console.log('setRouteByGeocode else if is running, this.vueRouter:', this.vueRouter, 'currentParams:', currentParams);
             this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: topic }});
           } else {
+            console.log('vueRouter push is being called with query');
             this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}});
           }
         } else {
@@ -384,7 +435,7 @@ class Router {
   }
 
   setRouteByBlockSearch() {
-    // console.log('router.js setRouteByBlockSearch is running');
+    console.log('router.js setRouteByBlockSearch is running');
     const block = this.store.state.geocode.input;
 
     this.vueRouter.push({ query: { block }});
@@ -393,7 +444,7 @@ class Router {
   }
 
   setRouteByOwnerSearch() {
-    // console.log('router.js setRouteByOwnerSearch is running');
+    console.log('router.js setRouteByOwnerSearch is running');
     const owner = this.store.state.geocode.input;
 
     this.vueRouter.push({ query: { owner }});
@@ -402,7 +453,7 @@ class Router {
   }
 
   setRouteByShapeSearch() {
-    // console.log('router.js setRouteByShapeSearch is running');
+    console.log('router.js setRouteByShapeSearch is running');
     const shapeInput = this.store.state.shapeSearch.input;
     // console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
     // only run this if the shape is in the store (which it will not be if it is created from the route)
