@@ -55,7 +55,8 @@ class Router {
       return null;
     }
 
-    let hash = `#/${encodeURIComponent(firstRouteParameter)}/`;
+    let hash = `${encodeURIComponent(firstRouteParameter)}/`;
+    // let hash = `#/${encodeURIComponent(firstRouteParameter)}/`;
     if (secondRouteParameter) {
       if (Array.isArray(secondRouteParameter)) {
         // console.log('secondRouteParameter is an Array');
@@ -97,7 +98,7 @@ class Router {
 
   hashChanged() {
     const location = window.location;
-    const hash = location.hash;
+    const hash = location.pathname;
     console.log('hashChanged is running, location:', location, 'hash:', hash, 'this.store.state.activeTopic:', this.store.state.activeTopic);
 
     // parse url
@@ -110,7 +111,7 @@ class Router {
 
     // parse path
     const pathComps = hash.split('/').splice(1);
-    // console.log('pathComps:', pathComps);
+    console.log('hashChanged pathComps:', pathComps);
 
     let encodedFirstRouteParameter;
     if (pathComps.length) {
