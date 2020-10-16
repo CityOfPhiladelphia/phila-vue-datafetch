@@ -339,8 +339,10 @@ class Router {
 
       if (address) {
         this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: nextTopic }});
+        // this.store.commit('setRouterTopic', nextTopic);
       } else if (this.topics.includes(nextTopic)) {
         this.vueRouter.push({ name: 'topic-only', params: { topic: nextTopic }});
+        this.store.commit('setRouterTopic', nextTopic);
       }
 
       // const nextHash = this.makeHash(address, nextTopic);
