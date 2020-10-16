@@ -5,6 +5,7 @@ const initialState = {
   // DataManager.resetGeocode, which is called by Router.hashChanged on app
   // load.
   activeTopic: '',
+  routerTopic: '',
   activeParcelLayer: '',
   clickCoords: null,
   // should addresscandidate be here if neither pvm or pvc were included?
@@ -168,6 +169,9 @@ const pvdStore = {
       },
       setActiveParcelLayer(state, payload) {
         state.activeParcelLayer = payload;
+      },
+      setRouterTopic(state, payload) {
+        state.routerTopic = payload;
       },
       setActiveTopic(state, payload) {
         state.activeTopic = payload;

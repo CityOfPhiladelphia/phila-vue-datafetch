@@ -149,14 +149,11 @@ class Router {
     if (secondRouteParameter !== "undefined") {
       if (!this.store.state.activeTopic) {
         this.store.commit('setActiveTopic', secondRouteParameter);
+        this.store.commit('setRouterTopic', secondRouteParameter);
       }
     }
 
-    // console.log('in hashChanged, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
-    // let topics = [];
-    // for (let topic of this.config.topics) {
-    //   topics.push(topic.key);
-    // }
+    console.log('in hashChanged, firstRouteParameter:', firstRouteParameter, 'secondRouteParameter:', secondRouteParameter);
 
     let nextAddress;
     let nextTopic;
@@ -326,6 +323,7 @@ class Router {
 
     if (!prevTopic || prevTopic !== nextTopic) {
       this.store.commit('setActiveTopic', nextTopic);
+      this.store.commit('setRouterTopic', nextTopic);
       this.store.commit('setActiveParcelLayer', this.activeParcelLayer());
     }
 
@@ -356,6 +354,10 @@ class Router {
 
   setRouteByGeocode(testAddress) {
     console.log('setRouteByGeocode is starting');
+    if (this.store.state.activeTopic) {
+      this.store.state.routerTopic = this.store.state.activeTopic;
+    }
+
     let geocodeData;
     // if (this.store.state.geocode.data.properties.street_address) {
     if (testAddress) {
