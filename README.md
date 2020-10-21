@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.4.4 - 10/21/2020
+
+* includes changes for running -board frameworks off vue-router
+
 ### 1.4.3 - 10/6/2020
 
 * ran yarn upgrades
