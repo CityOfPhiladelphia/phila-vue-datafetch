@@ -11,8 +11,10 @@ class Router {
     this.vueRouter = opts.router;
 
     this.topics = [];
-    for (let topic of this.config.topics) {
-      this.topics.push(topic.key);
+    if (this.config.topics) {
+      for (let topic of this.config.topics) {
+        this.topics.push(topic.key);
+      }
     }
 
     // check if the router should be silent (i.e. not update the url or listen
