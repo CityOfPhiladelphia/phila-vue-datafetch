@@ -100,7 +100,7 @@ class Router {
 
   hashChanged() {
     const location = window.location;
-    const hash = location.pathname;
+    let hash = location.pathname;
     console.log('hashChanged is running, location:', location, 'hash:', hash, 'this.store.state.activeTopic:', this.store.state.activeTopic);
 
     // parse url
@@ -110,6 +110,15 @@ class Router {
     // TODO handle ?search entry point
     // if (query && query.search) {
     // }
+
+    let publicPath = '';
+    if (process.env.VUE_APP_PUBLIC_PATH) {
+      publicPath = process.env.VUE_APP_PUBLIC_PATH;
+    }
+
+    // console.log('pvd router.js publicPath 1:', publicPath, 'hash:', hash);
+    hash = hash.replace(publicPath, '/');
+    // console.log('pvd router.js publicPath 2:', publicPath, 'hash:', hash);
 
     // parse path
     const pathComps = hash.split('/').splice(1);

@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.4.6 - 10/28/2020
+
+* update to routing for public path of real estate tax
+
 ### 1.4.5 - 10/27/2020
 
 * uses github actions to push to npmjs
