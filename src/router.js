@@ -112,15 +112,18 @@ class Router {
     // }
 
     let publicPath = '';
-    if (process.env.VUE_APP_PUBLIC_PATH) {
-      publicPath = process.env.VUE_APP_PUBLIC_PATH;
+    if (this.config.publicPath) {
+      publicPath = this.config.publicPath;
     }
+    // if (process.env.VUE_APP_PUBLIC_PATH) {
+    //   publicPath = process.env.VUE_APP_PUBLIC_PATH;
+    // }
 
-    // console.log('pvd router.js publicPath 1:', publicPath, 'hash:', hash);
+    console.log('pvd router.js publicPath 1:', publicPath, 'hash:', hash);
     if (publicPath) {
-      hash = hash.replace(publicPath, '/');
+      hash = hash.replace(publicPath, '');
     }
-    // console.log('pvd router.js publicPath 2:', publicPath, 'hash:', hash);
+    console.log('pvd router.js publicPath 2:', publicPath, 'hash:', hash);
 
     // parse path
     const pathComps = hash.split('/');//.splice(0);
