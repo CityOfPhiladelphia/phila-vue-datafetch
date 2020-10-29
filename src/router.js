@@ -117,11 +117,16 @@ class Router {
     }
 
     // console.log('pvd router.js publicPath 1:', publicPath, 'hash:', hash);
-    hash = hash.replace(publicPath, '/');
+    if (publicPath) {
+      hash = hash.replace(publicPath, '/');
+    }
     // console.log('pvd router.js publicPath 2:', publicPath, 'hash:', hash);
 
     // parse path
-    const pathComps = hash.split('/').splice(1);
+    const pathComps = hash.split('/');//.splice(0);
+    if (pathComps[0] == '') {
+      pathComps.splice(0, 1);
+    }
     console.log('hashChanged pathComps:', pathComps);
 
     let encodedFirstRouteParameter;
