@@ -2,7 +2,6 @@ import { parse as parseUrl } from 'url';
 
 class Router {
   constructor(opts) {
-    console.log('Router constructor, opts:', opts);
     const config = this.config = opts.config;
     this.store = opts.store;
     this.controller = opts.controller;
@@ -20,6 +19,7 @@ class Router {
     // check if the router should be silent (i.e. not update the url or listen
     // for hash changes)
     const silent = this.silent = !config.router || !config.router.enabled;
+    console.log('Router constructor, opts:', opts, 'silent:', silent);
 
     // only listen for route changes if routing is enabled
     if (!silent) {
@@ -428,11 +428,13 @@ class Router {
           } else if (this.config.router.pattern === 'address-and-topic') {
             let currentParams = this.vueRouter.history.current.params;
             console.log('setRouteByGeocode else if is running, currentParams:', currentParams, 'address:', address, 'topic:', topic);
-            if (!topic) {
-              this.vueRouter.push({ name: 'address-only', params: { address: address }});
-            } else {
-              // console.log('setRouteByGeocode else if is running, this.vueRouter:', this.vueRouter, 'currentParams:', currentParams);
-              this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: topic }});
+            if (currentParams.address !== address || currentParams.topic !== topic) {
+              if (!topic) {
+                this.vueRouter.push({ name: 'address-only', params: { address: address }});
+              } else {
+                // console.log('setRouteByGeocode else if is running, this.vueRouter:', this.vueRouter, 'currentParams:', currentParams);
+                this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: topic }});
+              }
             }
           } else {
             console.log('vueRouter push is being called with query');

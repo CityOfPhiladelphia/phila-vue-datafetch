@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 1.4.10 - 3/16/2021
+
+* fixes redundant re-routing
+
 ### 1.4.9 - 3/16/2021
 
 * comments out outdated topic routing code
