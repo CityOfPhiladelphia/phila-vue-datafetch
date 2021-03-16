@@ -605,16 +605,16 @@ class DataManager {
 
     // reset other topic and map state
     // if (this.config.topics.length) {
-    if (this.config.router.returnToDefaultTopicOnGeocode) {
-      if (this.config.topics != undefined) {
-        if (this.config.defaultTopic || this.config.defaultTopic === null) {
-          this.store.commit('setActiveTopic', this.config.defaultTopic);
-        } else {
-          // console.log('about to setActiveTopic, config:', this.config.topics[0].key);
-          this.store.commit('setActiveTopic', this.config.topics[0].key);
-        }
-      }
-    }
+    // if (this.config.router.returnToDefaultTopicOnGeocode) {
+    //   if (this.config.topics != undefined) {
+    //     if (this.config.defaultTopic || this.config.defaultTopic === null) {
+    //       this.store.commit('setActiveTopic', this.config.defaultTopic);
+    //     } else {
+    //       // console.log('about to setActiveTopic, config:', this.config.topics[0].key);
+    //       this.store.commit('setActiveTopic', this.config.topics[0].key);
+    //     }
+    //   }
+    // }
 
     // reset data sources
     if (this.store.state.sources) {

@@ -410,9 +410,9 @@ class Router {
 
 
       // TODO - datafetch should not know topics are a thing
-      if (this.config.router.returnToDefaultTopicOnGeocode) {
-        this.store.commit('setActiveTopic', this.config.defaultTopic);
-      }
+      // if (this.config.router.returnToDefaultTopicOnGeocode) {
+      //   this.store.commit('setActiveTopic', this.config.defaultTopic);
+      // }
 
       const topic = this.store.state.activeTopic;
       // console.log('setRouteByGeocode is running, address:', address, 'topic:', topic);
