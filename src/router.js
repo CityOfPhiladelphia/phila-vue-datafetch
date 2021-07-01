@@ -424,21 +424,21 @@ class Router {
         if (this.config.router.type === 'vue') {
           // console.log('in setRouteByGeocode, router type is vue, address:', address);
           if (this.store.state.bufferMode) {
-            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}});
+            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}}).catch(()=>{});
           } else if (this.config.router.pattern === 'address-and-topic') {
             let currentParams = this.vueRouter.history.current.params;
             console.log('setRouteByGeocode else if is running, currentParams:', currentParams, 'address:', address, 'topic:', topic);
             if (currentParams.address !== address || currentParams.topic !== topic) {
               if (!topic) {
-                this.vueRouter.push({ name: 'address-only', params: { address: address }});
+                this.vueRouter.push({ name: 'address-only', params: { address: address }}).catch(()=>{});
               } else {
                 // console.log('setRouteByGeocode else if is running, this.vueRouter:', this.vueRouter, 'currentParams:', currentParams);
-                this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: topic }});
+                this.vueRouter.push({ name: 'address-and-topic', params: { address: address, topic: topic }}).catch(()=>{});
               }
             }
           } else {
             console.log('vueRouter push is being called with query');
-            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}});
+            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}}).catch(()=>{});
           }
         } else {
           // console.log('in setRouteByGeocode, router type is not vue');
@@ -468,7 +468,7 @@ class Router {
     console.log('router.js setRouteByBlockSearch is running');
     const block = this.store.state.geocode.input;
 
-    this.vueRouter.push({ query: { block }});
+    this.vueRouter.push({ query: { block }}).catch(()=>{});
     // // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
 
   }
@@ -477,7 +477,7 @@ class Router {
     console.log('router.js setRouteByOwnerSearch is running');
     const owner = this.store.state.geocode.input;
 
-    this.vueRouter.push({ query: { owner }});
+    this.vueRouter.push({ query: { owner }}).catch(()=>{});
     // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
 
   }
@@ -497,7 +497,7 @@ class Router {
 
       // console.log('didShapeSearch is running, shape:', shape);
 
-      this.vueRouter.push({ query: { shape }});
+      this.vueRouter.push({ query: { shape }}).catch(()=>{});
     }
   }
 }
