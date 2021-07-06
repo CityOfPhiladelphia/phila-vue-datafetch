@@ -373,8 +373,12 @@ class Controller {
     if (this.config.app && this.config.app.title === 'Property Data Explorer'
         && this.store.state.lastSearchMethod !== 'owner search'
         && this.store.state.lastSearchMethod !== 'block search') {
-      this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
-    }
+      if (this.store.state.parcels.pwd) {
+        this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
+      } else {
+        this.router.setRouteByGeocode();
+      }
+    } 
     // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
     //   this.router.setRouteByGeocode(this.store.state.blockSearch.input);
     // }
