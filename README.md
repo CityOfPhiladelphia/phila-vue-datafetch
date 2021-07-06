@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+###1.4.11 - 7/6/2021
+
+* fixes Property - fix for null field in zoning and added catch() to fix routing errors
+
 ### 1.4.10 - 3/16/2021
 
 * fixes redundant re-routing
