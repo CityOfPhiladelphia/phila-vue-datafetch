@@ -248,7 +248,7 @@ class Controller {
     // console.log('after await aisResponse:', aisResponse, 'aisResponse.properties.street_address:', aisResponse.properties.street_address);//, 'this.clients:', this.clients);
 
     // if (aisResponse.properties.street_address && !this.store.state.bufferMode) {
-    if (aisResponse && !this.store.state.bufferMode) {
+    if (aisResponse && !this.store.state.bufferMode && !blockSearchCheck) {
       console.log('handleSearchFormSubmit has aisResponse, about to call setRouteByGeocode with no parameters');
       this.router.setRouteByGeocode();
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
