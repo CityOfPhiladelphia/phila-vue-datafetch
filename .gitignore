@@ -3,6 +3,5 @@ node_modules/
 npm-debug.log
 yarn-error.log
 _bin/
-package-lock.json
 .editorconfig
 dist/
