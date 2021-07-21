@@ -59,5 +59,8 @@
       "vue-cli-service lint",
       "git add"
     ]
+  },
+  "engines": {
+    "yarn": "YARN NO LONGER USED - use npm instead."
   }
 }
