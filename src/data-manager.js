@@ -225,7 +225,7 @@ class DataManager {
   }
 
   fetchData(optionalFeature) {
-    // console.log('\nFETCH DATA');
+    console.log('\nFETCH DATA');
     // console.log('-----------');
     let geocodeObj;
     let ownerSearchObj;
@@ -523,7 +523,7 @@ class DataManager {
   }
 
   resetData() {
-    // console.log('resetData is running');
+    console.log('data-manager.js, resetData is running');
     const dataSources = this.config.dataSources || {};
 
     for (let dataSourceKey of Object.keys(dataSources)) {
@@ -617,7 +617,8 @@ class DataManager {
     // }
 
     // reset data sources
-    if (this.store.state.sources) {
+    if (this.store.state.sources && this.config.resetDataOnGeocode === undefined || this.store.state.sources && this.config.resetDataOnGeocode != false) {
+      console.log('data-manager.js, resetGeocode is calling resetData, this.config.resetDataOnGeocode:', this.config.resetDataOnGeocode);
       this.resetData();
     }
   }
@@ -742,6 +743,7 @@ class DataManager {
           properties: {},
         };
         feature.properties.opa_account_num = this.store.state.geocode.input;
+        console.log('data-manager.js didTryGeocode is calling resetData');
         this.resetData();
         this.resetShape();
         this.fetchData(feature);
