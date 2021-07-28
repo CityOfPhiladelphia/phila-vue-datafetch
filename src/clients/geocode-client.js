@@ -36,6 +36,7 @@ class GeocodeClient extends BaseClient {
       feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
       feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.PARCELID;
       feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
+      feature.condo = true;
     } else {
       console.log('setFeatureProperties is still running', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
       let record = this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0];
@@ -48,6 +49,7 @@ class GeocodeClient extends BaseClient {
       // feature.properties.pwd_parcel_id = parcelId;
       feature.properties.dor_parcel_id = parcelId;
       feature._featureId = parcelId;
+      feature.condo = true;
     }
 
 
