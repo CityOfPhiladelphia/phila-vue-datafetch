@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.0.1 - 7/28/2021
+
+* fix - Add check for block search to ensure keyword triggers correctly.
+
 ### 2.0.0 - 7/26/2021
 
 * requires using npm for all package commands
