@@ -617,7 +617,8 @@ class DataManager {
     // }
 
     // reset data sources
-    if (this.store.state.sources) {
+    if (this.store.state.sources && this.config.resetDataOnGeocode === undefined || this.store.state.sources && this.config.resetDataOnGeocode != false) {
+      console.log('data-manager.js, resetGeocode is calling resetData, this.config.resetDataOnGeocode:', this.config.resetDataOnGeocode);
       this.resetData();
     }
   }

@@ -209,7 +209,13 @@ class Controller {
   }
 
   async handleSearchFormSubmit(value, searchCategory) {
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
+    if (!this.config.resetDataOnGeocode) {
+      console.log('this.config.resetDataOnGeocode', this.config.resetDataOnGeocode);
+      this.resetGeocode();
+      let aisResponse = this.clients.geocode.fetch(value);
+      return;
+    }
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
 
     this.dataManager.resetData();
