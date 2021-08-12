@@ -209,7 +209,13 @@ class Controller {
   }
 
   async handleSearchFormSubmit(value, searchCategory) {
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
+    if (!this.config.resetDataOnGeocode) {
+      console.log('this.config.resetDataOnGeocode', this.config.resetDataOnGeocode);
+      this.resetGeocode();
+      let aisResponse = this.clients.geocode.fetch(value);
+      return;
+    }
+    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
     // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
 
     this.dataManager.resetData();
@@ -248,12 +254,13 @@ class Controller {
     // console.log('after await aisResponse:', aisResponse, 'aisResponse.properties.street_address:', aisResponse.properties.street_address);//, 'this.clients:', this.clients);
 
     // if (aisResponse.properties.street_address && !this.store.state.bufferMode) {
-    if (aisResponse && !this.store.state.bufferMode) {
+    if (aisResponse && !this.store.state.bufferMode && !blockSearchCheck) {
       console.log('handleSearchFormSubmit has aisResponse, about to call setRouteByGeocode with no parameters');
       this.router.setRouteByGeocode();
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
       // console.log("block search is true");
+      this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
       this.router.setRouteByBlockSearch();
     } else if (!this.store.state.bufferMode) {
@@ -309,64 +316,71 @@ class Controller {
       // console.log('in loop, parcelLayer:', parcelLayer, 'parcelIdInGeocoder:', parcelIdInGeocoder, 'configForParcelLayer:', configForParcelLayer);
 
       let ids;
-      if (aisResponse.properties) {
-        // console.log('getting ids, first if');
-        ids = aisResponse.properties[parcelIdInGeocoder];
-      } else if (this.store.state.ownerSearch.data) {
-        // console.log('getting ids, middle if')
-        ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id );
-        ids = ids.filter( id => id != "" );
-      } else if (this.store.state.blockSearch.data) {
-        ids = this.store.state.blockSearch.data.map(item => item.properties.pwd_parcel_id );
-        ids = ids.filter( id => id != "" );
-      } else {
-        // console.log('getting ids, else');
-        ids = aisResponse.map(item => item.properties.pwd_parcel_id );
-        ids = ids.filter( id => id != "" );
-      }
-
-      // console.log('about to get parcels, ids:', ids);
-
-      if (ids && ids.length > 0) {
-        // console.log('it has ids');
-        response = await this.dataManager.getParcelsById(ids, parcelLayer);
-        // console.log('in handleSearchFormSubmit, response:', response);
-        // if (response.type === 'FeatureCollection') {
-        //   theParcels = response.features;
-        // } else {
-        //   theParcels.push(response);
-        // }
-        // console.log('theParcels:', theParcels);
-        // TODO - catch error before this if necessary
-      } else {
-        // console.log('ids length is 0');
-        if (configForParcelLayer.getByLatLngIfIdFails) {
-          // console.log(parcelLayer, 'Id failed - had to get by LatLng')
-          // console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
-          // TODO update getParcelByLAtLng to return parcels
-          const coords = aisResponse.geometry.coordinates;
-          let [ lng, lat ] = coords;
-          // const latlng = L.latLng(lat, lng);
-          const latlng = {
-            lat: lat,
-            lng: lng,
-          };
-          response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
-          // theParcels.push(response);
+      if(parcelLayer) {
+        if (aisResponse.properties) {
+          console.log('getting ids, first if', aisResponse.properties);
+          ids = aisResponse.properties[parcelIdInGeocoder];
+        } else if (this.store.state.ownerSearch.data) {
+          // console.log('getting ids, middle if')
+          ids = this.store.state.ownerSearch.data.map(item => item.properties.pwd_parcel_id );
+          ids = ids.filter( id => id != "" );
+        } else if (this.store.state.blockSearch.data) {
+          ids = this.store.state.blockSearch.data.map(item => item.properties.pwd_parcel_id );
+          ids = ids.filter( id => id != "" );
+        } else {
+          console.log('getting ids, else', aisResponse);
+          ids = aisResponse.map(item => item.properties.pwd_parcel_id !== "" ? item.properties.pwd_parcel_id : item.properties.dor_parcel_id);
+          ids = ids.filter( id => id != "" );
         }
+  
+        console.log('about to get parcels, ids:', ids);
+  
+        if (ids && ids.length > 0) {
+          // console.log('it has ids');
+          response = await this.dataManager.getParcelsById(ids, parcelLayer);
+          // console.log('in handleSearchFormSubmit, response:', response);
+          // if (response.type === 'FeatureCollection') {
+          //   theParcels = response.features;
+          // } else {
+          //   theParcels.push(response);
+          // }
+          // console.log('theParcels:', theParcels);
+          // TODO - catch error before this if necessary
+        } else {
+          console.log('ids length is 0');
+          if (configForParcelLayer.getByLatLngIfIdFails) {
+            // console.log(parcelLayer, 'Id failed - had to get by LatLng')
+            // console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
+            // TODO update getParcelByLAtLng to return parcels
+            const coords = aisResponse.geometry.coordinates;
+            let [ lng, lat ] = coords;
+            // const latlng = L.latLng(lat, lng);
+            const latlng = {
+              lat: lat,
+              lng: lng,
+            };
+            response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
+            // theParcels.push(response);
+          }
+        }
+  
+        console.log('about to call processParcels, response:', response.error);
+        let errorValue = response.error ? true : false;
+        this.dataManager.processParcels(errorValue, response, parcelLayer);
+        // this.dataManager.resetData();
+        let parcelResponse = response;
+  
+        if (this.store.state.bufferMode) {
+          await this.runBufferProcess(response);
+        }
+  
+        // console.log('still going, parcelResponse:', parcelResponse);
+        this.dataManager.fetchData();
+
+      } else {
+        console.log("No parcel layers.");
       }
 
-      // console.log('about to call processParcels, response:', response);
-      this.dataManager.processParcels(false, response, parcelLayer);
-      // this.dataManager.resetData();
-      let parcelResponse = response;
-
-      if (this.store.state.bufferMode) {
-        await this.runBufferProcess(response);
-      }
-
-      // console.log('still going, parcelResponse:', parcelResponse);
-      this.dataManager.fetchData();
     }
 
     // this.router.setRouteByGeocode()

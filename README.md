@@ -29,6 +29,22 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.1.0 - 8-12-2021
+
+* Task/pde issue 491 fix 220 locust building condos
+
+### 2.0.1 - 7/28/2021
+
+* fix - Add check for block search to ensure keyword triggers correctly.
+
+### 2.0.0 - 7/26/2021
+
+* requires using npm for all package commands
+
+### 1.4.11 - 7/6/2021
+
+* fixes Property - fix for null field in zoning and added catch() to fix routing errors
+
 ### 1.4.10 - 3/16/2021
 
 * fixes redundant re-routing

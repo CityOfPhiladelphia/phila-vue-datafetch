@@ -29,13 +29,26 @@ class CondoSearchClient extends BaseClient {
     // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
-    feature.properties.street_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
-    // console.log('setFeatureProperties is still running');
-    feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
-    feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.PARCELID;
-    feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
-    feature.condo = true;
-    // console.log('setFeatureProperties is ending');
+    if (this.store.state.parcels.pwd) {
+      feature.properties.street_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
+      feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
+      feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.PARCELID;
+      feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
+      feature.condo = true;
+    } else {
+      console.log('setFeatureProperties is still running', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
+      let record = this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0];
+      console.log("No pwd parcels, showing feature: ", record, record.properties);
+      let address = record.properties.address_low + " " + record.properties.street_full;
+      let parcelId = record.properties.dor_parcel_id;
+
+      feature.properties.street_address = address;
+      feature.properties.opa_address = address;
+      // feature.properties.pwd_parcel_id = parcelId;
+      feature.properties.dor_parcel_id = parcelId;
+      feature._featureId = parcelId;
+      feature.condo = true;
+    }
 
   }
 
@@ -104,47 +117,8 @@ class CondoSearchClient extends BaseClient {
         feature.properties[i] = "";
       }
 
-      // if(this.store.state.parcels.pwd === null) {
-      //   console.log('getPages if is running');
-      //   const latLng = { lat: feature.geometry.coordinates[1], lng: feature.geometry.coordinates[0] };
-      //   const callback = () => {
-      //     // console.log('callback is running');
-      //
-      //     this.setFeatureProperties(feature, totalUnits);
-      //
-      //     store.commit('setGeocodeData', feature);
-      //     store.commit('setGeocodeStatus', 'success');
-      //     if (this.store.state.lastSearchMethod === 'buffer search') {
-      //       console.log('in callback, in buffer search mode');
-      //       this.dataManager.didGeocode(feature);
-      //     }
-      //     if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
-      //       this.store.commit('setLastSearchMethod', 'geocode');
-      //       this.dataManager.fetchData();
-      //     }
-      //
-      //     // if(feature.geometry.coordinates) {
-      //     //   // console.log('if feature.geometry.coordinates is running');
-      //     //   this.store.commit('setMapZoom', 18);
-      //     //   this.store.commit('setMapCenter', feature.geometry.coordinates);
-      //     // }
-      //
-      //     return feature;
-      //   };
-      //
-      //   // if (this.store.state.lastSearchMethod === 'reverseGeocode') {
-      //   console.log('getPages if is still running');
-      //   return features;
-      //   // this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'noFetch', callback);
-      //   // } else {
-      //   // this.dataManager.getParcelsByLatLng(latLng, 'pwd', 'fetch', callback);
-      //   // }
-      //
-      // } else {
-      // console.log('getPages else is running, feature:', feature);
-
       if(this.store.state.parcels.pwd === null) {
-        // this.setFeatureProperties(feature, totalUnits);
+        this.setFeatureProperties(feature, totalUnits);
 
         console.log('condo-search-client, getPages else is still running 1');
         store.commit('setGeocodeData', feature);
