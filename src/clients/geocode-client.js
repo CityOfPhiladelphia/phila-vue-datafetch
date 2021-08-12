@@ -111,13 +111,20 @@ class GeocodeClient extends BaseClient {
     features = this.assignFeatureIds(features, 'geocode');
 
     // TODO do some checking here
-    let feature = features[0];
     // console.log('geocode success, store.js feature:', feature, 'opa_account_num:', feature.properties.opa_account_num);
+    let feature = features.filter(a => a.match_type === 'exact').length > 0 ? features.filter(a => a.match_type === 'exact')[0] :features[0];
     let relatedFeatures = [];
-    for (let relatedFeature of features.slice(1)){
-      if (feature.properties.address_high && relatedFeature.properties.address_high) {
-        relatedFeatures.push(relatedFeature);
-      } else {
+
+    // The slice is needed for reverse geocode bc there is a prototype object to remove
+    // However, in PDE the exact match needs to be filtered to get the correct parcel and route
+    // Example property: 1111 Herbert St.
+    let featureGroup = features[0].match_type === 'exact_key' ? features.slice(1) : features;
+    for (let relatedFeature of featureGroup){
+      if (feature.properties.address_high && relatedFeature.match_type !== 'exact') {
+        if (relatedFeature.properties.address_high) {
+          relatedFeatures.push(relatedFeature);
+        }
+      } else if (relatedFeature.match_type !== 'exact') {
         relatedFeatures.push(relatedFeature);
       }
     }
@@ -185,8 +192,10 @@ class GeocodeClient extends BaseClient {
         // }
       }
 
+      let exactMatch = features.filter(a => a.match_type === 'exact');
+      // console.log("exactMatch: ", exactMatch);
       getPages = getPages.bind(this);
-      if (this.config.app && this.config.app.title === 'Property Data Explorer') {
+      if (this.config.app && !exactMatch.length > 0 && this.config.app.title === 'Property Data Explorer') {
         return getPages(features);
       }
 
