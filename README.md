@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.1.1 - 8-12-2021
+
+* fix: Change logic for PDE to properly set related feature
+
 ### 2.1.0 - 8-12-2021
 
 * Task/pde issue 491 fix 220 locust building condos
