@@ -464,13 +464,12 @@ class Router {
     }
   }
 
-  setRouteByBlockSearch() {
-    console.log('router.js setRouteByBlockSearch is running');
-    const block = this.store.state.geocode.input;
-
+  setRouteByBlockSearch(value) {
+    const block = value;
+    // const block = this.store.state.geocode.input;
+    console.log('router.js setRouteByBlockSearch is running, block:', block, 'value:', value);
     this.vueRouter.push({ query: { block }}).catch(()=>{});
     // // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
-
   }
 
   setRouteByOwnerSearch() {

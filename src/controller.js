@@ -259,10 +259,10 @@ class Controller {
       this.router.setRouteByGeocode();
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
-      // console.log("block search is true");
+      console.log("block search is true, value:", value);
       this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
-      this.router.setRouteByBlockSearch();
+      this.router.setRouteByBlockSearch(value);
     } else if (!this.store.state.bufferMode) {
       this.dataManager.clearBlockSearch();
       if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
@@ -332,9 +332,9 @@ class Controller {
           ids = aisResponse.map(item => item.properties.pwd_parcel_id !== "" ? item.properties.pwd_parcel_id : item.properties.dor_parcel_id);
           ids = ids.filter( id => id != "" );
         }
-  
+
         console.log('about to get parcels, ids:', ids);
-  
+
         if (ids && ids.length > 0) {
           // console.log('it has ids');
           response = await this.dataManager.getParcelsById(ids, parcelLayer);
@@ -363,17 +363,17 @@ class Controller {
             // theParcels.push(response);
           }
         }
-  
+
         console.log('about to call processParcels, response:', response.error);
         let errorValue = response.error ? true : false;
         this.dataManager.processParcels(errorValue, response, parcelLayer);
         // this.dataManager.resetData();
         let parcelResponse = response;
-  
+
         if (this.store.state.bufferMode) {
           await this.runBufferProcess(response);
         }
-  
+
         // console.log('still going, parcelResponse:', parcelResponse);
         this.dataManager.fetchData();
 
@@ -392,7 +392,7 @@ class Controller {
       } else {
         this.router.setRouteByGeocode();
       }
-    } 
+    }
     // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
     //   this.router.setRouteByGeocode(this.store.state.blockSearch.input);
     // }
@@ -510,7 +510,7 @@ class Controller {
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
       }
     }
-    // console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
+    console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     // this.dataManager.resetData();
     // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo);
