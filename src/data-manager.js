@@ -69,7 +69,7 @@ class DataManager {
   /* DATA FETCHING METHODS */
 
   fetchRowData(){
-    // console.log("Fetching row data")
+    console.log("Fetching row data");
 
     var state = this.store.state;
     let input = [];
@@ -79,9 +79,12 @@ class DataManager {
         return object._featureId === state.activeFeature.featureId;
       });
     } else if (state.lastSearchMethod === 'shape search' || state.lastSearchMethod === 'buffer search') {
-      input = state.shapeSearch.data.rows.filter(object => {
-        return object._featureId === state.activeFeature.featureId;
-      });
+      console.log('state.shapeSearch.data:', state.shapeSearch.data);
+      if (state.shapeSearch.data) {
+        input = state.shapeSearch.data.rows.filter(object => {
+          return object._featureId === state.activeFeature.featureId;
+        });
+      }
     } else {
       let data;
       if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
