@@ -374,7 +374,7 @@ class Router {
   // TODO this could have a name that is more declarative like "changeURL" (used to be called "didGeocode")
 
   setRouteByGeocode(testAddress) {
-    console.log('setRouteByGeocode is starting');
+    console.log('setRouteByGeocode is starting, this.store.state.bufferMode:', this.store.state.bufferMode);
     if (this.store.state.activeTopic) {
       this.store.state.routerTopic = this.store.state.activeTopic;
     }
@@ -423,9 +423,10 @@ class Router {
       if (!this.silent) {
         if (this.config.router.type === 'vue') {
           // console.log('in setRouteByGeocode, router type is vue, address:', address);
-          if (this.store.state.bufferMode) {
-            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}}).catch(()=>{});
-          } else if (this.config.router.pattern === 'address-and-topic') {
+          // if (this.store.state.bufferMode) {
+          //   this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}}).catch(()=>{});
+          // } else if (this.config.router.pattern === 'address-and-topic') {
+          if (this.config.router.pattern === 'address-and-topic') {
             let currentParams = this.vueRouter.history.current.params;
             console.log('setRouteByGeocode else if is running, currentParams:', currentParams, 'address:', address, 'topic:', topic);
             if (currentParams.address !== address || currentParams.topic !== topic) {
@@ -464,6 +465,12 @@ class Router {
     }
   }
 
+  setRouteByOpaNumber(value) {
+    console.log('setRouteByOpaNumber is running');
+    let p = value;
+    this.vueRouter.push({ query: { p }}).catch(()=>{});
+  }
+
   setRouteByBlockSearch(value) {
     const block = value;
     // const block = this.store.state.geocode.input;
@@ -498,6 +505,18 @@ class Router {
 
       this.vueRouter.push({ query: { shape }}).catch(()=>{});
     }
+  }
+
+  setRouteByBufferSearch() {
+    console.log('pvd router.js setRouteByBufferSearch is running');
+    let geocodeData = this.store.state.geocode.data;
+    let address;
+    if (geocodeData.street_address) {
+      address = geocodeData.street_address;
+    } else if (geocodeData.properties.street_address) {
+      address = geocodeData.properties.street_address;
+    }
+    this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}}).catch(()=>{});
   }
 }
 

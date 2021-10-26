@@ -24,7 +24,7 @@ import {
 
 class Controller {
   constructor(opts) {
-    // console.log('in Controller constructor, opts:', opts);
+    console.log('in Controller constructor, opts:', opts);
     const store = this.store = opts.store;
     const config = this.config = opts.config;
     this.history = window.history;
@@ -172,7 +172,7 @@ class Controller {
     // console.log('parcelResponse:', parcelResponse);
     if (parcelResponse) {
       let bufferShapeResponse = await this.clients.bufferSearch.fetchBufferShape(null, null, parcelResponse, 'pwd', latLng);
-      console.log('runBufferProcess bufferShapeResponse:', bufferShapeResponse);
+      // console.log('runBufferProcess bufferShapeResponse:', bufferShapeResponse);
 
       const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0/query';
       const parameters = {};
@@ -255,14 +255,20 @@ class Controller {
 
     // if (aisResponse.properties.street_address && !this.store.state.bufferMode) {
     if (aisResponse && !this.store.state.bufferMode && !blockSearchCheck) {
-      console.log('handleSearchFormSubmit has aisResponse, about to call setRouteByGeocode with no parameters');
-      this.router.setRouteByGeocode();
+      console.log('aisResponse:', aisResponse, 'handleSearchFormSubmit has aisResponse, about to call setRouteByGeocode with no parameters');
+      if (this.config.router.geocode && this.config.router.geocode === 'opa') {
+        // this.router.setRouteByOpaNumber(aisResponse.properties.opa_account_num);
+      } else if (this.store.state.bufferMode) {
+        this.router.setRouteByBufferSearch(aisResponse);
+      } else {
+        this.router.setRouteByGeocode();
+      }
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
       console.log("block search is true, value:", value);
       this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
-      this.router.setRouteByBlockSearch(value);
+      // this.router.setRouteByBlockSearch(value);
     } else if (!this.store.state.bufferMode) {
       this.dataManager.clearBlockSearch();
       if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
@@ -383,20 +389,21 @@ class Controller {
 
     }
 
-    // this.router.setRouteByGeocode()
-    if (this.config.app && this.config.app.title === 'Property Data Explorer'
-        && this.store.state.lastSearchMethod !== 'owner search'
-        && this.store.state.lastSearchMethod !== 'block search') {
-      if (this.store.state.parcels.pwd) {
-        this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
-      } else {
-        this.router.setRouteByGeocode();
-      }
-    }
-    // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
-    //   this.router.setRouteByGeocode(this.store.state.blockSearch.input);
+    // if (this.config.app && this.config.app.title === 'Property Data Explorer'
+    //     && this.store.state.lastSearchMethod !== 'owner search'
+    //     && this.store.state.lastSearchMethod !== 'block search') {
+    //   if (this.store.state.parcels.pwd) {
+    //     console.log('end of function is calling setRouteByGeocode');
+    //     if (this.config.router.geocode && this.config.router.geocode === 'opa') {
+    //       this.router.setRouteByOpaNumber(this.store.state.parcels.pwd[0].properties.BRT_ID);
+    //     } else {
+    //       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
+    //     }
+    //   } else {
+    //     this.router.setRouteByGeocode();
+    //   }
     // }
-    // console.log('end of handleSearchFormSubmit');
+
   }
 
   async handleMapClick(e) {
@@ -481,7 +488,13 @@ class Controller {
     // console.log('after await aisResponse 2:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     console.log('handleMapClick is calling setRouteByGeocode with no parameters');
-    this.router.setRouteByGeocode();
+    // if (!this.store.state.bufferMode && this.config.router.geocode && this.config.router.geocode === 'opa') {
+    //   this.router.setRouteByOpaNumber(aisResponse.properties.opa_account_num);
+    // } else {
+    if (!this.config.app || !this.config.app.title || this.config.app.title !== 'Property Data Explorer') {
+      this.router.setRouteByGeocode();
+    }
+    // }
 
     // console.log('after await aisResponse 3:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
     // console.log('this.store.state.bufferMode:', this.store.state.bufferMode);
@@ -663,6 +676,31 @@ class Controller {
 
   goToDefaultAddress(address) {
     this.router.routeToAddress(address);
+  }
+
+  setRouteByGeocode() {
+    console.log('controller.js setRouteByGeocode is running');
+    this.router.setRouteByGeocode();
+  }
+
+  setRouteByOpaNumber(opaNumber) {
+    console.log('controller.js setRouteByOpaNumber is running, opaNumber:', opaNumber);
+    this.router.setRouteByOpaNumber(opaNumber);
+  }
+
+  setRouteByBlockSearch(value) {
+    console.log('controller.js setRouteByBlockSearch is running, value:', value);
+    this.router.setRouteByBlockSearch(value);
+  }
+
+  setRouteByShapeSearch() {
+    console.log('controller.js setRouteByShapeSearch is running');
+    this.router.setRouteByShapeSearch();
+  }
+
+  setRouteByBufferSearch() {
+    console.log('controller.js setRouteByBufferSearch is running');
+    this.router.setRouteByBufferSearch();
   }
 
 }
