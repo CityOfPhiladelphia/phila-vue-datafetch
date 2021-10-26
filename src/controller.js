@@ -271,7 +271,7 @@ class Controller {
       console.log("block search is true, value:", value);
       this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
-      this.router.setRouteByBlockSearch(value);
+      // this.router.setRouteByBlockSearch(value);
     } else if (!this.store.state.bufferMode) {
       this.dataManager.clearBlockSearch();
       if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
