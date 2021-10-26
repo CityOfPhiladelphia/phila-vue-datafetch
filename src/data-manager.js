@@ -75,9 +75,11 @@ class DataManager {
     let input = [];
     if (state.lastSearchMethod === 'owner search' ||state.lastSearchMethod === 'block search') {
       let searchType = state.lastSearchMethod === 'owner search'? 'ownerSearch' : 'blockSearch';
-      input = state[searchType].data.filter(object => {
-        return object._featureId === state.activeFeature.featureId;
-      });
+      if (state[searchType].data) {
+        input = state[searchType].data.filter(object => {
+          return object._featureId === state.activeFeature.featureId;
+        });
+      }
     } else if (state.lastSearchMethod === 'shape search' || state.lastSearchMethod === 'buffer search') {
       console.log('state.shapeSearch.data:', state.shapeSearch.data);
       if (state.shapeSearch.data) {
