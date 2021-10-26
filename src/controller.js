@@ -103,7 +103,7 @@ class Controller {
   // }
 
   initializeStatuses(input, searchCategory) {
-    // console.log('initializeStatuses is running', input);
+    console.log('initializeStatuses is running', input, 'searchCategory:', searchCategory);
     this.store.commit('setGeocodeStatus', null);
     if (!searchCategory || searchCategory === 'address') {
       this.store.commit('setGeocodeInput', input);
@@ -243,6 +243,9 @@ class Controller {
     let blockTerms = [ "block", "block:", "blk" ];
     let blockSearchCheck = null;
     blockTerms.map( x=> value.trim().toLowerCase().startsWith(x)? blockSearchCheck = true : "");
+    if (blockSearchCheck === true) {
+      searchCategory = 'block';
+    }
     this.initializeStatuses(value, searchCategory);
     if(searchCategory === "keyword") {
       return;
@@ -268,7 +271,7 @@ class Controller {
       console.log("block search is true, value:", value);
       this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
-      // this.router.setRouteByBlockSearch(value);
+      this.router.setRouteByBlockSearch(value);
     } else if (!this.store.state.bufferMode) {
       this.dataManager.clearBlockSearch();
       if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
