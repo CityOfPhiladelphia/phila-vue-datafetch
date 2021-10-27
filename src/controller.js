@@ -365,11 +365,16 @@ class Controller {
             };
             response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
             // theParcels.push(response);
+          } else {
+            console.log('nothing is happening');
           }
         }
 
-        // console.log('about to call processParcels, response:', response.error);
-        let errorValue = response.error ? true : false;
+        console.log('about to call processParcels, response:', response);
+        let errorValue = false;
+        if (response) {
+          errorValue = response.error ? true : false;
+        }
         this.dataManager.processParcels(errorValue, response, parcelLayer);
         let parcelResponse = response;
 
