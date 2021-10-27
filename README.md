@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.0 - 10-27-2021
+
+* changes for releasing Property Data Explorer
+
 ### 2.1.1 - 8-12-2021
 
 * fix: Change logic for PDE to properly set related feature
