@@ -19,7 +19,7 @@ class Router {
     // check if the router should be silent (i.e. not update the url or listen
     // for hash changes)
     const silent = this.silent = !config.router || !config.router.enabled;
-    console.log('Router constructor, opts:', opts, 'silent:', silent);
+    // console.log('Router constructor, opts:', opts, 'silent:', silent);
 
     // only listen for route changes if routing is enabled
     if (!silent) {
@@ -46,7 +46,6 @@ class Router {
       return this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
     }
     return null;
-
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
@@ -250,7 +249,6 @@ class Router {
   routeToAddress(nextAddress, searchCategory) {
     console.log('Router.routeToAddress, nextAddress:', nextAddress);
     if (nextAddress) {
-      // nextAddress = nextAddress.replace('addr ', '');
       // check against current address
       const prevAddress = this.getAddressFromState();
 
@@ -263,13 +261,6 @@ class Router {
       return prevAddress;
     }
   }
-
-  // routeToNoAddress() {
-  //   console.log('routeToNoAddress is running');
-  //   const nextHash = this.makeHash('noaddress', this.store.state.selectedServices);
-  //   const lastHistoryState = this.history.state;
-  //   this.history.replaceState(lastHistoryState, null, nextHash);
-  // }
 
   routeToOwner(nextOwner, searchCategory) {
     if (nextOwner) {
@@ -374,7 +365,7 @@ class Router {
   // TODO this could have a name that is more declarative like "changeURL" (used to be called "didGeocode")
 
   setRouteByGeocode(testAddress) {
-    console.log('setRouteByGeocode is starting');
+    console.log('setRouteByGeocode is starting, this.store.state.bufferMode:', this.store.state.bufferMode);
     if (this.store.state.activeTopic) {
       this.store.state.routerTopic = this.store.state.activeTopic;
     }
@@ -423,9 +414,10 @@ class Router {
       if (!this.silent) {
         if (this.config.router.type === 'vue') {
           // console.log('in setRouteByGeocode, router type is vue, address:', address);
-          if (this.store.state.bufferMode) {
-            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}}).catch(()=>{});
-          } else if (this.config.router.pattern === 'address-and-topic') {
+          // if (this.store.state.bufferMode) {
+          //   this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}}).catch(()=>{});
+          // } else if (this.config.router.pattern === 'address-and-topic') {
+          if (this.config.router.pattern === 'address-and-topic') {
             let currentParams = this.vueRouter.history.current.params;
             console.log('setRouteByGeocode else if is running, currentParams:', currentParams, 'address:', address, 'topic:', topic);
             if (currentParams.address !== address || currentParams.topic !== topic) {
@@ -464,22 +456,22 @@ class Router {
     }
   }
 
-  setRouteByBlockSearch() {
-    console.log('router.js setRouteByBlockSearch is running');
-    const block = this.store.state.geocode.input;
+  setRouteByOpaNumber(value) {
+    console.log('setRouteByOpaNumber is running');
+    let p = value;
+    this.vueRouter.push({ query: { p }}).catch(()=>{});
+  }
 
+  setRouteByBlockSearch(value) {
+    const block = value;
+    // console.log('router.js setRouteByBlockSearch is running, block:', block, 'value:', value);
     this.vueRouter.push({ query: { block }}).catch(()=>{});
-    // // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
-
   }
 
   setRouteByOwnerSearch() {
     console.log('router.js setRouteByOwnerSearch is running');
     const owner = this.store.state.geocode.input;
-
     this.vueRouter.push({ query: { owner }}).catch(()=>{});
-    // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
-
   }
 
   setRouteByShapeSearch() {
@@ -494,11 +486,20 @@ class Router {
         shape += shapeInput[i].lat.toFixed(5) + ',' + shapeInput[i].lng.toFixed(5) + '],[';
       }
       shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]';
-
-      // console.log('didShapeSearch is running, shape:', shape);
-
       this.vueRouter.push({ query: { shape }}).catch(()=>{});
     }
+  }
+
+  setRouteByBufferSearch() {
+    console.log('pvd router.js setRouteByBufferSearch is running');
+    let geocodeData = this.store.state.geocode.data;
+    let address;
+    if (geocodeData.street_address) {
+      address = geocodeData.street_address;
+    } else if (geocodeData.properties.street_address) {
+      address = geocodeData.properties.street_address;
+    }
+    this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}}).catch(()=>{});
   }
 }
 

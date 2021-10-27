@@ -69,19 +69,24 @@ class DataManager {
   /* DATA FETCHING METHODS */
 
   fetchRowData(){
-    // console.log("Fetching row data")
+    // console.log("Fetching row data");
 
     var state = this.store.state;
     let input = [];
     if (state.lastSearchMethod === 'owner search' ||state.lastSearchMethod === 'block search') {
       let searchType = state.lastSearchMethod === 'owner search'? 'ownerSearch' : 'blockSearch';
-      input = state[searchType].data.filter(object => {
-        return object._featureId === state.activeFeature.featureId;
-      });
+      if (state[searchType].data) {
+        input = state[searchType].data.filter(object => {
+          return object._featureId === state.activeFeature.featureId;
+        });
+      }
     } else if (state.lastSearchMethod === 'shape search' || state.lastSearchMethod === 'buffer search') {
-      input = state.shapeSearch.data.rows.filter(object => {
-        return object._featureId === state.activeFeature.featureId;
-      });
+      console.log('state.shapeSearch.data:', state.shapeSearch.data);
+      if (state.shapeSearch.data) {
+        input = state.shapeSearch.data.rows.filter(object => {
+          return object._featureId === state.activeFeature.featureId;
+        });
+      }
     } else {
       let data;
       if (state.geocode.related != null && state.geocode.data._featureId != state.activeModal.featureId ) {
@@ -523,7 +528,7 @@ class DataManager {
   }
 
   resetData() {
-    console.log('data-manager.js, resetData is running');
+    // console.log('data-manager.js, resetData is running');
     const dataSources = this.config.dataSources || {};
 
     for (let dataSourceKey of Object.keys(dataSources)) {
@@ -618,7 +623,7 @@ class DataManager {
 
     // reset data sources
     if (this.store.state.sources && this.config.resetDataOnGeocode === undefined || this.store.state.sources && this.config.resetDataOnGeocode != false) {
-      console.log('data-manager.js, resetGeocode is calling resetData, this.config.resetDataOnGeocode:', this.config.resetDataOnGeocode);
+      // console.log('data-manager.js, resetGeocode is calling resetData, this.config.resetDataOnGeocode:', this.config.resetDataOnGeocode);
       this.resetData();
     }
   }
@@ -814,7 +819,7 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
-    console.log('data-manager.js getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    // console.log('data-manager.js getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     if( latlng != null) {
       const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
       return new Promise(function(resolve, reject) {
@@ -830,7 +835,7 @@ class DataManager {
         };
 
         axios.get(url, { params }).then(function(response, error) {
-          console.log('end of getParcelsById response:', response);//, 'featureCollection:', featureCollection);
+          // console.log('end of getParcelsById response:', response);
           if (error) {
             reject(error);
           } else {
@@ -840,7 +845,6 @@ class DataManager {
       });
     }
     return;
-
   }
 
   getParcelsByShape(latlng, parcelLayer) {

@@ -347,6 +347,7 @@ const pvdStore = {
         state.blockSearch.status = payload;
       },
       setBlockSearchInput(state, payload) {
+        console.log('setBlockSearchInput is running, payload:', payload);
         state.blockSearch.input = payload;
       },
       setBlockSearchData(state, payload) {

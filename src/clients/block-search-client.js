@@ -45,7 +45,7 @@ class BlockSearchClient extends BaseClient {
       //   console.log("pwd parcels: ", this.store.state.parcels.pwd);
       // }
       let record = units[unit][0].properties;
-      bldgRecordPush.properties.opa_address = 
+      bldgRecordPush.properties.opa_address =
         ( record.address_high === null ? record.address_low :
           record.address_low === null ? record.address_high :
             record.address_high + "-" + record.address_low ) +
@@ -69,7 +69,7 @@ class BlockSearchClient extends BaseClient {
 
 
   fetch(input) {
-    // console.log('block search client fetch', input);
+    console.log('block search client fetch, input:', input);
 
     const store = this.store;
     // console.log(store.state.parcels.pwd);
@@ -94,14 +94,14 @@ class BlockSearchClient extends BaseClient {
   }
 
   success(response) {
-    // console.log('block search success', this, response);
+    console.log('block search success, this:', this, 'response:', response);
 
     const store = this.store;
     const data = response.data;
     const url = response.config.url;
     // let features = data.features;
     let params = response.config.params;
-    
+
 
     if (!data.features || data.features.length < 1) {
       // console.log('block search got no features', data);
@@ -124,21 +124,21 @@ class BlockSearchClient extends BaseClient {
           // console.log('response:', pageResponse, 'features:', features);
         }
       }
-      
+
 
       // console.log(features);
-      
-      
+
+
       // this.store.commit('setCondoUnitsStatus', 'success');
       // return feature;
       // }
       // console.log("finished loop");
       params.page = 1;
-      
-      
+
+
       let units = features.filter(a => a.properties.unit_num != "");
       features = this.evaluateDataForUnits(units, features);
-      
+
       // console.log(features);
 
 
@@ -149,12 +149,12 @@ class BlockSearchClient extends BaseClient {
       store.commit('setBlockSearchStatus', 'success');
       return features;
     }
-    
+
     let features = data.features;
 
     let pages = Math.ceil(data.total_size / 100);
     // console.log("pages: ", pages, features);
-    getPages = getPages.bind(this); 
+    getPages = getPages.bind(this);
     // console.log("line before loop");
     return features = getPages(features);
   }

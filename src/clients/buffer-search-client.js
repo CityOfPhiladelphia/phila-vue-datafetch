@@ -107,15 +107,15 @@ class BufferSearchClient extends BaseClient {
   }
 
   fetchBySpatialQuery(url, relationship, xyCoords, parameters = {}, calculateDistancePt, options = {}) {
-    console.log('bufferSearch fetch esri spatial query, url:', url, 'relationship:', relationship, 'xyCoords:', xyCoords, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    // console.log('bufferSearch fetch esri spatial query, url:', url, 'relationship:', relationship, 'xyCoords:', xyCoords, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
     const parcelLayer = [];
 
     let xyCoords2 = [[ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]];
     var i;
-    console.log('xyCoords:', xyCoords, 'xyCoords.length:', xyCoords.length);
+    // console.log('xyCoords:', xyCoords, 'xyCoords.length:', xyCoords.length);
     for (i = 0; i < xyCoords.length; i++) {
       if (i%3 == 0) {
-        console.log('i:', i);
+        // console.log('i:', i);
         let xyCoord2 = [ parseFloat(xyCoords[i][0].toFixed(6)), parseFloat(xyCoords[i][1].toFixed(6)) ];
         xyCoords2.push(xyCoord2);
       }

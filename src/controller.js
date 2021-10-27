@@ -103,7 +103,7 @@ class Controller {
   // }
 
   initializeStatuses(input, searchCategory) {
-    // console.log('initializeStatuses is running', input);
+    console.log('initializeStatuses is running', input, 'searchCategory:', searchCategory);
     this.store.commit('setGeocodeStatus', null);
     if (!searchCategory || searchCategory === 'address') {
       this.store.commit('setGeocodeInput', input);
@@ -172,7 +172,7 @@ class Controller {
     // console.log('parcelResponse:', parcelResponse);
     if (parcelResponse) {
       let bufferShapeResponse = await this.clients.bufferSearch.fetchBufferShape(null, null, parcelResponse, 'pwd', latLng);
-      console.log('runBufferProcess bufferShapeResponse:', bufferShapeResponse);
+      // console.log('runBufferProcess bufferShapeResponse:', bufferShapeResponse);
 
       const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0/query';
       const parameters = {};
@@ -216,7 +216,6 @@ class Controller {
       return;
     }
     console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
-    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory, 'this:', this);
 
     this.dataManager.resetData();
     // Added specifically to reset the condo units not being cleared elsewhere on hash change.
@@ -235,14 +234,15 @@ class Controller {
       this.store.commit('setParcelData', {});
       this.store.commit('setLastSearchMethod', 'geocode');
       this.store.commit('setBufferShape', null);
-      // console.log('handleSearchFormSubmit about to call setRouteByGeocode at the start');
-      // this.router.setRouteByGeocode();
       return;
     }
 
     let blockTerms = [ "block", "block:", "blk" ];
     let blockSearchCheck = null;
     blockTerms.map( x=> value.trim().toLowerCase().startsWith(x)? blockSearchCheck = true : "");
+    if (blockSearchCheck === true) {
+      searchCategory = 'block';
+    }
     this.initializeStatuses(value, searchCategory);
     if(searchCategory === "keyword") {
       return;
@@ -253,16 +253,20 @@ class Controller {
     let aisResponse = await this.clients.geocode.fetch(value);
     // console.log('after await aisResponse:', aisResponse, 'aisResponse.properties.street_address:', aisResponse.properties.street_address);//, 'this.clients:', this.clients);
 
-    // if (aisResponse.properties.street_address && !this.store.state.bufferMode) {
     if (aisResponse && !this.store.state.bufferMode && !blockSearchCheck) {
-      console.log('handleSearchFormSubmit has aisResponse, about to call setRouteByGeocode with no parameters');
-      this.router.setRouteByGeocode();
+      // console.log('aisResponse:', aisResponse, 'handleSearchFormSubmit has aisResponse, about to call setRouteByGeocode with no parameters');
+      if (this.config.router.geocode && this.config.router.geocode === 'opa') {
+        // this.router.setRouteByOpaNumber(aisResponse.properties.opa_account_num);
+      } else if (this.store.state.bufferMode) {
+        this.router.setRouteByBufferSearch(aisResponse);
+      } else {
+        this.router.setRouteByGeocode();
+      }
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
-      // console.log("block search is true");
+      // console.log('block search is true, value:', value);
       this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
-      this.router.setRouteByBlockSearch();
     } else if (!this.store.state.bufferMode) {
       this.dataManager.clearBlockSearch();
       if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
@@ -318,7 +322,7 @@ class Controller {
       let ids;
       if(parcelLayer) {
         if (aisResponse.properties) {
-          console.log('getting ids, first if', aisResponse.properties);
+          // console.log('getting ids, first if', aisResponse.properties);
           ids = aisResponse.properties[parcelIdInGeocoder];
         } else if (this.store.state.ownerSearch.data) {
           // console.log('getting ids, middle if')
@@ -328,13 +332,13 @@ class Controller {
           ids = this.store.state.blockSearch.data.map(item => item.properties.pwd_parcel_id );
           ids = ids.filter( id => id != "" );
         } else {
-          console.log('getting ids, else', aisResponse);
+          // console.log('getting ids, else', aisResponse);
           ids = aisResponse.map(item => item.properties.pwd_parcel_id !== "" ? item.properties.pwd_parcel_id : item.properties.dor_parcel_id);
           ids = ids.filter( id => id != "" );
         }
-  
-        console.log('about to get parcels, ids:', ids);
-  
+
+        // console.log('about to get parcels, ids:', ids);
+
         if (ids && ids.length > 0) {
           // console.log('it has ids');
           response = await this.dataManager.getParcelsById(ids, parcelLayer);
@@ -347,7 +351,7 @@ class Controller {
           // console.log('theParcels:', theParcels);
           // TODO - catch error before this if necessary
         } else {
-          console.log('ids length is 0');
+          // console.log('ids length is 0');
           if (configForParcelLayer.getByLatLngIfIdFails) {
             // console.log(parcelLayer, 'Id failed - had to get by LatLng')
             // console.log('in if lastSearchMethod === geocode, parcelLayer:', parcelLayer);
@@ -361,42 +365,46 @@ class Controller {
             };
             response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
             // theParcels.push(response);
+          } else {
+            console.log('nothing is happening');
           }
         }
-  
-        console.log('about to call processParcels, response:', response.error);
-        let errorValue = response.error ? true : false;
+
+        console.log('about to call processParcels, response:', response);
+        let errorValue = false;
+        if (response) {
+          errorValue = response.error ? true : false;
+        }
         this.dataManager.processParcels(errorValue, response, parcelLayer);
-        // this.dataManager.resetData();
         let parcelResponse = response;
-  
+
         if (this.store.state.bufferMode) {
           await this.runBufferProcess(response);
         }
-  
+
         // console.log('still going, parcelResponse:', parcelResponse);
         this.dataManager.fetchData();
 
       } else {
         console.log("No parcel layers.");
       }
-
     }
 
-    // this.router.setRouteByGeocode()
-    if (this.config.app && this.config.app.title === 'Property Data Explorer'
-        && this.store.state.lastSearchMethod !== 'owner search'
-        && this.store.state.lastSearchMethod !== 'block search') {
-      if (this.store.state.parcels.pwd) {
-        this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
-      } else {
-        this.router.setRouteByGeocode();
-      }
-    } 
-    // if (this.config.app && this.config.app.title === 'Property Data Explorer' && this.store.state.lastSearchMethod !== 'block search') {
-    //   this.router.setRouteByGeocode(this.store.state.blockSearch.input);
+    // if (this.config.app && this.config.app.title === 'Property Data Explorer'
+    //     && this.store.state.lastSearchMethod !== 'owner search'
+    //     && this.store.state.lastSearchMethod !== 'block search') {
+    //   if (this.store.state.parcels.pwd) {
+    //     console.log('end of function is calling setRouteByGeocode');
+    //     if (this.config.router.geocode && this.config.router.geocode === 'opa') {
+    //       this.router.setRouteByOpaNumber(this.store.state.parcels.pwd[0].properties.BRT_ID);
+    //     } else {
+    //       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
+    //     }
+    //   } else {
+    //     this.router.setRouteByGeocode();
+    //   }
     // }
-    // console.log('end of handleSearchFormSubmit');
+
   }
 
   async handleMapClick(e) {
@@ -481,7 +489,13 @@ class Controller {
     // console.log('after await aisResponse 2:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     console.log('handleMapClick is calling setRouteByGeocode with no parameters');
-    this.router.setRouteByGeocode();
+    // if (!this.store.state.bufferMode && this.config.router.geocode && this.config.router.geocode === 'opa') {
+    //   this.router.setRouteByOpaNumber(aisResponse.properties.opa_account_num);
+    // } else {
+    if (!this.config.app || !this.config.app.title || this.config.app.title !== 'Property Data Explorer') {
+      this.router.setRouteByGeocode();
+    }
+    // }
 
     // console.log('after await aisResponse 3:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
     // console.log('this.store.state.bufferMode:', this.store.state.bufferMode);
@@ -510,7 +524,7 @@ class Controller {
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
       }
     }
-    // console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
+    console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     // this.dataManager.resetData();
     // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo);
@@ -663,6 +677,26 @@ class Controller {
 
   goToDefaultAddress(address) {
     this.router.routeToAddress(address);
+  }
+
+  setRouteByGeocode() {
+    this.router.setRouteByGeocode();
+  }
+
+  setRouteByOpaNumber(opaNumber) {
+    this.router.setRouteByOpaNumber(opaNumber);
+  }
+
+  setRouteByBlockSearch(value) {
+    this.router.setRouteByBlockSearch(value);
+  }
+
+  setRouteByShapeSearch() {
+    this.router.setRouteByShapeSearch();
+  }
+
+  setRouteByBufferSearch() {
+    this.router.setRouteByBufferSearch();
   }
 
 }
