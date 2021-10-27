@@ -19,7 +19,7 @@ class Router {
     // check if the router should be silent (i.e. not update the url or listen
     // for hash changes)
     const silent = this.silent = !config.router || !config.router.enabled;
-    console.log('Router constructor, opts:', opts, 'silent:', silent);
+    // console.log('Router constructor, opts:', opts, 'silent:', silent);
 
     // only listen for route changes if routing is enabled
     if (!silent) {
@@ -46,7 +46,6 @@ class Router {
       return this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
     }
     return null;
-
   }
 
   makeHash(firstRouteParameter, secondRouteParameter) {
@@ -250,7 +249,6 @@ class Router {
   routeToAddress(nextAddress, searchCategory) {
     console.log('Router.routeToAddress, nextAddress:', nextAddress);
     if (nextAddress) {
-      // nextAddress = nextAddress.replace('addr ', '');
       // check against current address
       const prevAddress = this.getAddressFromState();
 
@@ -263,13 +261,6 @@ class Router {
       return prevAddress;
     }
   }
-
-  // routeToNoAddress() {
-  //   console.log('routeToNoAddress is running');
-  //   const nextHash = this.makeHash('noaddress', this.store.state.selectedServices);
-  //   const lastHistoryState = this.history.state;
-  //   this.history.replaceState(lastHistoryState, null, nextHash);
-  // }
 
   routeToOwner(nextOwner, searchCategory) {
     if (nextOwner) {
@@ -473,19 +464,14 @@ class Router {
 
   setRouteByBlockSearch(value) {
     const block = value;
-    // const block = this.store.state.geocode.input;
-    console.log('router.js setRouteByBlockSearch is running, block:', block, 'value:', value);
+    // console.log('router.js setRouteByBlockSearch is running, block:', block, 'value:', value);
     this.vueRouter.push({ query: { block }}).catch(()=>{});
-    // // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
   }
 
   setRouteByOwnerSearch() {
     console.log('router.js setRouteByOwnerSearch is running');
     const owner = this.store.state.geocode.input;
-
     this.vueRouter.push({ query: { owner }}).catch(()=>{});
-    // this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'owner': owner }}});
-
   }
 
   setRouteByShapeSearch() {
@@ -500,9 +486,6 @@ class Router {
         shape += shapeInput[i].lat.toFixed(5) + ',' + shapeInput[i].lng.toFixed(5) + '],[';
       }
       shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]';
-
-      // console.log('didShapeSearch is running, shape:', shape);
-
       this.vueRouter.push({ query: { shape }}).catch(()=>{});
     }
   }
