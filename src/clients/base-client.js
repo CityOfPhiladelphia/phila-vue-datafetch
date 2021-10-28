@@ -109,26 +109,29 @@ class BaseClient {
       data.rows = data.rows.filter(a => !Object.keys(units).includes(a.pwd_parcel_id));
     }
 
-    console.log('units:', units, 'units.length:', units.length, 'Data:', data );
+    // console.log('units:', units, 'units.length:', units.length, 'Data:', data );
     this.store.commit('setUnits', units);
 
-    if (units.length) {
-      for (let unit in units) {
-        // console.log("Unit: ", units[unit])
-        for (let i in bldgRecord) {
-          bldgRecord[i] = "";
-        }
-        let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
-        bldgRecordPush.owner_1 = "Condominium (" + units[unit].length + " Units)";
-        bldgRecordPush.owner_2 = null;
-        console.log('right before location');
-        bldgRecordPush.location = units[unit][0].location;
-        console.log('right after location');
-        bldgRecordPush.condo = true;
-        bldgRecordPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
-        data.rows.push(bldgRecordPush);
+    // this is the location of a bug that causes you to not be able to do a shape search of a single property after
+    // exporting a csv in property-data-explorer
+    // we have decided to leave this bug in the app, since nobody will use the shape search for searching single properties
+    // if (units.length > 0) {
+    for (let unit in units) {
+      // console.log("Unit: ", units[unit])
+      for (let i in bldgRecord) {
+        bldgRecord[i] = "";
       }
+      let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
+      bldgRecordPush.owner_1 = "Condominium (" + units[unit].length + " Units)";
+      bldgRecordPush.owner_2 = null;
+      // console.log('right before location');
+      bldgRecordPush.location = units[unit][0].location;
+      // console.log('right after location');
+      bldgRecordPush.condo = true;
+      bldgRecordPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
+      data.rows.push(bldgRecordPush);
     }
+    // }
     return data;
   }
 }

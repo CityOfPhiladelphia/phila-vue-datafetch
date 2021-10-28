@@ -29,6 +29,11 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.2 - 10-28-2021
+
+* undoes fix of weird bug with shape searching a single building after exporting a csv
+* documents reason for leaving the bug in place in the comments
+
 ### 2.2.1 - 10-28-2021
 
 * fixes weird bug with shape searching a single building after exporting a csv
