@@ -93,7 +93,7 @@ class BaseClient {
   }
 
   evaluateDataForUnits(data) {
-    // console.log('base-client evaluateDataForUnits data:', data);
+    console.log('base-client evaluateDataForUnits data:', data);
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data.rows, a => a.pwd_parcel_id);
@@ -109,21 +109,25 @@ class BaseClient {
       data.rows = data.rows.filter(a => !Object.keys(units).includes(a.pwd_parcel_id));
     }
 
-    // console.log("Units List: ", units, "Data: ", data )
+    console.log('units:', units, 'units.length:', units.length, 'Data:', data );
     this.store.commit('setUnits', units);
 
-    for (let unit in units) {
-      // console.log("Unit: ", units[unit])
-      for (let i in bldgRecord) {
-        bldgRecord[i] = "";
+    if (units.length) {
+      for (let unit in units) {
+        // console.log("Unit: ", units[unit])
+        for (let i in bldgRecord) {
+          bldgRecord[i] = "";
+        }
+        let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
+        bldgRecordPush.owner_1 = "Condominium (" + units[unit].length + " Units)";
+        bldgRecordPush.owner_2 = null;
+        console.log('right before location');
+        bldgRecordPush.location = units[unit][0].location;
+        console.log('right after location');
+        bldgRecordPush.condo = true;
+        bldgRecordPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
+        data.rows.push(bldgRecordPush);
       }
-      let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
-      bldgRecordPush.owner_1 = "Condominium (" + units[unit].length + " Units)";
-      bldgRecordPush.owner_2 = null;
-      bldgRecordPush.location = units[unit][0].location;
-      bldgRecordPush.condo = true;
-      bldgRecordPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
-      data.rows.push(bldgRecordPush);
     }
     return data;
   }

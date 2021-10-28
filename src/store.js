@@ -370,10 +370,11 @@ const pvdStore = {
         state.shapeSearch.input = payload;
       },
       setShapeSearchData(state, payload) {
+        console.log('store.js, setShapeSearchData is running, payload:', payload);
         state.shapeSearch.data = payload;
       },
       setShapeSearchDataPush(state, payload) {
-        // console.log('store.js, setShapeSearchDataPush is running, payload:', payload);
+        console.log('store.js, setShapeSearchDataPush is running, payload:', payload);
         let objIndex = parseInt(payload.objIndex);
         delete payload.objIndex;
         state.shapeSearch.data.rows.splice(objIndex + 1, 0, ...payload);
