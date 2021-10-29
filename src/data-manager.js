@@ -239,7 +239,7 @@ class DataManager {
     if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true && this.store.state.condoUnits.units.length) {
     // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
 
-      console.log('in if, this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
+      // console.log('in if, this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
       if (Array.isArray(this.store.state.parcels.pwd)) {
         geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
       } else {
@@ -250,7 +250,7 @@ class DataManager {
       // ownerSearchObj = geocodeObj;
 
     } else {
-      console.log('fetchData, in else, setting geocodeObj');
+      // console.log('fetchData, in else, setting geocodeObj');
       geocodeObj = this.store.state.geocode.data;
       ownerSearchObj = this.store.state.ownerSearch.data;
       blockSearchObj = this.store.state.blockSearch.data;
@@ -281,15 +281,15 @@ class DataManager {
     }
 
     let dataSourceKeys = Object.entries(dataSources);
-    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
-    console.log('geocodeObj:', geocodeObj, 'blockSearchObj:', blockSearchObj, 'shapeSearchObj:', shapeSearchObj);
+    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    // console.log('geocodeObj:', geocodeObj, 'blockSearchObj:', blockSearchObj, 'shapeSearchObj:', shapeSearchObj);
 
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
     // even if the property is not in OPA and AIS
     if (!geocodeObj && !ownerSearchObj && !blockSearchObj  && !shapeSearchObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
-        console.log('inside if and filter, dataSourceKey:', dataSourceKey);
+        // console.log('inside if and filter, dataSourceKey:', dataSourceKey);
         if (dataSourceKey[1].dependent) {
           if (dataSourceKey[1].dependent === 'parcel' || dataSourceKey[1].dependent === 'none') {
             return true;
@@ -298,7 +298,7 @@ class DataManager {
       });
     }
 
-    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
@@ -306,7 +306,7 @@ class DataManager {
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
-      console.log('targetsDef:', targetsDef);
+      // console.log('targetsDef:', targetsDef);
 
       // if the data sources specifies a features getter, use that to source
       // features for evaluating params/forming requests. otherwise,
@@ -316,7 +316,7 @@ class DataManager {
       let targetsFn;
 
       if (targetsDef) {
-        console.log('in fetchData, IF targetsDef is true, targetsDef:', targetsDef);
+        // console.log('in fetchData, IF targetsDef is true, targetsDef:', targetsDef);
         targetsFn = targetsDef.get;
         targetIdFn = targetsDef.getTargetId;
 
@@ -369,10 +369,10 @@ class DataManager {
         targets = [ geocodeObj ];
       }
 
-      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
+      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
-        console.log('fetchData, target:', target, 'target.length:', target.length);
+        // console.log('fetchData, target:', target, 'target.length:', target.length);
 
         // get id of target
         let targetId;
@@ -384,13 +384,13 @@ class DataManager {
 
         // check if it's ready
         const isReady = this.checkDataSourceReady(dataSourceKey, dataSource, targetId);
-        console.log('isReady:', isReady);
+        // console.log('isReady:', isReady);
         if (!isReady) {
-          console.log('not ready');
+          // console.log('not ready');
           continue;
         }
 
-        console.log('still going after isReady test');
+        // console.log('still going after isReady test');
 
         // update status to `waiting`
         const setSourceStatusOpts = {
