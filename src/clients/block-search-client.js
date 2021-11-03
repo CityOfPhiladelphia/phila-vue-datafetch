@@ -160,7 +160,7 @@ class BlockSearchClient extends BaseClient {
   }
 
   error(error) {
-    // console.log('block search error', error);
+    console.log('block search error', error);
 
     const store = this.store;
     store.commit('setBlockSearchStatus', 'error');

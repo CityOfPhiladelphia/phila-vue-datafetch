@@ -93,7 +93,6 @@ class BaseClient {
   }
 
   evaluateDataForUnits(data) {
-    console.log('base-client evaluateDataForUnits data:', data);
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data.rows, a => a.pwd_parcel_id);
@@ -101,6 +100,7 @@ class BaseClient {
     for (let item in groupedData){
       groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) : dataList.push(groupedData[item][0]);
     }
+    console.log('base-client evaluateDataForUnits data:', data, 'groupedData:', groupedData, 'units:', units, 'dataList:', dataList);
 
     let bldgRecord = JSON.parse(JSON.stringify(data.rows[0]));
 
@@ -115,9 +115,13 @@ class BaseClient {
     // this is the location of a bug that causes you to not be able to do a shape search of a single property after
     // exporting a csv in property-data-explorer
     // we have decided to leave this bug in the app, since nobody will use the shape search for searching single properties
-    // if (units.length > 0) {
+    // if (this.store.state.lastSearchMethod === 'shape search' && units.length > 0) {
+    console.log('base-client evaluateDataForUnits, units:', units, 'typeof(units):', typeof(units));
     for (let unit in units) {
-      // console.log("Unit: ", units[unit])
+      console.log('inside units loop, units:', units, 'units[unit]:', units[unit], 'typeof(units[unit]):', typeof(units[unit]));
+      if (typeof(units[unit]) === 'function') {
+        break;
+      }
       for (let i in bldgRecord) {
         bldgRecord[i] = "";
       }
@@ -131,6 +135,22 @@ class BaseClient {
       bldgRecordPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
       data.rows.push(bldgRecordPush);
     }
+    // } else if (this.store.state.lastSearchMethod !== 'shape search') {
+    //   for (let unit in units) {
+    //     // console.log("Unit: ", units[unit])
+    //     for (let i in bldgRecord) {
+    //       bldgRecord[i] = "";
+    //     }
+    //     let bldgRecordPush = JSON.parse(JSON.stringify(bldgRecord));
+    //     bldgRecordPush.owner_1 = "Condominium (" + units[unit].length + " Units)";
+    //     bldgRecordPush.owner_2 = null;
+    //     // console.log('right before location');
+    //     bldgRecordPush.location = units[unit][0].location;
+    //     // console.log('right after location');
+    //     bldgRecordPush.condo = true;
+    //     bldgRecordPush.pwd_parcel_id = units[unit][0].pwd_parcel_id;
+    //     data.rows.push(bldgRecordPush);
+    //   }
     // }
     return data;
   }
