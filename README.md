@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.3 - 11/15/2021
+
+* fixes all bugs involving exporting csv's in property data explorer
+
 ### 2.2.2 - 10-28-2021
 
 * undoes fix of weird bug with shape searching a single building after exporting a csv

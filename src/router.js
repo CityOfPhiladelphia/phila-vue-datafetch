@@ -430,7 +430,9 @@ class Router {
             }
           } else {
             console.log('vueRouter push is being called with query');
-            this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}}).catch(()=>{});
+            if (!this.store.state.bufferMode) {
+              this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'address': address }}}).catch(()=>{});
+            }
           }
         } else {
           // console.log('in setRouteByGeocode, router type is not vue');
