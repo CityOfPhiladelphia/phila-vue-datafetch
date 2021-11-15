@@ -100,7 +100,7 @@ class BaseClient {
     for (let item in groupedData){
       groupedData[item].length > 1 ? units.push.apply(units,groupedData[item]) : dataList.push(groupedData[item][0]);
     }
-    console.log('base-client evaluateDataForUnits data:', data, 'groupedData:', groupedData, 'units:', units, 'dataList:', dataList);
+    // console.log('base-client evaluateDataForUnits data:', data, 'groupedData:', groupedData, 'units:', units, 'dataList:', dataList);
 
     let bldgRecord = JSON.parse(JSON.stringify(data.rows[0]));
 
@@ -116,9 +116,9 @@ class BaseClient {
     // exporting a csv in property-data-explorer
     // we have decided to leave this bug in the app, since nobody will use the shape search for searching single properties
     // if (this.store.state.lastSearchMethod === 'shape search' && units.length > 0) {
-    console.log('base-client evaluateDataForUnits, units:', units, 'typeof(units):', typeof(units));
+    // console.log('base-client evaluateDataForUnits, units:', units, 'typeof(units):', typeof(units));
     for (let unit in units) {
-      console.log('inside units loop, units:', units, 'units[unit]:', units[unit], 'typeof(units[unit]):', typeof(units[unit]));
+      // console.log('inside units loop, units:', units, 'units[unit]:', units[unit], 'typeof(units[unit]):', typeof(units[unit]));
       if (typeof(units[unit]) === 'function') {
         break;
       }

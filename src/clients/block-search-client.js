@@ -8,7 +8,7 @@ class BlockSearchClient extends BaseClient {
 
 
   evaluateDataForUnits(data, features) {
-    // console.log('base-client evaluateDataForUnits data:', data);
+    // console.log('block-search-client evaluateDataForUnits data:', data);
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
@@ -34,6 +34,9 @@ class BlockSearchClient extends BaseClient {
 
     for (let unit in units) {
       // console.log(unit);
+      if (typeof(units[unit]) === 'function') {
+        break;
+      }
       for (let i in bldgRecord.properties) {
         bldgRecord.properties[i] = "";
       }
