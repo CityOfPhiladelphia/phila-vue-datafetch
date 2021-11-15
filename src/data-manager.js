@@ -564,7 +564,7 @@ class DataManager {
   }
 
   resetGeocodeOnly() {
-    // console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
+    console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
     // reset geocode
     this.store.commit('setClickCoords', null);
     this.store.commit('setGeocodeStatus', null);
@@ -577,7 +577,7 @@ class DataManager {
   // this gets called when the current geocoded address is wiped out, such as
   // when you click on the "Atlas" title and it navigates to an empty hash
   resetGeocode() {
-    // console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
+    console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
     // reset geocode
     this.store.commit('setClickCoords', null);
     this.store.commit('setGeocodeStatus', null);
