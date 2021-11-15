@@ -94,8 +94,9 @@ class GeocodeClient extends BaseClient {
   }
 
   success(response) {
-    console.log('geocode success is running, response:', response, response.data.features[0].properties.opa_account_num);
-    // this.dataManager.resetGeocodeOnly();
+    let status = 'waiting';
+    // console.log('geocode success is running, response:', response, response.data.features[0].properties.opa_account_num, 'about to call resetGeocodeOnly, status:', status);
+    this.dataManager.resetGeocodeOnly(status);
     const store = this.store;
     const data = response.data;
     const url = response.config.url;
@@ -167,7 +168,6 @@ class GeocodeClient extends BaseClient {
 
           console.log('getPages if is running, feature:', feature);
           feature.condo = true;
-          this.dataManager.resetGeocodeOnly();
           store.commit('setGeocodeData', feature);
           store.commit('setGeocodeStatus', 'success');
           // console.log('getPages else is still running 2');
@@ -179,7 +179,6 @@ class GeocodeClient extends BaseClient {
           // console.log('getPages else is running, feature:', feature);
           this.setFeatureProperties(feature, totalUnits);
 
-          this.dataManager.resetGeocodeOnly();
           // console.log('getPages else is still running 1');
           store.commit('setGeocodeData', feature);
           store.commit('setGeocodeStatus', 'success');
@@ -218,7 +217,6 @@ class GeocodeClient extends BaseClient {
     // feature['condo'] = false;
 
     console.log('geocode-client success 2, feature:', feature, feature.condo, 'relatedFeatures:', relatedFeatures);
-    this.dataManager.resetGeocodeOnly();
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');

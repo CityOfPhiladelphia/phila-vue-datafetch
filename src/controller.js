@@ -79,8 +79,8 @@ class Controller {
     this.dataManager.resetGeocode();
   }
 
-  resetGeocodeOnly() {
-    this.dataManager.resetGeocodeOnly();
+  resetGeocodeOnly(optionalStatus) {
+    this.dataManager.resetGeocodeOnly(optionalStatus);
   }
 
   // filterInputSubmit(value, process, searchCategory) {

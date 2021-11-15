@@ -563,11 +563,15 @@ class DataManager {
     this.store.commit('setShapeSearchStatus', null);
   }
 
-  resetGeocodeOnly() {
-    console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels);
+  resetGeocodeOnly(optionalStatus) {
+    console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels, 'optionalStatus:', optionalStatus);
     // reset geocode
     this.store.commit('setClickCoords', null);
-    this.store.commit('setGeocodeStatus', null);
+    if (optionalStatus) {
+      this.store.commit('setGeocodeStatus', optionalStatus);
+    } else {
+      this.store.commit('setGeocodeStatus', null);
+    }
     this.store.commit('setGeocodeData', null);
     this.store.commit('setGeocodeRelated', null);
     this.store.commit('setUnits', null);
