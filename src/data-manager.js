@@ -853,12 +853,20 @@ class DataManager {
   }
 
   getParcelsByShape(latlng, parcelLayer) {
-    console.log('getParcelsByShape is running, latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer);
+    console.log('getParcelsByShape is running, latlng:', latlng, 'latlng._latlngs:', latlng._latlngs, 'parcelLayer:', parcelLayer);
     let theLatLngs = [];
-    for (let latLng of latlng._latlngs[0]) {
-      theLatLngs.push([ latLng.lng, latLng.lat ]);
+    if (latlng._latlngs) {
+      for (let latLng of latlng._latlngs[0]) {
+        theLatLngs.push([ latLng.lng, latLng.lat ]);
+      }
+      theLatLngs.push([ latlng._latlngs[0][0].lng, latlng._latlngs[0][0].lat ]);
+    } else {
+      theLatLngs = latlng;
     }
-    theLatLngs.push([ latlng._latlngs[0][0].lng, latlng._latlngs[0][0].lat ]);
+
+
+
+
     const url = this.config.map.featureLayers.pwdParcels.url + '/query?';
 
     let theGeom = { "rings": [ theLatLngs ], "spatialReference": { "wkid": 4326 }};

@@ -408,7 +408,7 @@ class Controller {
   }
 
   async handleMapClick(e) {
-    // console.log('handle map click', e, this);
+    console.log('controller.js handle map click', e, this);
 
     // TODO figure out why form submits via enter key are generating a map
     // click event and remove this
