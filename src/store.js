@@ -343,7 +343,7 @@ const pvdStore = {
       },
 
       setBlockSearchStatus(state, payload) {
-        //console.log('setShapeSearchStatus is running, payload:', payload);
+        //console.log('setBlockSearchStatus is running, payload:', payload);
         state.blockSearch.status = payload;
       },
       setBlockSearchInput(state, payload) {

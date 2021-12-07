@@ -864,9 +864,6 @@ class DataManager {
       theLatLngs = latlng;
     }
 
-
-
-
     const url = this.config.map.featureLayers.pwdParcels.url + '/query?';
 
     let theGeom = { "rings": [ theLatLngs ], "spatialReference": { "wkid": 4326 }};
