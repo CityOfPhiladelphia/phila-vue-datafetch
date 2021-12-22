@@ -563,6 +563,12 @@ class DataManager {
     this.store.commit('setShapeSearchStatus', null);
   }
 
+  resetBlockSearch() {
+    this.store.commit('setBlockSearchInput', null);
+    this.store.commit('setBlockSearchData', null);
+    this.store.commit('setBlockSearchStatus', null);
+  }
+
   resetGeocodeOnly(optionalStatus) {
     console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels, 'optionalStatus:', optionalStatus);
     // reset geocode

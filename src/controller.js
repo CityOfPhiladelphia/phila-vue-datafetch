@@ -221,6 +221,7 @@ class Controller {
     // Added specifically to reset the condo units not being cleared elsewhere on hash change.
     this.dataManager.resetShape();
     this.dataManager.removeShape();
+    this.dataManager.resetBlockSearch();
     this.resetGeocode();
 
     if(value === '' || value === null) {
@@ -455,6 +456,7 @@ class Controller {
     this.dataManager.resetData();
     this.dataManager.resetShape();
     this.dataManager.removeShape();
+    this.dataManager.resetBlockSearch();
 
     if (this.store.state.lastSearchMethod !== 'buffer search') {
       // console.log('in didGetParcels, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
