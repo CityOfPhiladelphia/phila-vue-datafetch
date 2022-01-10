@@ -824,7 +824,7 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
-    // console.log('data-manager.js getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    console.log('data-manager.js getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     if( latlng != null) {
       const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
       return new Promise(function(resolve, reject) {

@@ -6,7 +6,7 @@ import BaseClient from './base-client';
 class CondoSearchClient extends BaseClient {
 
   evaluateDataForUnits(data) {
-    // console.log('condo-search-client evaluateDataForUnit, data:', data);
+    console.log('condo-search-client evaluateDataForUnit, data:', data);
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id);
@@ -19,6 +19,7 @@ class CondoSearchClient extends BaseClient {
     let mObj = JSON.parse(JSON.stringify(data[0]));
 
     units.length > 0 ? units = _.groupBy(units, a => a.properties.pwd_parcel_id) : "";
+    console.log('condo-search-client.js about to call setUnits, units:', units);
     this.store.commit('setUnits', units);
 
     return data;
@@ -53,7 +54,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    console.log('condo-search-client fetch is running');
+    console.log('condo-search-client fetch is running, input:', input);
     this.store.commit('setCondoUnitsStatus', 'waiting');
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));

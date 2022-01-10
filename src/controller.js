@@ -363,6 +363,7 @@ class Controller {
               lat: lat,
               lng: lng,
             };
+            console.log('controller.js handleSearchFormSubmit calling getParcelsByLatLng');
             response = await this.dataManager.getParcelsByLatLng(latlng, parcelLayer);
             // theParcels.push(response);
           } else {
@@ -488,7 +489,7 @@ class Controller {
 
     // console.log('after await aisResponse 2:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
-    console.log('handleMapClick is calling setRouteByGeocode with no parameters');
+    console.log('handleMapClick is calling setRouteByGeocode with no parameters, aisResponse:', aisResponse);
     // if (!this.store.state.bufferMode && this.config.router.geocode && this.config.router.geocode === 'opa') {
     //   this.router.setRouteByOpaNumber(aisResponse.properties.opa_account_num);
     // } else {
@@ -524,7 +525,7 @@ class Controller {
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
       }
     }
-    console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
+    // console.log('after await aisResponse 4:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
     // this.dataManager.resetData();
     // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo);

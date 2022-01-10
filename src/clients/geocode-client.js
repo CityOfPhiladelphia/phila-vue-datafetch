@@ -7,10 +7,11 @@ import BaseClient from './base-client';
 class GeocodeClient extends BaseClient {
 
   evaluateDataForUnits(data) {
-    // console.log('condo-search-client evaluateDataForUnit, data:', data);
 
     var units = [], filteredData, dataList = [];
     let groupedData = _.groupBy(data, a => a.properties.pwd_parcel_id ? a.properties.pwd_parcel_id : a.properties.dor_parcel_id);
+    console.log('geocode-client evaluateDataForUnit, data:', data, 'groupedData:', groupedData);
+
 
     for (let item in groupedData){
       units.push.apply(units, groupedData[item]);
@@ -20,27 +21,42 @@ class GeocodeClient extends BaseClient {
     let mObj = JSON.parse(JSON.stringify(data[0]));
 
     units.length > 0 ? units = _.groupBy(units, a => a.properties.pwd_parcel_id ? a.properties.pwd_parcel_id : a.properties.dor_parcel_id) : "";
-    Object.keys(units).length > 1 ? delete units[""] : "";
+    let unitKeys = Object.keys(units);
+    console.log('geocode-client.js about to call setUnits 1, units:', units, 'unitKeys:', unitKeys, 'unitKeys.length:', unitKeys.length);
+
+    unitKeys.length > 1 ? delete units[""] : "";
+    if (unitKeys[0] === '') {
+      console.log('geocode-client.js in if, this.store.state:', this.store.state, "units['']:", units['']);
+      // let idNumber = this.store.state.parcels.pwd ? Number(this.store.state.parcels.pwd[0].properties.PARCELID) : this.store.state.geocode.data.properties.dor_parcel_id;
+      // Object.keys(units)[0] = idNumber;
+      // units[''] = ;
+      units = { 101: units[''] };
+    }
+    console.log('geocode-client.js about to call setUnits 2, units:', units, 'unitKeys:', unitKeys);
     this.store.commit('setUnits', units);
 
     return data;
   }
 
   setFeatureProperties(feature, totalUnits, units) {
-    console.log('geocode setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
     // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
+    console.log('setFeatureProperties is running');
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
-    if (this.store.state.parcels.pwd) {
+    let record = this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0];
+
+    console.log('geocode setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits, 'record:', record);
+    if (record.properties.pwd_parcel_id && this.store.state.parcels.pwd) {
+      console.log('geocode setFeatureProperties, in if');
       feature.properties.street_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
       feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
       feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.PARCELID;
       feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
       feature.condo = true;
-    } else {
-      console.log('setFeatureProperties is still running', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
-      let record = this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0];
-      console.log("No pwd parcels, showing feature: ", record, record.properties);
+    } else if (record.properties.dor_parcel_id) {
+      console.log('geocode setFeatureProperties in else if', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
+      // let record = this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0];
+      console.log("geocode setFeatureProperties in else if no pwd parcels, showing feature: ", record, record.properties);
       let address = record.properties.address_low + " " + record.properties.street_full;
       let parcelId = record.properties.dor_parcel_id;
 
@@ -50,18 +66,31 @@ class GeocodeClient extends BaseClient {
       feature.properties.dor_parcel_id = parcelId;
       feature._featureId = parcelId;
       feature.condo = true;
+    } else {
+      let address = record.properties.address_low + " " + record.properties.street_full;
+      let parcelId = record.properties.dor_parcel_id;
+      feature.properties.street_address = address;
+      console.log('geocode setFeatureProperties wawa address:', address, 'feature.properties.street_address:', feature.properties.street_address, 'feature.properties:', feature.properties);
+      feature.properties.opa_address = address;
+      // feature.properties.pwd_parcel_id = parcelId;
+      // feature.properties.dor_parcel_id = parcelId;
+      // feature._featureId = parcelId;
+      feature.condo = true;
+      console.log('geocode setFeatureProperties in else, feature:', feature);
+      return feature;
     }
 
 
     feature.condo = true;
-    // console.log('setFeatureProperties is ending');
+    console.log('setFeatureProperties is ending, feature:', feature);
+    // return feature;
 
   }
 
 
   // fetch(input, category) {
   async fetch(input) {
-    // console.log('geocode client fetch', input);//, 'this.store:', this.store);
+    console.log('geocode client fetch', input);//, 'this.store:', this.store);
 
     const store = this.store;
     let geocodeConfig;
@@ -95,7 +124,7 @@ class GeocodeClient extends BaseClient {
 
   success(response) {
     let status = 'waiting';
-    // console.log('geocode success is running, response:', response, response.data.features[0].properties.opa_account_num, 'about to call resetGeocodeOnly, status:', status);
+    console.log('geocode success is running, response:', response, response.data.features[0].properties.opa_account_num, 'about to call resetGeocodeOnly, status:', status);
     this.dataManager.resetGeocodeOnly(status);
     const store = this.store;
     const data = response.data;
@@ -129,9 +158,9 @@ class GeocodeClient extends BaseClient {
         relatedFeatures.push(relatedFeature);
       }
     }
-    console.log('geocode success, relatedFeatures:', relatedFeatures);
+    console.log('geocode success, feature:', feature, 'relatedFeatures:', relatedFeatures);
     if (relatedFeatures.length > 0) {
-      console.log('if relatedFeatures is running');
+      console.log('geocode success if relatedFeatures is running');
       // feature.condo = true;
       // this.store.commit('setUnits', {
       //   [feature.properties.pwd_parcel_id]: features,
@@ -141,10 +170,10 @@ class GeocodeClient extends BaseClient {
       async function getPages(features) {
 
         let pages = Math.ceil(data.total_size / 100);
-        console.log('getPages is running still going 2, url:', url, 'data:', data, 'pages:', pages);
+        console.log('geocode success getPages is running still going 2, url:', url, 'data:', data, 'pages:', pages);
 
         if (pages > 1) {
-          console.log('if pages > 1 is running');
+          console.log('geocode success if pages > 1 is running');
           for (let counter = 2; counter<=pages; counter++) {
             console.log('in loop, counter:', counter, 'this:', this, 'params:', params);
             params.page = counter;
@@ -158,17 +187,19 @@ class GeocodeClient extends BaseClient {
         let units = features.filter(a => a.properties.unit_num != "");
         units = this.evaluateDataForUnits(units);
 
-        var feature = JSON.parse(JSON.stringify(units[0]));
-        for (let i in feature.properties) {
-          feature.properties[i] = "";
+        let theFeature = JSON.parse(JSON.stringify(units[1]));
+        // var feature = units[1];
+        console.log('geocode success units:', units, 'theFeature:', theFeature, 'theFeature.properties.street_address:', theFeature.properties.street_address);
+        for (let i in theFeature.properties) {
+          theFeature.properties[i] = "";
         }
 
         if(this.store.state.parcels.pwd === null) {
-          this.setFeatureProperties(feature, totalUnits, units);
+          theFeature = this.setFeatureProperties(theFeature, totalUnits, units);
 
-          console.log('getPages if is running, feature:', feature);
-          feature.condo = true;
-          store.commit('setGeocodeData', feature);
+          console.log('getPages if is running, theFeature:', theFeature, 'this.store.state.parcels.pwd:', this.store.state.parcels.pwd);
+          theFeature.condo = true;
+          store.commit('setGeocodeData', theFeature);
           store.commit('setGeocodeStatus', 'success');
           // console.log('getPages else is still running 2');
           if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
@@ -176,11 +207,11 @@ class GeocodeClient extends BaseClient {
           }
           // console.log('feature:', feature);
         } else {
-          // console.log('getPages else is running, feature:', feature);
-          this.setFeatureProperties(feature, totalUnits);
+          console.log('getPages else is running, feature:', theFeature);
+          this.setFeatureProperties(theFeature, totalUnits);
 
           // console.log('getPages else is still running 1');
-          store.commit('setGeocodeData', feature);
+          store.commit('setGeocodeData', theFeature);
           store.commit('setGeocodeStatus', 'success');
           // console.log('getPages else is still running 2');
           if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
@@ -190,7 +221,7 @@ class GeocodeClient extends BaseClient {
         }
 
 
-        return feature;
+        return theFeature;
         // }
       }
 
