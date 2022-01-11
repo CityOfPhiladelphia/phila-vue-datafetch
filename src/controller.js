@@ -221,6 +221,7 @@ class Controller {
     // Added specifically to reset the condo units not being cleared elsewhere on hash change.
     this.dataManager.resetShape();
     this.dataManager.removeShape();
+    this.dataManager.resetBlockSearch();
     this.resetGeocode();
 
     if(value === '' || value === null) {
@@ -408,7 +409,7 @@ class Controller {
   }
 
   async handleMapClick(e) {
-    // console.log('handle map click', e, this);
+    console.log('controller.js handle map click', e, this);
 
     // TODO figure out why form submits via enter key are generating a map
     // click event and remove this
@@ -455,6 +456,7 @@ class Controller {
     this.dataManager.resetData();
     this.dataManager.resetShape();
     this.dataManager.removeShape();
+    this.dataManager.resetBlockSearch();
 
     if (this.store.state.lastSearchMethod !== 'buffer search') {
       // console.log('in didGetParcels, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
@@ -538,6 +540,7 @@ class Controller {
     let changeCenter;
 
     if (!shape) {
+      shape = [];
       // let query = this.vueRouter.history.current.query;
       let query = this.vueRouter.currentRoute.query;
       // console.log('App.vue mounted is running, window.location.hash:', this.vueRouter);
@@ -550,16 +553,20 @@ class Controller {
       for (let point of queryShape) {
         test.push(point.split(','));
       }
-      let _latlngs = [[]];
-      for (let item of test) {
+      console.log('handleDrawnShape test:', test);
+
+      // let _latlngs = [[]];
+      for (let [ lng, lat ] of test) {
+        console.log('handleDrawnShape lng', lng, 'lat:', lat);
+        shape.push([ lng,lat ]);
         // let latlng = new L.LatLng(parseFloat(item[0]), parseFloat(item[1]));
-        let latlng = {
-          lat: parseFloat(item[0]),
-          lng: parseFloat(item[1]),
-        };
-        _latlngs[0].push(latlng);
+        // let latlng = {
+        //   lat: parseFloat(item[0]),
+        //   lng: parseFloat(item[1]),
+        // };
+        // _latlngs[0].push(latlng);
       }
-      shape = { _latlngs };
+      // shape = { _latlngs };
       changeCenter = true;
     }
 

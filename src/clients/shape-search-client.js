@@ -8,7 +8,7 @@ import BaseClient from './base-client';
 class ShapeSearchClient extends BaseClient {
 
   fetch(input) {
-    // console.log('shape-search-client fetch is running, input:', input);
+    console.log('shape-search-client fetch is running, input:', input);
     const data = input.map(a => a.properties.PARCELID);
     // console.log('shapeSearch DATA', data);
 

@@ -477,17 +477,20 @@ class Router {
   }
 
   setRouteByShapeSearch() {
-    console.log('router.js setRouteByShapeSearch is running');
+    // console.log('router.js setRouteByShapeSearch is running');
     const shapeInput = this.store.state.shapeSearch.input;
-    // console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
+    console.log('Router.didShapeSearch is running, shapeInput:', shapeInput);
     // only run this if the shape is in the store (which it will not be if it is created from the route)
     if (shapeInput) {
       let shape = '[[';
       var i;
       for (i=0; i < shapeInput.length - 1; i++) {
-        shape += shapeInput[i].lat.toFixed(5) + ',' + shapeInput[i].lng.toFixed(5) + '],[';
+        shape += shapeInput[i][0].toFixed(5) + ',' + shapeInput[i][1].toFixed(5) + '],[';
+        // shape += shapeInput[i].lat.toFixed(5) + ',' + shapeInput[i].lng.toFixed(5) + '],[';
       }
-      shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]';
+      // shape += ']]';
+      shape += shapeInput[shapeInput.length - 1][0].toFixed(5) + ',' + shapeInput[shapeInput.length - 1][1].toFixed(5) + ']]';
+      // shape += shapeInput[shapeInput.length - 1].lat.toFixed(5) + ',' + shapeInput[shapeInput.length - 1].lng.toFixed(5) + ']]';
       this.vueRouter.push({ query: { shape }}).catch(()=>{});
     }
   }
