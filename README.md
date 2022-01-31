@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.5 - 1/31/2022
+
+* fixes bug with variable in console log
+
 ### 2.2.4 - 1/11/2022
 
 * changes for allowing property-data-explorer to use maplibre
