@@ -168,6 +168,7 @@ const pvdStore = {
         state.searchType = payload;
       },
       setActiveParcelLayer(state, payload) {
+        // console.log('store.js setActiveParcelLayer is running, payload:', payload);
         state.activeParcelLayer = payload;
       },
       setRouterTopic(state, payload) {

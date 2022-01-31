@@ -490,13 +490,13 @@ class Controller {
 
     // console.log('after await aisResponse 2:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
 
-    console.log('handleMapClick is calling setRouteByGeocode with no parameters');
+    // console.log('handleMapClick is calling setRouteByGeocode with no parameters');
     // if (!this.store.state.bufferMode && this.config.router.geocode && this.config.router.geocode === 'opa') {
     //   this.router.setRouteByOpaNumber(aisResponse.properties.opa_account_num);
     // } else {
-    if (!this.config.app || !this.config.app.title || this.config.app.title !== 'Property Data Explorer') {
-      this.router.setRouteByGeocode();
-    }
+    // if (!this.config.app || !this.config.app.title || this.config.app.title !== 'Property Data Explorer') {
+    //   this.router.setRouteByGeocode();
+    // }
     // }
 
     // console.log('after await aisResponse 3:', aisResponse, 'aisResponse opa number:', aisResponse.properties.opa_account_num);
@@ -523,11 +523,21 @@ class Controller {
         this.dataManager.setParcelsInState(otherParcelLayer, otherMultipleAllowed, null, [], otherMapregStuff);
 
         let otherResponse = await this.dataManager.getParcelsByLatLng(latLng, otherParcelLayer, 'noFetch');
+        console.log('otherResponse:', otherResponse.features.length);
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
+        if (!aisResponse) {
+          if (otherResponse && otherResponse.features && otherResponse.features.length) {
+            let otherId = otherResponse.features[0].properties.PARCELID;
+            aisResponse = await this.clients.geocode.fetch(otherId);
+          }
+        }
       }
     }
-    console.log('after await aisResponse 4:', aisResponse);
 
+    // console.log('after await aisResponse 4:', aisResponse);
+    if (!this.config.app || !this.config.app.title || this.config.app.title !== 'Property Data Explorer') {
+      this.router.setRouteByGeocode();
+    }
     // this.dataManager.resetData();
     // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo);
     // console.log('getting to end of handleMapClick, calling fetchData, this.store.state.geocode.data.condo:', this.store.state.geocode.data.condo, 'aisResponse opa:', aisResponse.properties.opa_account_num,'opa_account_num:', this.store.state.geocode.data.properties.opa_account_num);

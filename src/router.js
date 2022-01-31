@@ -365,7 +365,7 @@ class Router {
   // TODO this could have a name that is more declarative like "changeURL" (used to be called "didGeocode")
 
   setRouteByGeocode(testAddress) {
-    console.log('setRouteByGeocode is starting, this.store.state.bufferMode:', this.store.state.bufferMode);
+    console.log('setRouteByGeocode is starting, this.store.state.bufferMode:', this.store.state.bufferMode, 'testAddress:', testAddress);
     if (this.store.state.activeTopic) {
       this.store.state.routerTopic = this.store.state.activeTopic;
     }
@@ -387,7 +387,7 @@ class Router {
 
 
     // make hash if there is geocode data
-    // console.log('router setRouteByGeocode is running - geocodeData:', geocodeData, 'geocodeData.properties.street_address:', geocodeData.properties.street_address);
+    console.log('router setRouteByGeocode is running - geocodeData:', geocodeData);//, 'geocodeData.properties.street_address:', geocodeData.properties.street_address);
     if (geocodeData) {
       let address;
 
