@@ -52,19 +52,19 @@ class DataManager {
   // REVIEW maybe the getXXXParcelsById methods should just take an argument
   // activeParcelLayer? that's the only reason these are in here.
 
-  // activeTopicConfig() {
-  //   const key = this.store.state.activeTopic;
-  //   let config;
-  //
-  //   // if no active topic, return null
-  //   if (key) {
-  //     config = this.config.topics.filter((topic) => {
-  //       return topic.key === key;
-  //     })[0];
-  //   }
-  //
-  //   return config || {};
-  // }
+  activeTopicConfig() {
+    const key = this.store.state.activeTopic;
+    let config;
+
+    // if no active topic, return null
+    if (key) {
+      config = this.config.topics.filter((topic) => {
+        return topic.key === key;
+      })[0];
+    }
+
+    return config || {};
+  }
 
   /* DATA FETCHING METHODS */
 
@@ -616,7 +616,10 @@ class DataManager {
         mapregStuff: this.config.parcels.pwd.mapregStuff,
         data: null,
       });
-      this.store.commit('setActiveParcelLayer', 'pwd');
+      let currentParcels = this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
+      console.log('currentParcels:', currentParcels);
+      // this.store.commit('setActiveParcelLayer', 'pwd');
+      this.store.commit('setActiveParcelLayer', currentParcels);
     }
 
     // reset other topic and map state
@@ -830,7 +833,7 @@ class DataManager {
   }
 
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
-    // console.log('data-manager.js getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
+    console.log('data-manager.js getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     if( latlng != null) {
       const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
       return new Promise(function(resolve, reject) {
