@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.6 - 1/31/2022
+
+* fixes handleMapClick for Atlas by geocoding otherParcel if there is no geocode for the main parcel
+
 ### 2.2.5 - 1/31/2022
 
 * fixes bug with variable in console log
