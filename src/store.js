@@ -298,7 +298,11 @@ const pvdStore = {
         state.geocode.status = payload;
       },
       setGeocodeData(state, payload) {
-        // console.log('store.js setGeocodeData is running, payload:', payload);
+        if (payload) {
+          console.log('store.js setGeocodeData is running, payload:', payload, 'payload.properties.street_address:', payload.properties.street_address);
+        } else {
+          console.log('store.js setGeocodeData is running, payload:', payload);
+        }
         state.geocode.data = payload;
       },
       setGeocodeRelated(state, payload) {

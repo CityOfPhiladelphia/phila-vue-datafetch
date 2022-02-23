@@ -25,7 +25,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   setFeatureProperties(feature, totalUnits) {
-    console.log('condo setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
+    console.log('csc setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
     // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
@@ -36,9 +36,9 @@ class CondoSearchClient extends BaseClient {
       feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
       feature.condo = true;
     } else {
-      console.log('setFeatureProperties is still running', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
+      console.log('csc setFeatureProperties is still running', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
       let record = this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0];
-      console.log("No pwd parcels, showing feature: ", record, record.properties);
+      console.log("csc setFeatureProperties No pwd parcels, showing feature: ", record, record.properties);
       let address = record.properties.address_low + " " + record.properties.street_full;
       let parcelId = record.properties.dor_parcel_id;
 

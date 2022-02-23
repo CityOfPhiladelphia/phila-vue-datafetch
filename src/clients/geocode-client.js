@@ -27,21 +27,23 @@ class GeocodeClient extends BaseClient {
   }
 
   setFeatureProperties(feature, totalUnits, units) {
-    console.log('geocode setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
+    console.log('gc setFeatureProperties is running, feature:', feature, 'feature.properties.street_address:', feature.properties.street_address, 'totalUnits:', totalUnits);
     // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
     if (this.store.state.parcels.pwd) {
+      console.log('gc in setFeatureProperties if');
       feature.properties.street_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
       feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
       feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.PARCELID;
       feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
       feature.condo = true;
     } else {
-      console.log('setFeatureProperties is still running', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
+      console.log('in gc setFeatureProperties else');
+      console.log('gc setFeatureProperties is still running', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
       let record = this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0];
-      console.log("No pwd parcels, showing feature: ", record, record.properties);
       let address = record.properties.address_low + " " + record.properties.street_full;
+      console.log('gc setFeatureProperties, no pwd parcels, showing feature:', record, record.properties, 'address:', address);
       let parcelId = record.properties.dor_parcel_id;
 
       feature.properties.street_address = address;
@@ -54,6 +56,7 @@ class GeocodeClient extends BaseClient {
 
 
     feature.condo = true;
+    return feature;
     // console.log('setFeatureProperties is ending');
 
   }
@@ -164,11 +167,11 @@ class GeocodeClient extends BaseClient {
         }
 
         if(this.store.state.parcels.pwd === null) {
-          this.setFeatureProperties(feature, totalUnits, units);
-
-          console.log('getPages if is running, feature:', feature);
-          feature.condo = true;
-          store.commit('setGeocodeData', feature);
+          console.log('setFeatureProperties is being called 1, feature:', feature, 'feature.properties.street_address:', feature.properties.street_address);
+          let newFeature = this.setFeatureProperties(feature, totalUnits, units);
+          console.log('setFeatureProperties newFeature:', newFeature, 'newFeature.properties.street_address:', newFeature.properties.street_address, 'about to call setGeocodeData');
+          // feature.condo = true;
+          store.commit('setGeocodeData', newFeature);
           store.commit('setGeocodeStatus', 'success');
           // console.log('getPages else is still running 2');
           if (this.store.state.lastSearchMethod !== 'reverseGeocode') {
@@ -177,9 +180,11 @@ class GeocodeClient extends BaseClient {
           // console.log('feature:', feature);
         } else {
           // console.log('getPages else is running, feature:', feature);
+          console.log('setFeatureProperties is being called 2');
           this.setFeatureProperties(feature, totalUnits);
 
           // console.log('getPages else is still running 1');
+          console.log('gc in else about to call setGeocodeData');
           store.commit('setGeocodeData', feature);
           store.commit('setGeocodeStatus', 'success');
           // console.log('getPages else is still running 2');
