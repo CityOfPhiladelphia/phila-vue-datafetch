@@ -153,15 +153,28 @@ class EsriClient extends BaseClient {
   }
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
-    // console.log('esri-client fetchBySpatialQuery, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'typeof(parameters.sourceValue):', typeof(parameters.sourceValue), 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    console.log('esri-client fetchBySpatialQuery, dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'typeof(parameters.sourceValue):', typeof(parameters.sourceValue), 'options:', options, 'calculateDistancePt:', calculateDistancePt);
 
     let query = url + '/query'; //+ [relationship](targetGeom);
     let theGeom, theGeomType, theSpatialRel;
     let params;
 
+    let where = '1=1';
+    if (options.where) {
+      const valOrGetter = options.where;
+      const valOrGetterType = typeof valOrGetter;
+
+      if (valOrGetterType === 'function') {
+        const getter = valOrGetter;
+        where = getter();
+      } else {
+        where = valOrGetter;
+      }
+    }
+
     if (relationship === 'where') {
       params = {
-        'where': '1=1',
+        'where': where,
         'outFields': '*',
         'f': 'geojson',
       };
@@ -183,7 +196,7 @@ class EsriClient extends BaseClient {
 
       params = {
         'returnGeometry': true,
-        'where': '1=1',
+        'where': where,
         'outSR': 4326,
         'outFields': '*',
         'inSr': 4326,
