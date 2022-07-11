@@ -487,6 +487,8 @@ class DataManager {
       // console.log('didFetchData else if is running, data:', data, 'key:', key, 'targetId:', targetId);
       if (data.rows && data.rows.length) {
         data.rows = this.assignFeatureIds(data.rows, key, targetId);
+      } else if (data.records && data.records.length) {
+        data.records = this.assignFeatureIds(data.records, key, targetId);
       } else {
         data.features = this.assignFeatureIds(data.features, key, targetId);
       }
