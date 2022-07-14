@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.8 - 7/14/2022
+
+* fix for airtable data
+
 ### 2.2.7 - 3/2/2022
 
 * esri-client.js fetchBySpatialQuery can take a where clause
