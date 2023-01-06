@@ -270,7 +270,7 @@ class Router {
   }
 
   routeToKeyword(nextKeywords) {
-    // console.log('in router.js routeToKeyword, nextKeywords:', nextKeywords);
+    console.log('in pvd router.js routeToKeyword, nextKeywords:', nextKeywords);
     let values = nextKeywords.split(',');
     // console.log('in routeToKeyword values:', values);
     this.store.commit('setSelectedKeywords', values);

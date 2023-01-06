@@ -24,7 +24,7 @@ import {
 
 class Controller {
   constructor(opts) {
-    // console.log('in Controller constructor, opts:', opts);
+    console.log('in Controller constructor, opts:', opts);
     const store = this.store = opts.store;
     const config = this.config = opts.config;
     this.history = window.history;
@@ -112,7 +112,10 @@ class Controller {
     } else if (searchCategory === 'block') {
       this.store.commit('setBlockSearchInput', input);
     } else if (searchCategory === 'keyword') {
-      // console.log('initializeStatuses with searchCategory keyword');
+      // let startQuery = this.router.currentRoute.query;
+      // let startQuery = { ...this.route.query };
+      console.log('initializeStatuses with searchCategory keyword, this.router:', this.router, 'this:', this);
+
       this.router.routeToKeyword(input);
     }
     if (this.store.state.lastSearchMethod) {
@@ -217,6 +220,11 @@ class Controller {
     }
     console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
 
+    this.initializeStatuses(value, searchCategory);
+    if(searchCategory === "keyword") {
+      return;
+    }
+
     this.dataManager.resetData();
     // Added specifically to reset the condo units not being cleared elsewhere on hash change.
     this.dataManager.resetShape();
@@ -244,10 +252,10 @@ class Controller {
     if (blockSearchCheck === true) {
       searchCategory = 'block';
     }
-    this.initializeStatuses(value, searchCategory);
-    if(searchCategory === "keyword") {
-      return;
-    }
+    // this.initializeStatuses(value, searchCategory);
+    // if(searchCategory === "keyword") {
+    //   return;
+    // }
     // console.log('after await initializeStatuses is running');
 
     // TODO rename to aisResponse
