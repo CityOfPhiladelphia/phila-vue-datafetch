@@ -104,9 +104,9 @@ class Controller {
 
   initializeStatuses(input, searchCategory) {
     console.log('initializeStatuses is running', input, 'searchCategory:', searchCategory);
-    this.store.commit('setGeocodeStatus', null);
     if (!searchCategory || searchCategory === 'address') {
       this.store.commit('setGeocodeInput', input);
+      this.store.commit('setGeocodeStatus', null);
     } else if (searchCategory === 'owner') {
       this.store.commit('setOwnerSearchInput', input);
     } else if (searchCategory === 'block') {
