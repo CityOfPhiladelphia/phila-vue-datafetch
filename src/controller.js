@@ -111,6 +111,9 @@ class Controller {
       this.store.commit('setOwnerSearchInput', input);
     } else if (searchCategory === 'block') {
       this.store.commit('setBlockSearchInput', input);
+    } else if (searchCategory === 'zipcode') {
+      // console.log('initializeStatuses with searchCategory zipcode');
+      this.router.routeToZipcode(input);
     } else if (searchCategory === 'keyword') {
       // console.log('initializeStatuses with searchCategory keyword');
       this.router.routeToKeyword(input);
@@ -245,7 +248,7 @@ class Controller {
       searchCategory = 'block';
     }
     this.initializeStatuses(value, searchCategory);
-    if(searchCategory === "keyword") {
+    if(searchCategory === "keyword" || searchCategory === "zipcode") {
       return;
     }
     // console.log('after await initializeStatuses is running');
