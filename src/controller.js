@@ -163,8 +163,8 @@ class Controller {
       // console.log('initializeStatuses is running');
     }
 
-    if (this.store.state.lastSearchMethod !== 'buffer search') {
-      // console.log('in didGetParcels, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
+    if (!this.config.pinboard && this.store.state.lastSearchMethod !== 'buffer search') {
+      console.log('in initializeStatuses, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
       this.store.commit('setBufferShape', null);
     }
   }
