@@ -269,6 +269,11 @@ class Router {
     }
   }
 
+  routeToZipcode(nextZipcode) {
+    // console.log('routeToZipcode is running');
+    this.store.commit('setSelectedZipcode', nextZipcode);
+  }
+
   routeToKeyword(nextKeywords) {
     console.log('in pvd router.js routeToKeyword, nextKeywords:', nextKeywords);
     let values = nextKeywords.split(',');
