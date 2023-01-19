@@ -255,8 +255,8 @@ class Controller {
     if (blockSearchCheck === true) {
       searchCategory = 'block';
     }
-    this.initializeStatuses(value, searchCategory);
-    if(searchCategory === "keyword" || searchCategory === "zipcode") {
+    // this.initializeStatuses(value, searchCategory);
+    if(searchCategory === "zipcode") {
       return;
     }
     // console.log('after await initializeStatuses is running');
