@@ -262,7 +262,9 @@ class Controller {
     // console.log('after await initializeStatuses is running');
 
     // TODO rename to aisResponse
+    console.log('controller.js handleSearchFormSubmit about to call ais');
     let aisResponse = await this.clients.geocode.fetch(value);
+    console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
     // console.log('after await aisResponse:', aisResponse, 'aisResponse.properties.street_address:', aisResponse.properties.street_address);//, 'this.clients:', this.clients);
 
     if (aisResponse && !this.store.state.bufferMode && !blockSearchCheck) {
@@ -276,22 +278,26 @@ class Controller {
       }
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
-      // console.log('block search is true, value:', value);
+      console.log('else if 1 is running, block search is true, value:', value);
       this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
     } else if (!this.store.state.bufferMode) {
+      console.log('else if 2 is running');
       this.dataManager.clearBlockSearch();
       if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
-        // console.log('onGeocodeFail exists');
+        console.log('elseif 2 if is running, onGeocodeFail exists');
         let feature = {
           properties: {},
         };
         feature.properties.opa_account_num = this.store.state.geocode.input;
         this.dataManager.fetchData(feature);
       } else {
-        aisResponse = await this.clients.ownerSearch.fetch(value);
-        this.router.setRouteByOwnerSearch();
+        console.log('elseif 2 else is running, this used to do an owner search');
+        // aisResponse = await this.clients.ownerSearch.fetch(value);
+        // this.router.setRouteByOwnerSearch();
       }
+    } else {
+      console.log('controller handleSearchFormSubmit final else is running');
     }
     //
     // if (!aisResponse) {

@@ -61,7 +61,7 @@ class GeocodeClient extends BaseClient {
 
   // fetch(input, category) {
   async fetch(input) {
-    // console.log('geocode client fetch', input);//, 'this.store:', this.store);
+    console.log('geocode client fetch', input);//, 'this.store:', this.store);
 
     const store = this.store;
     let geocodeConfig;
@@ -224,7 +224,7 @@ class GeocodeClient extends BaseClient {
   }
 
   error(error) {
-    // console.log('geocode error is running, error:', error);
+    console.log('geocode error is running, error:', error);
     const store = this.store;
     store.commit('setGeocodeStatus', 'error');
     store.commit('setGeocodeData', null);
