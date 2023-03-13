@@ -1,5 +1,5 @@
 import axios from 'axios';
-import httpsProxyAgent from 'https-proxy-agent';
+// import httpsProxyAgent from 'https-proxy-agent';
 import BaseClient from './base-client';
 
 // the high-level purpose of this is: take an address, geocode it, and put
@@ -68,7 +68,7 @@ class GeocodeClient extends BaseClient {
 
     geocodeConfig = this.config.geocoder;
     const url = geocodeConfig.url(input);
-    const agent = new httpsProxyAgent('http://proxy.phila.gov:8080');
+    // const agent = new httpsProxyAgent('http://proxy.phila.gov:8080');
 
     const params = geocodeConfig.params;
     if (params.page) {
