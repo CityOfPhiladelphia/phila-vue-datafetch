@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.12 - 3/23/2023
+
+* uses new geometry server
+
 ### 2.2.11 - 3/13/2023
 
 * comments out httpsProxyAgent to fix bugs
