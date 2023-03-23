@@ -1,7 +1,7 @@
 {
   "name": "@phila/vue-datafetch",
   "description": "the infrastructure needed for fetching data for a vue app",
-  "version": "2.2.11",
+  "version": "2.2.12",
   "author": "City of Philadelphia <maps@phila.gov>",
   "license": "MIT",
   "private": false,
