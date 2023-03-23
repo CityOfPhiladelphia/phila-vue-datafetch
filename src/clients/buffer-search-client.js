@@ -20,6 +20,7 @@ class BufferSearchClient extends BaseClient {
     const parcelUrl = this.config.map.featureLayers.pwdParcels;
     // const geometryServerUrl = this.config.map.tools.geometryServer;
     const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
+    // const geometryServerUrl = '//citygeo-geocoder-pub.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
     // console.log('geometryServerUrl:', geometryServerUrl);
     const calculateDistance = true;
     const distances = 250;
@@ -31,18 +32,18 @@ class BufferSearchClient extends BaseClient {
 
     // if you do it by parcel
     const parcelGeom = response.features[0].geometry;
-    // console.log('parcelGeom:', parcelGeom);
-
+    
     let polyCoords2272 = [];
     for (let polyCoord of parcelGeom.coordinates[0]) {
       let polyCoord2272 = proj4(projection4326, projection2272, [ polyCoord[0], polyCoord[1] ]);
       polyCoords2272.push(polyCoord2272);
     }
-
+    
     let newGeometries = {
       "geometryType": "esriGeometryPolygon",
       "geometries": [{ "rings": [ polyCoords2272 ]}],
     };
+    console.log('parcelGeom:', parcelGeom, 'newGeometries:', newGeometries);
 
     const params = {
       // geometries: `[${coords2272.join(', ')}]`,

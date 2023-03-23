@@ -78,7 +78,7 @@ class EsriClient extends BaseClient {
     // console.log('coords:', coords, 'coords2272:', coords2272);
     const params = {
       // geometries: feature => '[' + feature.geometry.coordinates[0] + ', ' + feature.geometry.coordinates[1] + ']',
-      geometries: `[${coords2272.join(', ')}]`,
+      geometries: `${coords2272.join(', ')}`,
       inSR: 2272,
       outSR: 4326,
       bufferSR: 2272,
