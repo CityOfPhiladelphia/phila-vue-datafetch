@@ -24,7 +24,7 @@ import {
 
 class Controller {
   constructor(opts) {
-    console.log('in Controller constructor, opts:', opts);
+    // console.log('in Controller constructor, opts:', opts);
     const store = this.store = opts.store;
     const config = this.config = opts.config;
     this.history = window.history;

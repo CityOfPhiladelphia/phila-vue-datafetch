@@ -129,9 +129,9 @@ class GeocodeClient extends BaseClient {
         relatedFeatures.push(relatedFeature);
       }
     }
-    console.log('geocode success, relatedFeatures:', relatedFeatures);
+    // console.log('geocode success, relatedFeatures:', relatedFeatures);
     if (relatedFeatures.length > 0) {
-      console.log('if relatedFeatures is running');
+      // console.log('if relatedFeatures is running');
       // feature.condo = true;
       // this.store.commit('setUnits', {
       //   [feature.properties.pwd_parcel_id]: features,
@@ -216,7 +216,7 @@ class GeocodeClient extends BaseClient {
     // feature.condo = false;
     // feature['condo'] = false;
 
-    console.log('geocode-client success 2, feature:', feature, feature.condo, 'relatedFeatures:', relatedFeatures);
+    // console.log('geocode-client success 2, feature:', feature, feature.condo, 'relatedFeatures:', relatedFeatures);
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');

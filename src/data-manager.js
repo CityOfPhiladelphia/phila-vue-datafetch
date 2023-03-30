@@ -477,7 +477,7 @@ class DataManager {
   didFetchData(key, status, dataOrNull, targetId, targetIdFn) {
 
     let data = status === 'error' ? null : dataOrNull;
-    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data, 'targetIdFn:', targetIdFn);
+    // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data.features[0], 'targetIdFn:', targetIdFn);
 
     // assign feature ids
     if (Array.isArray(data)) {
@@ -572,7 +572,7 @@ class DataManager {
   }
 
   resetGeocodeOnly(optionalStatus) {
-    console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels, 'optionalStatus:', optionalStatus);
+    // console.log('resetGeocodeOnly is running, this.config.parcels:', this.config.parcels, 'optionalStatus:', optionalStatus);
     // reset geocode
     this.store.commit('setClickCoords', null);
     if (optionalStatus) {
@@ -589,7 +589,7 @@ class DataManager {
   // this gets called when the current geocoded address is wiped out, such as
   // when you click on the "Atlas" title and it navigates to an empty hash
   resetGeocode() {
-    console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
+    // console.log('resetGeocode is running, this.config.parcels:', this.config.parcels);
     // reset geocode
     this.store.commit('setClickCoords', null);
     this.store.commit('setGeocodeStatus', null);
