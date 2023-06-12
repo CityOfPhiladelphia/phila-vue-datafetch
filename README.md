@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.13 - 6/12/2023
+
+* includes changes made for user testing sessions
+
 ### 2.2.12 - 3/23/2023
 
 * uses new geometry server
