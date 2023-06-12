@@ -148,6 +148,7 @@ class HttpClient extends BaseClient {
       // axios.get('http://data.phila.gov/resource/w7rb-qrn8.json?parcel_number=012099800%27').then(response => {
       // call success fn
       let data = response.data;
+      // console.log('http-client fetch, after axios call, targetIdFn:', targetIdFn, 'successFn:', successFn, 'data:', data.features[0].latlng);
 
       if (successFn) {
         data = successFn(data, this.store.state);

@@ -104,15 +104,21 @@ class Controller {
 
   initializeStatuses(input, searchCategory) {
     console.log('initializeStatuses is running', input, 'searchCategory:', searchCategory);
-    this.store.commit('setGeocodeStatus', null);
     if (!searchCategory || searchCategory === 'address') {
       this.store.commit('setGeocodeInput', input);
+      this.store.commit('setGeocodeStatus', null);
     } else if (searchCategory === 'owner') {
       this.store.commit('setOwnerSearchInput', input);
     } else if (searchCategory === 'block') {
       this.store.commit('setBlockSearchInput', input);
+    } else if (searchCategory === 'zipcode') {
+      // console.log('initializeStatuses with searchCategory zipcode');
+      this.router.routeToZipcode(input);
     } else if (searchCategory === 'keyword') {
-      // console.log('initializeStatuses with searchCategory keyword');
+      // let startQuery = this.router.currentRoute.query;
+      // let startQuery = { ...this.route.query };
+      console.log('initializeStatuses with searchCategory keyword, this.router:', this.router, 'this:', this);
+
       this.router.routeToKeyword(input);
     }
     if (this.store.state.lastSearchMethod) {
@@ -157,8 +163,8 @@ class Controller {
       // console.log('initializeStatuses is running');
     }
 
-    if (this.store.state.lastSearchMethod !== 'buffer search') {
-      // console.log('in didGetParcels, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
+    if (!this.config.pinboard && this.store.state.lastSearchMethod !== 'buffer search') {
+      console.log('in initializeStatuses, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
       this.store.commit('setBufferShape', null);
     }
   }
@@ -217,6 +223,11 @@ class Controller {
     }
     console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
 
+    this.initializeStatuses(value, searchCategory);
+    if(searchCategory === "keyword") {
+      return;
+    }
+
     this.dataManager.resetData();
     // Added specifically to reset the condo units not being cleared elsewhere on hash change.
     this.dataManager.resetShape();
@@ -244,14 +255,16 @@ class Controller {
     if (blockSearchCheck === true) {
       searchCategory = 'block';
     }
-    this.initializeStatuses(value, searchCategory);
-    if(searchCategory === "keyword") {
+    // this.initializeStatuses(value, searchCategory);
+    if(searchCategory === "zipcode") {
       return;
     }
     // console.log('after await initializeStatuses is running');
 
     // TODO rename to aisResponse
+    console.log('controller.js handleSearchFormSubmit about to call ais');
     let aisResponse = await this.clients.geocode.fetch(value);
+    console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
     // console.log('after await aisResponse:', aisResponse, 'aisResponse.properties.street_address:', aisResponse.properties.street_address);//, 'this.clients:', this.clients);
 
     if (aisResponse && !this.store.state.bufferMode && !blockSearchCheck) {
@@ -265,22 +278,26 @@ class Controller {
       }
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
-      // console.log('block search is true, value:', value);
+      console.log('else if 1 is running, block search is true, value:', value);
       this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
     } else if (!this.store.state.bufferMode) {
+      console.log('else if 2 is running');
       this.dataManager.clearBlockSearch();
       if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
-        // console.log('onGeocodeFail exists');
+        console.log('elseif 2 if is running, onGeocodeFail exists');
         let feature = {
           properties: {},
         };
         feature.properties.opa_account_num = this.store.state.geocode.input;
         this.dataManager.fetchData(feature);
       } else {
-        aisResponse = await this.clients.ownerSearch.fetch(value);
-        this.router.setRouteByOwnerSearch();
+        console.log('elseif 2 else is running, this used to do an owner search');
+        // aisResponse = await this.clients.ownerSearch.fetch(value);
+        // this.router.setRouteByOwnerSearch();
       }
+    } else {
+      console.log('controller handleSearchFormSubmit final else is running');
     }
     //
     // if (!aisResponse) {

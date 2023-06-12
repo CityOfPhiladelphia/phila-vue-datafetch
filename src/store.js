@@ -48,7 +48,7 @@ const initialState = {
   },
   selectedServices: [],
   selectedKeywords: [],
-
+  selectedZipcode: null,
 };
 
 const pvdStore = {
@@ -158,6 +158,9 @@ const pvdStore = {
   store: {
     state: initialState,
     mutations: {
+      setSelectedZipcode(state, payload) {
+        state.selectedZipcode = payload;
+      },
       setSelectedServices(state, payload) {
         state.selectedServices = payload;
       },
