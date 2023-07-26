@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.14 - 7/26/2023
+
+* allows passing esri token in esri query
+
 ### 2.2.13 - 6/12/2023
 
 * includes changes made for user testing sessions
