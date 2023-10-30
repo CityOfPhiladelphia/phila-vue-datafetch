@@ -230,7 +230,7 @@ class DataManager {
   }
 
   fetchData(optionalFeature) {
-    console.log('\nFETCH DATA');
+    console.log('\nFETCH DATA STARTING, optionalFeature:', optionalFeature);
     // console.log('-----------');
     let geocodeObj;
     let ownerSearchObj;
@@ -303,6 +303,7 @@ class DataManager {
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
     for (let [ dataSourceKey, dataSource ] of dataSourceKeys) {
+      // console.log('fetchData loop, dataSourceKey:', dataSourceKey, 'dataSource:', dataSource);
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
@@ -333,7 +334,7 @@ class DataManager {
           }
           targets = targetsFn(state);
 
-          // console.log('in fetchData, targetsDef is NOT true, targets:', targets);
+          // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'dataSource:', dataSource, 'targetsDef is NOT true, targets:', targets);
 
           // check if target objs exist in state.
           const targetIds = targets.map(targetIdFn);
@@ -416,19 +417,28 @@ class DataManager {
         // TODO do this for all targets
         switch(type) {
         case 'http-get':
-          // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+          // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSource.segments:', dataSource.segments, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
           if (this.config.app) {
             if (this.config.app.title === 'Property Data Explorer') {
               this.clients.http.fetchPde(target,
                 dataSource,
                 dataSourceKey,
                 targetIdFn);
+              // } else if (dataSource.segments == true) {
+              //   console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+
             } else {
               this.clients.http.fetch(target,
                 dataSource,
                 dataSourceKey,
                 targetIdFn);
             }
+          } else if (dataSource.segments == true) {
+            console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+            this.clients.http.fetchDataInSegments(target,
+              dataSource,
+              dataSourceKey,
+              targetIdFn);
           } else {
             this.clients.http.fetch(target,
               dataSource,
@@ -478,6 +488,7 @@ class DataManager {
 
     let data = status === 'error' ? null : dataOrNull;
     // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data.features[0], 'targetIdFn:', targetIdFn);
+    console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'targetIdFn:', targetIdFn);
 
     // assign feature ids
     if (Array.isArray(data)) {
@@ -649,7 +660,7 @@ class DataManager {
   }
 
   checkDataSourcesFetched(paths = []) {
-    // console.log('check data sources fetched', paths);
+    // console.log('checkDataSourcesFetched, paths:', paths);
     const state = this.store.state;
     return paths.every(path => {
       // deps can be deep keys, e.g. `dor.parcels`. split on periods to get
@@ -673,17 +684,19 @@ class DataManager {
         return acc[pathKey];
       }, state);
 
+      // console.log('paths:', paths, 'stateObj:', stateObj);
+
       return stateObj.status === 'success';
     });
   }
 
   checkDataSourceReady(key, options, targetId) {
-    // console.log(`check data source ready: ${key} ${targetId || ''}`, options);
+    // console.log('checkDataSourceReady, key:', key, 'options:', options, 'targetId:', targetId);
 
     const deps = options.deps;
     // console.log('deps', deps);
     const depsMet = this.checkDataSourcesFetched(deps);
-    // console.log('depsMet', depsMet);
+    // console.log('key:', key, 'depsMet', depsMet);
     let isReady = false;
 
     // if data deps have been met
