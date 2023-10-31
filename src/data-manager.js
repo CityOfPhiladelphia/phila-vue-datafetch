@@ -129,7 +129,7 @@ class DataManager {
   }
 
   didFetchMoreData(key, secondaryStatus, data) {
-    // console.log('INCREMENT - DID FETCH More DATA:', key, secondaryStatus, data);
+    console.log('INCREMENT - DID FETCH More DATA:', key, secondaryStatus, data);
 
     const dataOrNull = status === 'error' ? null : data;
     let stateData = dataOrNull;
@@ -485,17 +485,40 @@ class DataManager {
   }
 
   didFetchData(key, status, dataOrNull, targetId, targetIdFn) {
+    console.log('didFetchData, this.config.dataSources[key]:', this.config.dataSources[key]);
 
     let data = status === 'error' ? null : dataOrNull;
     // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data.features[0], 'targetIdFn:', targetIdFn);
-    console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'targetIdFn:', targetIdFn);
+    // console.log('data-manager DID FETCH DATA, key:', key, 'data:', data, 'targetId:', targetId || '', 'targetIdFn:', targetIdFn);
 
     // assign feature ids
     if (Array.isArray(data)) {
-      // console.log('didFetchData if is running');
-      data = this.assignFeatureIds(data, key, targetId);
+      console.log('didFetchData if is running, data:', data, 'key:', key);
+      if (this.config.dataSources[key].segments) {
+        let value = [];
+        let dataPoints;
+        if (data[0].features) {
+          dataPoints = 'features';
+        } else if (data[0].rows) {
+          dataPoints = 'rows';
+        }
+        // console.log('didFetchData, data:', data, 'Array.isArray(data):', Array.isArray(data));
+        if (data && Array.isArray(data)) {
+          value = data[0][dataPoints];
+          for (let i=1;i<data.length;i++) {
+            // console.log('didFetchData value:', value, 'data.length:', data.length, 'data[i]', data[i]);
+            value = value.concat(data[i][dataPoints]);
+          }
+        } else if (data && data[dataPoints]) {
+          value = data[dataPoints];
+        }
+        data = value;
+        console.log('didFetchData key:', key, 'dataPoints:', dataPoints, 'value:', value);
+      } else {
+        data = this.assignFeatureIds(data, key, targetId);
+      }
     } else if (data) {
-      // console.log('didFetchData else if is running, data:', data, 'key:', key, 'targetId:', targetId);
+      console.log('didFetchData else if is running, data:', data, 'key:', key, 'targetId:', targetId);
       if (data.rows && data.rows.length) {
         data.rows = this.assignFeatureIds(data.rows, key, targetId);
       } else if (data.records && data.records.length) {
