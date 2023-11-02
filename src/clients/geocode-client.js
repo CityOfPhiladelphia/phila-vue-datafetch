@@ -61,7 +61,7 @@ class GeocodeClient extends BaseClient {
 
   // fetch(input, category) {
   async fetch(input) {
-    console.log('geocode client fetch, input:', input, 'this.config.geocoder:', this.config.geocoder, 'this.store.state:', this.store.state);
+    // console.log('geocode client fetch, input:', input, 'this.config.geocoder:', this.config.geocoder, 'this.store.state:', this.store.state);
 
     const store = this.store;
     let geocodeConfig;

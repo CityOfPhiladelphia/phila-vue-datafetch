@@ -3,6 +3,7 @@ const Visualizer = require('webpack-visualizer-plugin');
 // const path = require('path');
 
 module.exports = {
+  // mode: 'production',
   configureWebpack: {
     plugins: [
       new Visualizer({ filename: './statistics.html' }),

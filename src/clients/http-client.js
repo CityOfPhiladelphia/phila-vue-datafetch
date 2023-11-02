@@ -5,10 +5,10 @@ import BaseClient from './base-client';
 class HttpClient extends BaseClient {
 
   fetchDataInSegments(feature, dataSource, dataSourceKey, targetIdFn, params) {
-    console.log('http-client fetchDataInSegments, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    // console.log('http-client fetchDataInSegments, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
 
     let featureArr = feature.properties[dataSource.splitField].split('|');
-    console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length);
+    // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length);
     // Divide feature into groups of 200 so the url won't create an error
 
     let featuresObj = [];
@@ -42,7 +42,7 @@ class HttpClient extends BaseClient {
     }
     // console.log('url', url);
     const successFn = options.success;
-    console.log('in fetchDataInSegments, successFn:', successFn);
+    // console.log('in fetchDataInSegments, successFn:', successFn);
 
     let responseResult = [];
 
@@ -54,7 +54,7 @@ class HttpClient extends BaseClient {
 
         let params = this.evaluateParams(features, dataSource);
         let featureResponse = await axios.get(url, { params });
-        console.log('params:', params, 'featureResponse:', featureResponse);
+        // console.log('params:', params, 'featureResponse:', featureResponse);
         data = await data.concat(successFn(featureResponse.data));
 
         if (targetIdFn) {

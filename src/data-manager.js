@@ -230,7 +230,7 @@ class DataManager {
   }
 
   fetchData(optionalFeature) {
-    console.log('\nFETCH DATA STARTING, optionalFeature:', optionalFeature);
+    // console.log('\nFETCH DATA STARTING, optionalFeature:', optionalFeature);
     // console.log('-----------');
     let geocodeObj;
     let ownerSearchObj;
@@ -434,7 +434,7 @@ class DataManager {
                 targetIdFn);
             }
           } else if (dataSource.segments == true) {
-            console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+            // console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
             this.clients.http.fetchDataInSegments(target,
               dataSource,
               dataSourceKey,
@@ -485,7 +485,7 @@ class DataManager {
   }
 
   didFetchData(key, status, dataOrNull, targetId, targetIdFn) {
-    console.log('didFetchData, this.config.dataSources[key]:', this.config.dataSources[key]);
+    // console.log('didFetchData, this.config.dataSources[key]:', this.config.dataSources[key]);
 
     let data = status === 'error' ? null : dataOrNull;
     // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data.features[0], 'targetIdFn:', targetIdFn);
@@ -493,7 +493,7 @@ class DataManager {
 
     // assign feature ids
     if (Array.isArray(data)) {
-      console.log('didFetchData if is running, data:', data, 'key:', key);
+      // console.log('didFetchData if is running, data:', data, 'key:', key);
       if (this.config.dataSources[key].segments) {
         let value = [];
         let dataPoints;
@@ -513,12 +513,12 @@ class DataManager {
           value = data[dataPoints];
         }
         data = value;
-        console.log('didFetchData key:', key, 'dataPoints:', dataPoints, 'value:', value);
+        // console.log('didFetchData key:', key, 'dataPoints:', dataPoints, 'value:', value);
       } else {
         data = this.assignFeatureIds(data, key, targetId);
       }
     } else if (data) {
-      console.log('didFetchData else if is running, data:', data, 'key:', key, 'targetId:', targetId);
+      // console.log('didFetchData else if is running, data:', data, 'key:', key, 'targetId:', targetId);
       if (data.rows && data.rows.length) {
         data.rows = this.assignFeatureIds(data.rows, key, targetId);
       } else if (data.records && data.records.length) {
@@ -657,7 +657,7 @@ class DataManager {
         data: null,
       });
       let currentParcels = this.activeTopicConfig().parcels || Object.keys(this.config.parcels)[0];
-      console.log('currentParcels:', currentParcels);
+      // console.log('currentParcels:', currentParcels);
       // this.store.commit('setActiveParcelLayer', 'pwd');
       this.store.commit('setActiveParcelLayer', currentParcels);
     }
