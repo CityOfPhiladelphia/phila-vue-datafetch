@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.15 - 11/10/2023
+
+* all changes to get building certs into atlas.phila.gov
+
 ### 2.2.14 - 7/26/2023
 
 * allows passing esri token in esri query
