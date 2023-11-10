@@ -154,7 +154,7 @@ class EsriClient extends BaseClient {
 
   fetchBySpatialQuery(dataSourceKey, url, relationship, targetGeom, parameters = {}, options = {}, calculateDistancePt) {
     let token = this.store.state.agoToken;
-    console.log('esri-client fetchBySpatialQuery, token:', token, 'dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'typeof(parameters.sourceValue):', typeof(parameters.sourceValue), 'options:', options, 'calculateDistancePt:', calculateDistancePt);
+    // console.log('esri-client fetchBySpatialQuery, token:', token, 'dataSourceKey:', dataSourceKey, 'url:', url, 'relationship:', relationship, 'targetGeom:', targetGeom, 'parameters:', parameters, 'typeof(parameters.sourceValue):', typeof(parameters.sourceValue), 'options:', options, 'calculateDistancePt:', calculateDistancePt);
 
     let query = url + '/query'; //+ [relationship](targetGeom);
     let theGeom, theGeomType, theSpatialRel;

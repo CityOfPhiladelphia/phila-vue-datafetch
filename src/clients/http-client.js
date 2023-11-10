@@ -7,13 +7,13 @@ class HttpClient extends BaseClient {
   fetchDataInSegments(feature, dataSource, dataSourceKey, targetIdFn, params) {
     // console.log('http-client fetchDataInSegments, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
 
-    let featureArr = feature.split(',');
-    // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length)
+    let featureArr = feature.properties[dataSource.splitField].split('|');
+    // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length);
     // Divide feature into groups of 200 so the url won't create an error
 
     let featuresObj = [];
     let featuresLength = featureArr.length,
-      chunk = 200,
+      chunk = 100,
       subset;
 
     for (let i = 0; i < featuresLength; i += chunk) {
@@ -25,10 +25,16 @@ class HttpClient extends BaseClient {
     // console.log("subset: ", subset)
     // console.log("featuresObj: ", featuresObj)
 
-    let data = [], targetId =[];
+    // let data = [], targetId =[];
+    let data = [];
+    let targetId;
     let url = dataSource.url;
     const options = dataSource.options;
-    const urlAddition = params.urlAddition;
+
+    let urlAddition;
+    if (params) {
+      urlAddition = params.urlAddition;
+    }
 
     if (urlAddition) {
       url += encodeURIComponent(urlAddition);
@@ -36,15 +42,19 @@ class HttpClient extends BaseClient {
     }
     // console.log('url', url);
     const successFn = options.success;
+    // console.log('in fetchDataInSegments, successFn:', successFn);
 
     let responseResult = [];
 
+    // async function getDataBySegments(successFn) {
     async function getDataBySegments() {
+      // console.log('in getDataBySegments, successFn:', successFn);
       const allFeaturesReturned = await featuresObj.map( async features => {
         // if the data is not dependent on other data
 
         let params = this.evaluateParams(features, dataSource);
         let featureResponse = await axios.get(url, { params });
+        // console.log('params:', params, 'featureResponse:', featureResponse);
         data = await data.concat(successFn(featureResponse.data));
 
         if (targetIdFn) {
@@ -62,6 +72,7 @@ class HttpClient extends BaseClient {
     getDataBySegments = getDataBySegments.bind(this);
 
     // return getDataBySegments();
+    // let final = getDataBySegments(successFn);
     let final = getDataBySegments();
     return final;
   }

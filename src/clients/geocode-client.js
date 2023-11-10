@@ -61,12 +61,17 @@ class GeocodeClient extends BaseClient {
 
   // fetch(input, category) {
   async fetch(input) {
-    console.log('geocode client fetch', input);//, 'this.store:', this.store);
+    // console.log('geocode client fetch, input:', input, 'this.config.geocoder:', this.config.geocoder, 'this.store.state:', this.store.state);
 
     const store = this.store;
     let geocodeConfig;
 
     geocodeConfig = this.config.geocoder;
+
+    if (this.store.state.activeParcelLayer === 'pwd') {
+      geocodeConfig.params.include_units = false;
+    }
+
     const url = geocodeConfig.url(input);
     // const agent = new httpsProxyAgent('http://proxy.phila.gov:8080');
 

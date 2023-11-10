@@ -103,7 +103,7 @@ class Controller {
   // }
 
   initializeStatuses(input, searchCategory) {
-    console.log('initializeStatuses is running', input, 'searchCategory:', searchCategory);
+    // console.log('initializeStatuses is running', input, 'searchCategory:', searchCategory);
     if (!searchCategory || searchCategory === 'address') {
       this.store.commit('setGeocodeInput', input);
       this.store.commit('setGeocodeStatus', null);
@@ -164,7 +164,7 @@ class Controller {
     }
 
     if (!this.config.pinboard && this.store.state.lastSearchMethod !== 'buffer search') {
-      console.log('in initializeStatuses, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
+      // console.log('in initializeStatuses, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
       this.store.commit('setBufferShape', null);
     }
   }
@@ -221,7 +221,7 @@ class Controller {
       let aisResponse = this.clients.geocode.fetch(value);
       return;
     }
-    console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
+    // console.log('phila-vue-datafetch controller.js, handleSearchFormSubmit is running, value:', value, 'searchCategory:', searchCategory);
 
     this.initializeStatuses(value, searchCategory);
     if(searchCategory === "keyword") {
@@ -262,9 +262,9 @@ class Controller {
     // console.log('after await initializeStatuses is running');
 
     // TODO rename to aisResponse
-    console.log('controller.js handleSearchFormSubmit about to call ais');
+    // console.log('controller.js handleSearchFormSubmit about to call ais');
     let aisResponse = await this.clients.geocode.fetch(value);
-    console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
+    // console.log('after await aisResponse:', aisResponse);//, 'this.clients:', this.clients);
     // console.log('after await aisResponse:', aisResponse, 'aisResponse.properties.street_address:', aisResponse.properties.street_address);//, 'this.clients:', this.clients);
 
     if (aisResponse && !this.store.state.bufferMode && !blockSearchCheck) {
@@ -278,21 +278,21 @@ class Controller {
       }
     } else if (!this.store.state.bufferMode && blockSearchCheck === true) {
       this.dataManager.clearOwnerSearch();
-      console.log('else if 1 is running, block search is true, value:', value);
+      // console.log('else if 1 is running, block search is true, value:', value);
       this.dataManager.resetGeocode();
       aisResponse = await this.clients.blockSearch.fetch(value);
     } else if (!this.store.state.bufferMode) {
-      console.log('else if 2 is running');
+      // console.log('else if 2 is running');
       this.dataManager.clearBlockSearch();
       if (this.config.onGeocodeFail && this.config.onGeocodeFail.data === 'tips') {
-        console.log('elseif 2 if is running, onGeocodeFail exists');
+        // console.log('elseif 2 if is running, onGeocodeFail exists');
         let feature = {
           properties: {},
         };
         feature.properties.opa_account_num = this.store.state.geocode.input;
         this.dataManager.fetchData(feature);
       } else {
-        console.log('elseif 2 else is running, this used to do an owner search');
+        // console.log('elseif 2 else is running, this used to do an owner search');
         // aisResponse = await this.clients.ownerSearch.fetch(value);
         // this.router.setRouteByOwnerSearch();
       }
@@ -388,7 +388,7 @@ class Controller {
           }
         }
 
-        console.log('about to call processParcels, response:', response);
+        // console.log('about to call processParcels, response:', response);
         let errorValue = false;
         if (response) {
           errorValue = response.error ? true : false;
