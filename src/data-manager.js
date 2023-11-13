@@ -591,8 +591,10 @@ class DataManager {
       }
     }
 
-    for (let extraData of Object.keys(this.config.resetDataExtra)) {
-      this.store.commit('set' + extraData, this.config.resetDataExtra[extraData]);
+    if (this.config.resetExtraData) {
+      for (let extraData of Object.keys(this.config.resetDataExtra)) {
+        this.store.commit('set' + extraData, this.config.resetDataExtra[extraData]);
+      }
     }
   }
 
