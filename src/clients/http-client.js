@@ -274,7 +274,7 @@ class HttpClient extends BaseClient {
       params['q'] = params['q'] + " group by " + groupby + ", the_geom";
     }
 
-    console.log('fetchNearby, select:', select, 'params:', params);
+    // console.log('fetchNearby, select:', select, 'params:', params);
 
     // if the data is not dependent on other data
     axios.get(url, { params }).then(response => {
