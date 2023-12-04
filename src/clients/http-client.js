@@ -222,6 +222,8 @@ class HttpClient extends BaseClient {
     const distances = options.distances || 250;
     // console.log('fetchNearby distances:', distances);
 
+    const groupby = options.groupby || null;
+
     const distQuery = "ST_Distance(the_geom::geography, ST_SetSRID(ST_Point("
                     + feature.geometry.coordinates[0]
                     + "," + feature.geometry.coordinates[1]
@@ -230,12 +232,18 @@ class HttpClient extends BaseClient {
     const latQuery = "ST_Y(the_geom)";
     const lngQuery = "ST_X(the_geom)";
 
-    // let select = '*'
+    let select;
+    
+    if (!groupby) {
+      select = '*';
+    } else {
+      select = groupby + ', the_geom';
+    }
     // if (calculateDistance) {
-    const select = "*, " + distQuery + 'as distance,' + latQuery + 'as lat, ' + lngQuery + 'as lng';
+    select = select + ", " + distQuery + 'as distance,' + latQuery + 'as lat, ' + lngQuery + 'as lng';
     // }
 
-    params['q'] = "select" + select + " from " + table + " where " + distQuery + " < " + distances;
+    params['q'] = "select " + select + " from " + table + " where " + distQuery + " < " + distances;
 
     let subFn;
     if (dateMinNum) {
@@ -261,6 +269,12 @@ class HttpClient extends BaseClient {
       // let test = format(subFn(new Date(), dateMinNum), 'YYYY-MM-DD');
       params['q'] = params['q'] + " and " + dateField + " > '" + format(subFn(new Date(), dateMinNum), 'yyyy-MM-dd') + "'";
     }
+
+    if (groupby) {
+      params['q'] = params['q'] + " group by " + groupby + ", the_geom";
+    }
+
+    // console.log('fetchNearby, select:', select, 'params:', params);
 
     // if the data is not dependent on other data
     axios.get(url, { params }).then(response => {
