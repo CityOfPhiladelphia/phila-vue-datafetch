@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.18 - 12/4/2023
+
+* updates .yml file to use node 16 for pushing to npm
+
 ### 2.2.17 - 12/4/2023
 
 * small changes from ux review of atlas.phila.gov
