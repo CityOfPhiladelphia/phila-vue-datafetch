@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.17 - 12/4/2023
+
+* small changes from ux review of atlas.phila.gov
+
 ### 2.2.16 - 11/13/2023
 
 * fixes bug with clearing extra data which doesn't exist in a pinboard app
