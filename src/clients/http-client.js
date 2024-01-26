@@ -136,6 +136,7 @@ class HttpClient extends BaseClient {
 
   fetch(feature, dataSource, dataSourceKey, targetIdFn) {
     let params = this.evaluateParams(feature, dataSource);
+    let headers = dataSource.options.headers;
     // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
     let url = dataSource.url;
     const options = dataSource.options;
@@ -153,7 +154,7 @@ class HttpClient extends BaseClient {
     }
 
     // if the data is not dependent on other data
-    axios.get(url, { params }).then(response => {
+    axios.get(url, { params, headers }).then(response => {
 
       // console.log('in axios callback in http-client, this.store.state:', this.store.state);
       // axios.get('http://data.phila.gov/resource/w7rb-qrn8.json?parcel_number=012099800%27').then(response => {
