@@ -5,7 +5,7 @@ import BaseClient from './base-client';
 class HttpClient extends BaseClient {
 
   fetchDataInSegments(feature, dataSource, dataSourceKey, targetIdFn, params) {
-    // console.log('http-client fetchDataInSegments, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    console.log('http-client fetchDataInSegments, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
 
     let featureArr = feature.properties[dataSource.splitField].split('|');
     // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length);
@@ -135,9 +135,10 @@ class HttpClient extends BaseClient {
   }
 
   fetch(feature, dataSource, dataSourceKey, targetIdFn) {
+    console.log('http-client.js fetch is running');
     let params = this.evaluateParams(feature, dataSource);
     let headers = dataSource.options.headers;
-    // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
     let url = dataSource.url;
     const options = dataSource.options;
     const urlAddition = params.urlAddition;
