@@ -287,23 +287,28 @@ class DataManager {
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
     // even if the property is not in OPA and AIS
+    let astate = this.store.state;
     if (!geocodeObj && !ownerSearchObj && !blockSearchObj  && !shapeSearchObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
-        // console.log('inside if and filter, dataSourceKey:', dataSourceKey);
+        console.log('in fetchData, inside if and filter, dataSourceKey:', dataSourceKey, 'astate.sources:', astate.sources);
         if (dataSourceKey[1].dependent) {
           if (dataSourceKey[1].dependent === 'parcel' || dataSourceKey[1].dependent === 'none') {
             return true;
+          } else if (dataSourceKey[1].dependent) {
+            if (astate.sources[dataSourceKey[1].dependent].status === 'success') {
+              return true;
+            }
           }
         }
       });
     }
 
-    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
     for (let [ dataSourceKey, dataSource ] of dataSourceKeys) {
-      // console.log('fetchData loop, dataSourceKey:', dataSourceKey, 'dataSource:', dataSource);
+      console.log('fetchData loop, dataSourceKey:', dataSourceKey, 'dataSource:', dataSource);
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
@@ -427,6 +432,12 @@ class DataManager {
               // } else if (dataSource.segments == true) {
               //   console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
 
+            // } else if (dataSource.segments == true) {
+            //   console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+            //   this.clients.http.fetchDataInSegments(target,
+            //     dataSource,
+            //     dataSourceKey,
+            //     targetIdFn);
             } else {
               this.clients.http.fetch(target,
                 dataSource,
@@ -434,7 +445,7 @@ class DataManager {
                 targetIdFn);
             }
           } else if (dataSource.segments == true) {
-            // console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+            console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
             this.clients.http.fetchDataInSegments(target,
               dataSource,
               dataSourceKey,
