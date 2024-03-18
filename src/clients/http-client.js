@@ -137,7 +137,7 @@ class HttpClient extends BaseClient {
   fetch(feature, dataSource, dataSourceKey, targetIdFn) {
     let params = this.evaluateParams(feature, dataSource);
     let headers = dataSource.options.headers;
-    // console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
+    console.log('http-client fetch, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
     let url = dataSource.url;
     const options = dataSource.options;
     const urlAddition = params.urlAddition;

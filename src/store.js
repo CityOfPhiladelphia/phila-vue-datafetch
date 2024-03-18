@@ -214,9 +214,16 @@ const pvdStore = {
         // }
       },
       setSourceData(state, payload) {
-        // console.log('store setSourceData is running, payload:', payload);
+        console.log('store setSourceData is running, payload:', payload);
         const key = payload.key;
         const data = payload.data;
+        
+        // let data;
+        // if (Array.isArray(payload.data)) {
+        //   data = { features: payload.data };
+        // } else {
+        //   data = payload.data;
+        // }
 
         // if a target id was passed in, set the data object for that target
         const targetId = payload.targetId;

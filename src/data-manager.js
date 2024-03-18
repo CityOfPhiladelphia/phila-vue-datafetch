@@ -485,7 +485,7 @@ class DataManager {
   }
 
   didFetchData(key, status, dataOrNull, targetId, targetIdFn) {
-    // console.log('didFetchData, this.config.dataSources[key]:', this.config.dataSources[key]);
+    console.log('didFetchData, this.config.dataSources[key]:', this.config.dataSources[key]);
 
     let data = status === 'error' ? null : dataOrNull;
     // console.log('data-manager DID FETCH DATA, key:', key, 'targetId:', targetId || '', 'data:', data.features[0], 'targetIdFn:', targetIdFn);
