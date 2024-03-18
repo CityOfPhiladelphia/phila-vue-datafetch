@@ -4,7 +4,7 @@ data fetching. It is a "thin" class that mostly proxies events to the router and
 data manager, and facilitates communication between them.
 */
 
-import Vue from 'vue';
+// import Vue from 'vue';
 import Router from './router';
 import DataManager from './data-manager';
 import utils from './utils.js';
@@ -163,10 +163,10 @@ class Controller {
       // console.log('initializeStatuses is running');
     }
 
-    if (!this.config.pinboard && this.store.state.lastSearchMethod !== 'buffer search') {
-      // console.log('in initializeStatuses, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
-      this.store.commit('setBufferShape', null);
-    }
+    // if (!this.config.pinboard && this.store.state.lastSearchMethod !== 'buffer search') {
+    //   // console.log('in initializeStatuses, removing BufferShape, this.store.state.lastSearchMethod:', this.store.state.lastSearchMethod);
+    //   this.store.commit('setBufferShape', null);
+    // }
   }
 
   async runBufferProcess(parcelResponse) {
@@ -697,16 +697,16 @@ class Controller {
       return;
     }
 
-    Vue.nextTick(() => {
-      // REVIEW this check is returning true even when the header el isn't
-      // really visible, probbaly because of a timing issue. it works well
-      // enough without it. commenting out for now.
-      // const visible = this.isElementInViewport(el);
+    // Vue.nextTick(() => {
+    //   // REVIEW this check is returning true even when the header el isn't
+    //   // really visible, probbaly because of a timing issue. it works well
+    //   // enough without it. commenting out for now.
+    //   // const visible = this.isElementInViewport(el);
 
-      // if (!visible) {
-      el.scrollIntoView();
-      // }
-    });
+    //   // if (!visible) {
+    //   el.scrollIntoView();
+    //   // }
+    // });
   }
 
   goToDefaultAddress(address) {

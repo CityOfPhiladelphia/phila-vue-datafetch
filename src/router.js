@@ -1,4 +1,4 @@
-import { parse as parseUrl } from 'url';
+// import { parse as parseUrl } from 'url';
 
 class Router {
   constructor(opts) {
@@ -103,7 +103,8 @@ class Router {
     console.log('hashChanged is running, location:', location, 'hash:', hash, 'this.store.state.activeTopic:', this.store.state.activeTopic);
 
     // parse url
-    const comps = parseUrl(location.href);
+    // const comps = parseUrl(location.href);
+    const comps = location.href;
     const query = comps.query;
 
     // TODO handle ?search entry point
