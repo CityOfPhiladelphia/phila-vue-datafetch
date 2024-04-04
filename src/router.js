@@ -371,7 +371,8 @@ class Router {
   // TODO this could have a name that is more declarative like "changeURL" (used to be called "didGeocode")
 
   setRouteByGeocode(testAddress) {
-    console.log('setRouteByGeocode is starting, this.store.state.bufferMode:', this.store.state.bufferMode, 'testAddress:', testAddress);
+
+    console.log('setRouteByGeocode is starting wawa, this.store.state.bufferMode:', this.store.state.bufferMode, 'testAddress:', testAddress);
     if (this.store.state.activeTopic) {
       this.store.state.routerTopic = this.store.state.activeTopic;
     }
@@ -417,6 +418,7 @@ class Router {
 
       // REVIEW this is only pushing state when routing is turned on. but maybe we
       // want this to happen all the time, right?
+      
       if (!this.silent) {
         if (this.config.router.type === 'vue') {
           // console.log('in setRouteByGeocode, router type is vue, address:', address);
@@ -424,7 +426,9 @@ class Router {
           //   this.vueRouter.push({ query: { ...this.vueRouter.query, ...{ 'buffer': address }}}).catch(()=>{});
           // } else if (this.config.router.pattern === 'address-and-topic') {
           if (this.config.router.pattern === 'address-and-topic') {
-            let currentParams = this.vueRouter.history.current.params;
+            console.log('this.vueRouter:', this.vueRouter);
+            // let currentParams = this.vueRouter.history.current.params;
+            let currentParams = this.vueRouter.currentRoute._value.params;
             console.log('setRouteByGeocode else if is running, currentParams:', currentParams, 'address:', address, 'topic:', topic);
             if (currentParams.address !== address || currentParams.topic !== topic) {
               if (!topic) {

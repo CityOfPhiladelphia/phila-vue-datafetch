@@ -281,7 +281,7 @@ class DataManager {
     }
 
     let dataSourceKeys = Object.entries(dataSources);
-    // console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources before filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
     // console.log('geocodeObj:', geocodeObj, 'blockSearchObj:', blockSearchObj, 'shapeSearchObj:', shapeSearchObj);
 
     // this was added to allow fetchData to run even without a geocode result
@@ -308,7 +308,7 @@ class DataManager {
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
     for (let [ dataSourceKey, dataSource ] of dataSourceKeys) {
-      console.log('fetchData loop, dataSourceKey:', dataSourceKey, 'dataSource:', dataSource);
+      // console.log('fetchData loop, dataSourceKey:', dataSourceKey, 'dataSource:', dataSource);
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
@@ -375,10 +375,10 @@ class DataManager {
         targets = [ geocodeObj ];
       }
 
-      console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
+      // console.log('in fetchData, dataSourceKey:', dataSourceKey, 'targets:', targets, 'doPins:', doPins);
 
       for (let target of targets) {
-        console.log('fetchData, target:', target, 'target.length:', target.length);
+        // console.log('fetchData, target:', target, 'target.length:', target.length);
 
         // get id of target
         let targetId;
@@ -479,12 +479,12 @@ class DataManager {
           this.clients.esri.fetchNearby(target, dataSource, dataSourceKey);
           break;
 
-        // case 'airtable':
-        //   this.clients.airtable.fetch(target,
-        //     dataSource,
-        //     dataSourceKey,
-        //     targetIdFn);
-        //   break;
+          // case 'airtable':
+          //   this.clients.airtable.fetch(target,
+          //     dataSource,
+          //     dataSourceKey,
+          //     targetIdFn);
+          //   break;
 
         default:
           throw `Unknown data source type: ${type}`;
