@@ -295,6 +295,7 @@ class DataManager {
           if (dataSourceKey[1].dependent === 'parcel' || dataSourceKey[1].dependent === 'none') {
             return true;
           } else if (dataSourceKey[1].dependent) {
+            console.log('astate.sources:', astate.sources, 'dataSourceKey:', dataSourceKey, 'astate.sources[dataSourceKey[1].dependent]:', astate.sources[dataSourceKey[1].dependent]);
             if (astate.sources[dataSourceKey[1].dependent].status === 'success') {
               return true;
             }
@@ -468,7 +469,7 @@ class DataManager {
           break;
 
         case 'esri':
-          // console.log('esri', dataSourceKey)
+          console.log('esri', dataSourceKey);
           // TODO add targets id fn
           this.clients.esri.fetch(target, dataSource, dataSourceKey);
           break;
@@ -720,7 +721,7 @@ class DataManager {
         return acc[pathKey];
       }, state);
 
-      // console.log('paths:', paths, 'stateObj:', stateObj);
+      console.log('paths:', paths, 'stateObj:', stateObj);
 
       return stateObj.status === 'success';
     });
