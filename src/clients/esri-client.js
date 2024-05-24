@@ -12,7 +12,7 @@ import BaseClient from './base-client';
 
 class EsriClient extends BaseClient {
   async fetch(feature, dataSource, dataSourceKey) {
-    // console.log('esri-client fetch is running');
+    console.log('esri-client fetch is running');
 
     const url = dataSource.url;
     const { relationship, targetGeometry, ...options } = dataSource.options;
@@ -172,7 +172,7 @@ class EsriClient extends BaseClient {
         where = valOrGetter;
       }
     }
-
+    console.log('targetGeom:', targetGeom);
     if (relationship === 'where') {
       params = {
         'where': where,
@@ -183,7 +183,7 @@ class EsriClient extends BaseClient {
       if (token) {
         params.token = token;
       }
-
+      
     } else {
       if (relationship === 'intersects') {
         theGeom = { "xmin": targetGeom.coordinates[0][0][0], "ymin": targetGeom.coordinates[0][0][1], "xmax": targetGeom.coordinates[0][2][0], "ymax": targetGeom.coordinates[0][2][1], "spatialReference": { "wkid":4326 }};
@@ -193,6 +193,11 @@ class EsriClient extends BaseClient {
         theGeom = { "rings": targetGeom.coordinates, "spatialReference": { "wkid": 4326 }};
         theGeomType = 'esriGeometryPolygon';
         theSpatialRel = 'esriSpatialRelContains';
+      } else if (targetGeom.type === 'Feature') {
+        console.log('esri targetGeom is a Feature');
+        theGeom = { "points": targetGeom.geometry.coordinates, "spatialReference": { "wkid": 4326 }};
+        theGeomType = 'esriGeometryMultipoint';
+        theSpatialRel = 'esriSpatialRelIntersects';
       } else {
         theGeom = { "x": targetGeom.coordinates[0], "y": targetGeom.coordinates[1], "spatialReference": { "wkid": 4326 }};
         theGeomType = 'esriGeometryPoint';
