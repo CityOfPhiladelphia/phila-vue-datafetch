@@ -18,6 +18,7 @@ import {
   CondoSearchClient,
   ShapeSearchClient,
   BufferSearchClient,
+  AgoTokenClient
 } from './clients';
 
 // console.log('controller.js is being read')
@@ -54,6 +55,9 @@ class Controller {
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.shapeSearch = new ShapeSearchClient(clientOpts);
     this.clients.bufferSearch = new BufferSearchClient(clientOpts);
+    this.clients.agoToken = new AgoTokenClient(clientOpts);
+
+    console.log('controller.js constructor is running, this.clients.agoToken:', this.clients.agoToken, 'this.clients.http:', this.clients.http);
   }
 
   /*
