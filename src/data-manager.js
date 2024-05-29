@@ -22,6 +22,7 @@ import {
   EsriClient,
   CondoSearchClient,
   AirtableClient,
+  AgoTokenClient,
 } from './clients';
 
 class DataManager {
@@ -45,6 +46,7 @@ class DataManager {
     this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.airtable = new AirtableClient(clientOpts);
+    this.clients.agoToken = new AgoTokenClient(clientOpts);
   }
 
   /* STATE HELPERS */
@@ -422,6 +424,12 @@ class DataManager {
 
         // TODO do this for all targets
         switch(type) {
+        case 'ago-token':
+          console.log('this.clients.agoToken:', this.clients.agoToken);
+          this.clients.agoToken.fetch();
+
+          break;
+
         case 'http-get':
           // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSource.segments:', dataSource.segments, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
           if (this.config.app) {
