@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.20 - 8/23/2024
+
+* merges changes for making lactation-spaces-finder work
+
 ### 2.2.19 - 2/28/2024
 
 * adds headers to http request
