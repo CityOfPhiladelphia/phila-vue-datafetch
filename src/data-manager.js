@@ -22,6 +22,7 @@ import {
   EsriClient,
   CondoSearchClient,
   AirtableClient,
+  AgoTokenClient,
 } from './clients';
 
 class DataManager {
@@ -45,6 +46,7 @@ class DataManager {
     this.clients.esri = new EsriClient(clientOpts);
     this.clients.condoSearch = new CondoSearchClient(clientOpts);
     this.clients.airtable = new AirtableClient(clientOpts);
+    this.clients.agoToken = new AgoTokenClient(clientOpts);
   }
 
   /* STATE HELPERS */
@@ -287,23 +289,29 @@ class DataManager {
     // this was added to allow fetchData to run even without a geocode result
     // for the real estate tax site which sometimes needs data from TIPS
     // even if the property is not in OPA and AIS
+    let astate = this.store.state;
     if (!geocodeObj && !ownerSearchObj && !blockSearchObj  && !shapeSearchObj) {
       dataSourceKeys = dataSourceKeys.filter(dataSourceKey => {
-        // console.log('inside if and filter, dataSourceKey:', dataSourceKey);
+        console.log('in fetchData, inside if and filter, dataSourceKey:', dataSourceKey, 'astate.sources:', astate.sources);
         if (dataSourceKey[1].dependent) {
           if (dataSourceKey[1].dependent === 'parcel' || dataSourceKey[1].dependent === 'none') {
             return true;
+          } else if (dataSourceKey[1].dependent) {
+            console.log('astate.sources:', astate.sources, 'dataSourceKey:', dataSourceKey, 'astate.sources[dataSourceKey[1].dependent]:', astate.sources[dataSourceKey[1].dependent]);
+            if (astate.sources[dataSourceKey[1].dependent].status === 'success') {
+              return true;
+            }
           }
         }
       });
     }
 
-    // console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
+    console.log('in fetchData, dataSources after filter:', dataSources, 'dataSourceKeys:', dataSourceKeys);
 
     // get "ready" data sources (ones whose deps have been met)
     // for (let [dataSourceKey, dataSource] of Object.entries(dataSources)) {
     for (let [ dataSourceKey, dataSource ] of dataSourceKeys) {
-      // console.log('fetchData loop, dataSourceKey:', dataSourceKey, 'dataSource:', dataSource);
+      console.log('fetchData loop, dataSourceKey:', dataSourceKey, 'dataSource:', dataSource);
       const state = this.store.state;
       const type = dataSource.type;
       const targetsDef = dataSource.targets;
@@ -416,6 +424,12 @@ class DataManager {
 
         // TODO do this for all targets
         switch(type) {
+        case 'ago-token':
+          console.log('this.clients.agoToken:', this.clients.agoToken);
+          this.clients.agoToken.fetch();
+
+          break;
+
         case 'http-get':
           // console.log('http-get, target:', target, 'dataSource:', dataSource, 'dataSource.segments:', dataSource.segments, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
           if (this.config.app) {
@@ -427,6 +441,12 @@ class DataManager {
               // } else if (dataSource.segments == true) {
               //   console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
 
+            // } else if (dataSource.segments == true) {
+            //   console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+            //   this.clients.http.fetchDataInSegments(target,
+            //     dataSource,
+            //     dataSourceKey,
+            //     targetIdFn);
             } else {
               this.clients.http.fetch(target,
                 dataSource,
@@ -434,7 +454,7 @@ class DataManager {
                 targetIdFn);
             }
           } else if (dataSource.segments == true) {
-            // console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
+            console.log('segments is true, http-get, target:', target, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn);
             this.clients.http.fetchDataInSegments(target,
               dataSource,
               dataSourceKey,
@@ -457,7 +477,7 @@ class DataManager {
           break;
 
         case 'esri':
-          // console.log('esri', dataSourceKey)
+          console.log('esri', dataSourceKey);
           // TODO add targets id fn
           this.clients.esri.fetch(target, dataSource, dataSourceKey);
           break;
@@ -709,7 +729,7 @@ class DataManager {
         return acc[pathKey];
       }, state);
 
-      // console.log('paths:', paths, 'stateObj:', stateObj);
+      console.log('paths:', paths, 'stateObj:', stateObj);
 
       return stateObj.status === 'success';
     });

@@ -8,6 +8,7 @@ import CondoSearchClient from './condo-search-client';
 import ShapeSearchClient from './shape-search-client';
 import BufferSearchClient from './buffer-search-client';
 import AirtableClient from './airtable-client';
+import AgoTokenClient from './ago-token-client';
 
 export {
   GeocodeClient,
@@ -20,4 +21,5 @@ export {
   ShapeSearchClient,
   BufferSearchClient,
   AirtableClient,
+  AgoTokenClient,
 };
