@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.22 - 6/26/2025
+
+* fixes bug for property-data-explorer, introduced in 2.2.15
+
 ### 2.2.21 - 6/26/2025
 
 * change for property-data-explorer, allows condos with no condo number

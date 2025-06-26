@@ -7,7 +7,12 @@ class HttpClient extends BaseClient {
   fetchDataInSegments(feature, dataSource, dataSourceKey, targetIdFn, params) {
     console.log('http-client fetchDataInSegments, feature:', feature, 'dataSource:', dataSource, 'dataSourceKey:', dataSourceKey, 'targetIdFn:', targetIdFn, 'params:', params);
 
-    let featureArr = feature.properties[dataSource.splitField].split('|');
+    let featureArr;
+    if (this.config.app && this.config.app.title === 'Property Data Explorer') {
+      featureArr = feature.split(',');
+    } else {
+      featureArr = feature.properties[dataSource.splitField].split('|');
+    }
     // console.log("Here is the featureArr: ", featureArr, "length: ", featureArr.length);
     // Divide feature into groups of 200 so the url won't create an error
 
