@@ -53,7 +53,7 @@ class CondoSearchClient extends BaseClient {
   }
 
   fetch(input) {
-    console.log('condo-search-client fetch is running');
+    console.log('condo-search-client fetch is running, input:', input);
     this.store.commit('setCondoUnitsStatus', 'waiting');
     const store = this.store;
     let condoConfig = JSON.parse(JSON.stringify(this.config.geocoder));
@@ -109,7 +109,10 @@ class CondoSearchClient extends BaseClient {
         }
       }
 
-      let units = features.filter(a => a.properties.unit_num != "");
+      // 6/26/2025 - This was changed to add make 2018 Delancey Place show a condo with no unit_num
+      let units = features;
+      // let units = features.filter(a => a.properties.unit_num != "");
+      console.log('units:', units);
       units = this.evaluateDataForUnits(units);
 
       var feature = JSON.parse(JSON.stringify(units[0]));

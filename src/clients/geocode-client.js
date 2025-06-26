@@ -68,7 +68,7 @@ class GeocodeClient extends BaseClient {
 
     geocodeConfig = this.config.geocoder;
 
-    if (this.store.state.activeParcelLayer === 'pwd') {
+    if (this.store.state.activeParcelLayer === 'pwd' && this.config.app.title !== 'Property Data Explorer') {
       geocodeConfig.params.include_units = false;
     }
 
@@ -160,8 +160,13 @@ class GeocodeClient extends BaseClient {
           }
         }
 
-        let units = features.filter(a => a.properties.unit_num != "");
+        // 6/26/2025 - This was changed to add make 2018 Delancey Place show a condo with no unit_num
+        let units = features;
+        // let units = features.filter(a => a.properties.unit_num != "");
+        console.log('units1:', units);
         units = this.evaluateDataForUnits(units);
+        // units.unshift(units[0]);
+        console.log('units2:', units);
 
         var feature = JSON.parse(JSON.stringify(units[0]));
         for (let i in feature.properties) {
@@ -181,7 +186,7 @@ class GeocodeClient extends BaseClient {
           }
           // console.log('feature:', feature);
         } else {
-          // console.log('getPages else is running, feature:', feature);
+          console.log('getPages else is running, feature:', feature);
           this.setFeatureProperties(feature, totalUnits);
 
           // console.log('getPages else is still running 1');
@@ -221,7 +226,7 @@ class GeocodeClient extends BaseClient {
     // feature.condo = false;
     // feature['condo'] = false;
 
-    // console.log('geocode-client success 2, feature:', feature, feature.condo, 'relatedFeatures:', relatedFeatures);
+    console.log('geocode-client success 2, feature:', feature, 'feature.condo:', feature.condo, 'relatedFeatures:', relatedFeatures);
     store.commit('setGeocodeData', feature);
     store.commit('setGeocodeRelated', relatedFeatures);
     store.commit('setGeocodeStatus', 'success');

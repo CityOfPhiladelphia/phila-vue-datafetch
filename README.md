@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.21 - 6/26/2025
+
+* change for property-data-explorer, allows condos with no condo number
+
 ### 2.2.20 - 8/23/2024
 
 * merges changes for making lactation-spaces-finder work
