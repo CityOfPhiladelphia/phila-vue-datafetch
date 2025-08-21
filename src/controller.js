@@ -418,9 +418,9 @@ class Controller {
     //   if (this.store.state.parcels.pwd) {
     //     console.log('end of function is calling setRouteByGeocode');
     //     if (this.config.router.geocode && this.config.router.geocode === 'opa') {
-    //       this.router.setRouteByOpaNumber(this.store.state.parcels.pwd[0].properties.BRT_ID);
+    //       this.router.setRouteByOpaNumber(this.store.state.parcels.pwd[0].properties.brt_id);
     //     } else {
-    //       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.ADDRESS);
+    //       this.router.setRouteByGeocode(this.store.state.parcels.pwd[0].properties.address);
     //     }
     //   } else {
     //     this.router.setRouteByGeocode();
@@ -548,7 +548,7 @@ class Controller {
         this.dataManager.processParcels(false, otherResponse, otherParcelLayer);
         if (!aisResponse) {
           if (otherResponse && otherResponse.features && otherResponse.features.length) {
-            let otherId = otherResponse.features[0].properties.PARCELID;
+            let otherId = otherResponse.features[0].properties.parcelid;
             aisResponse = await this.clients.geocode.fetch(otherId);
           }
         }

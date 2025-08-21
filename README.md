@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.23 - 8/21/2025
+
+* changes all fields related to PWD_PARCELS to lowercase for database update
+
 ### 2.2.22 - 6/26/2025
 
 * fixes bug for property-data-explorer, introduced in 2.2.15

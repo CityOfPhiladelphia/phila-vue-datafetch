@@ -241,14 +241,14 @@ class DataManager {
     if (this.store.state.geocode.data && this.store.state.geocode.data.condo === true && this.store.state.condoUnits.units.length) {
     // if (this.store.state.lastSearchMethod === 'geocode' && this.store.state.geocode.data.condo === true) {
 
-      // console.log('in if, this.store.state.parcels.pwd[0].properties.PARCELID:', this.store.state.parcels.pwd[0].properties.PARCELID);
+      // console.log('in if, this.store.state.parcels.pwd[0].properties.parcelid:', this.store.state.parcels.pwd[0].properties.parcelid);
       if (Array.isArray(this.store.state.parcels.pwd)) {
-        geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
+        geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd[0].properties.parcelid)][0];
       } else {
-        geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.PARCELID)][0];
+        geocodeObj = this.store.state.condoUnits.units[Number(this.store.state.parcels.pwd.properties.parcelid)][0];
       }
 
-      // geocodeObj = this.store.state.geocode.data;//.units[Number(this.store.state.parcels.pwd[0].properties.PARCELID)][0];
+      // geocodeObj = this.store.state.geocode.data;//.units[Number(this.store.state.parcels.pwd[0].properties.parcelid)][0];
       // ownerSearchObj = geocodeObj;
 
     } else {
