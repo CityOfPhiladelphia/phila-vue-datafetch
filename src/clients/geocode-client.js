@@ -28,14 +28,14 @@ class GeocodeClient extends BaseClient {
 
   setFeatureProperties(feature, totalUnits, units) {
     console.log('geocode setFeatureProperties is running, feature:', feature, 'totalUnits:', totalUnits);
-    // console.log('this.store.state.parcels.pwd[0].properties.ADDRESS:', this.store.state.parcels.pwd[0].properties.ADDRESS);
+    // console.log('this.store.state.parcels.pwd[0].properties.address:', this.store.state.parcels.pwd[0].properties.address);
 
     feature.properties.opa_owners = [ "Condominium (" + totalUnits + " Units)" ];
     if (this.store.state.parcels.pwd) {
-      feature.properties.street_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
-      feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.ADDRESS;
-      feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.PARCELID;
-      feature._featureId = this.store.state.parcels.pwd[0].properties.PARCELID;
+      feature.properties.street_address = this.store.state.parcels.pwd[0].properties.address;
+      feature.properties.opa_address = this.store.state.parcels.pwd[0].properties.address;
+      feature.properties.pwd_parcel_id = this.store.state.parcels.pwd[0].properties.parcelid;
+      feature._featureId = this.store.state.parcels.pwd[0].properties.parcelid;
       feature.condo = true;
     } else {
       console.log('setFeatureProperties is still running', this.store.state.condoUnits.units[Object.keys(this.store.state.condoUnits.units)[0]][0]);
