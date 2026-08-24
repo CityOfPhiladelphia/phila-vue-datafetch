@@ -29,7 +29,12 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
-### 2.2.24 - 8/24/2025
+### 2.2.25 - 8/24/2026
+
+* uses explicit https for the geometry server buffer call and fully encodes its query params (the server rejects raw brackets with a 400, and http redirects break CORS)
+* note: 2.2.24 was published without the buffer fix below due to a merge-order mishap - use 2.2.25
+
+### 2.2.24 - 8/24/2026
 
 * uses citygeo-geocoder-pub.databridge.phila.gov rather than gis-utils.databridge.phila.gov for buffer
 

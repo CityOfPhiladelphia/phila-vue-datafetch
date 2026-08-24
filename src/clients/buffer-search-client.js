@@ -20,7 +20,7 @@ class BufferSearchClient extends BaseClient {
     const parcelUrl = this.config.map.featureLayers.pwdParcels;
     // const geometryServerUrl = this.config.map.tools.geometryServer;
     // const geometryServerUrl = '//gis-utils.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
-    const geometryServerUrl = '//citygeo-geocoder-pub.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
+    const geometryServerUrl = 'https://citygeo-geocoder-pub.databridge.phila.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer/';
     // console.log('geometryServerUrl:', geometryServerUrl);
     const calculateDistance = true;
     const distances = 250;
@@ -65,7 +65,13 @@ class BufferSearchClient extends BaseClient {
     const bufferShapeSuccess = this.bufferShapeSuccess.bind(this);
     const bufferShapeError = this.bufferShapeError.bind(this);
 
-    return axios.get(bufferUrl, { params })
+    // fully encode params - the geometry server's tomcat rejects raw brackets in query strings
+    const paramsSerializer = p => Object.keys(p).map(key => {
+      const value = p[key];
+      return key + '=' + encodeURIComponent(typeof value === 'object' ? JSON.stringify(value) : value);
+    }).join('&');
+
+    return axios.get(bufferUrl, { params, paramsSerializer })
       .then(bufferShapeSuccess)
       .catch(bufferShapeError);
 
