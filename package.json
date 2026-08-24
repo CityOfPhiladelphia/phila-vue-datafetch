@@ -22,7 +22,7 @@
     "https-proxy-agent": "^3.0.1",
     "leaflet": "1.7.1",
     "proj4": "^2.8.0",
-    "vue": "^2.7.10",
+    "vue": "^3.0.0",
     "vuex": "^3.5.1"
   },
   "devDependencies": {
