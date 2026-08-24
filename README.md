@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.24 - 8/24/2025
+
+* uses citygeo-geocoder-pub.databridge.phila.gov rather than gis-utils.databridge.phila.gov for buffer
+
 ### 2.2.23 - 8/21/2025
 
 * changes all fields related to PWD_PARCELS to lowercase for database update
