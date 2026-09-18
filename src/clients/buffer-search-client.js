@@ -6,6 +6,7 @@ import { point, polygon, isNumber } from '@turf/helpers';
 import distance from '@turf/distance';
 import area from '@turf/area';
 import utils from '../utils.js';
+import { fetchDatabridgeFeatures, ringWhere } from '../databridge.js';
 
 import BaseClient from './base-client';
 
@@ -113,23 +114,74 @@ class BufferSearchClient extends BaseClient {
     // console.log('bufferShapeError:', error);
   }
 
+  // thins a buffer ring to every 3rd vertex (rounded to 6 decimals) and closes it
+  thinRing(xyCoords) {
+    let ring = [[ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]];
+    var i;
+    for (i = 0; i < xyCoords.length; i++) {
+      if (i%3 == 0) {
+        let coord = [ parseFloat(xyCoords[i][0].toFixed(6)), parseFloat(xyCoords[i][1].toFixed(6)) ];
+        ring.push(coord);
+      }
+    }
+    ring.push([ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]);
+    return ring;
+  }
+
+  // stamps each feature with _distance (feet) from the given [lng, lat] point
+  addDistances(features, calculateDistancePt) {
+    const from = point(calculateDistancePt);
+
+    return features.map(feature => {
+      const featureCoords = feature.geometry.coordinates;
+      let dist;
+      if (Array.isArray(featureCoords[0])) {
+        let polygonInstance;
+        try {
+          polygonInstance = polygon([ featureCoords[0] ]);
+          const vertices = explode(polygonInstance);
+          const closestVertex = nearest(from, vertices);
+          dist = distance(from, closestVertex, { units: 'miles' });
+        } catch (e) {
+          // console.log('error in distance to polygon:', e);
+        }
+
+      } else {
+        const to = point(featureCoords);
+        dist = distance(from, to, { units: 'miles' });
+      }
+
+      // TODO make distance units an option. for now, just hard code to ft.
+      const distFeet = parseInt(dist * 5280);
+      // console.log('distFeet:', distFeet);
+
+      feature._distance = distFeet;
+
+      return feature;
+    });
+  }
+
+  // buffer search through databridge-api instead of the AGO PWD_PARCELS layer.
+  // Needs config.databridge { url, clientId }.
+  fetchPwdParcelsByShape(xyCoords, calculateDistancePt) {
+    const ring = this.thinRing(xyCoords);
+    return fetchDatabridgeFeatures(this.config.databridge, 'pwd_parcels', ringWhere(ring)).then(featureCollection => {
+      let features = featureCollection.features;
+      if (calculateDistancePt) {
+        features = this.addDistances(features, calculateDistancePt);
+      }
+      return { features: features };
+    });
+  }
+
   fetchBySpatialQuery(url, relationship, xyCoords, parameters = {}, calculateDistancePt, options = {}) {
     // console.log('bufferSearch fetch esri spatial query, url:', url, 'relationship:', relationship, 'xyCoords:', xyCoords, 'parameters:', parameters, 'options:', options, 'calculateDistancePt:', calculateDistancePt);
     const parcelLayer = [];
 
-    let xyCoords2 = [[ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]];
-    var i;
-    // console.log('xyCoords:', xyCoords, 'xyCoords.length:', xyCoords.length);
-    for (i = 0; i < xyCoords.length; i++) {
-      if (i%3 == 0) {
-        // console.log('i:', i);
-        let xyCoord2 = [ parseFloat(xyCoords[i][0].toFixed(6)), parseFloat(xyCoords[i][1].toFixed(6)) ];
-        xyCoords2.push(xyCoord2);
-      }
-    }
-    xyCoords2.push([ parseFloat(xyCoords[0][0].toFixed(6)), parseFloat(xyCoords[0][1].toFixed(6)) ]);
-
+    let xyCoords2 = this.thinRing(xyCoords);
     console.log('xyCoords2:', xyCoords2);
+
+    const addDistances = features => this.addDistances(features, calculateDistancePt);
 
     let theGeom = { "rings": [ xyCoords2 ], "spatialReference": { "wkid": 4326 }};
 
@@ -160,35 +212,7 @@ class BufferSearchClient extends BaseClient {
 
           // calculate distance
           if (calculateDistancePt) {
-            const from = point(calculateDistancePt);
-
-            features = features.map(feature => {
-              const featureCoords = feature.geometry.coordinates;
-              let dist;
-              if (Array.isArray(featureCoords[0])) {
-                let polygonInstance;
-                try {
-                  polygonInstance = polygon([ featureCoords[0] ]);
-                  const vertices = explode(polygonInstance);
-                  const closestVertex = nearest(from, vertices);
-                  dist = distance(from, closestVertex, { units: 'miles' });
-                } catch (e) {
-                  // console.log('error in distance to polygon:', e);
-                }
-
-              } else {
-                const to = point(featureCoords);
-                dist = distance(from, to, { units: 'miles' });
-              }
-
-              // TODO make distance units an option. for now, just hard code to ft.
-              const distFeet = parseInt(dist * 5280);
-              // console.log('distFeet:', distFeet);
-
-              feature._distance = distFeet;
-
-              return feature;
-            });
+            features = addDistances(features);
           }
           resolve(response.data);
         }

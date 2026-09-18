@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.26 - 9/18/2026
+
+* adds a databridge-api mode, gated on a new `config.databridge` (`{ url, clientId }`): the PWD parcel queries (by id, by point, by drawn shape, by buffer) move from the AGO PWD_PARCELS layer to table-style databridge queries, and the shape search accepts the databridge response envelope
+
 ### 2.2.25 - 8/24/2026
 
 * uses explicit https for the geometry server buffer call and fully encodes its query params (the server rejects raw brackets with a 400, and http redirects break CORS)

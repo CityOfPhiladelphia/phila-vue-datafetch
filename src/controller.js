@@ -18,7 +18,7 @@ import {
   CondoSearchClient,
   ShapeSearchClient,
   BufferSearchClient,
-  AgoTokenClient
+  AgoTokenClient,
 } from './clients';
 
 // console.log('controller.js is being read')
@@ -184,16 +184,24 @@ class Controller {
       let bufferShapeResponse = await this.clients.bufferSearch.fetchBufferShape(null, null, parcelResponse, 'pwd', latLng);
       // console.log('runBufferProcess bufferShapeResponse:', bufferShapeResponse);
 
-      const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0/query';
       const parameters = {};
       const calculateDistance = true;
       const coords = aisResponse.geometry.coordinates;
-      let spatialResponse = await this.clients.bufferSearch.fetchBySpatialQuery(parcelUrl,
-        'intersects',
-        bufferShapeResponse,
-        parameters,
-        calculateDistance ? coords : null,
-      );
+      let spatialResponse;
+      if (this.config.databridge) {
+        spatialResponse = await this.clients.bufferSearch.fetchPwdParcelsByShape(
+          bufferShapeResponse,
+          calculateDistance ? coords : null,
+        );
+      } else {
+        const parcelUrl = 'https://services.arcgis.com/fLeGjb7u4uXqeF9q/ArcGIS/rest/services/PWD_PARCELS/FeatureServer/0/query';
+        spatialResponse = await this.clients.bufferSearch.fetchBySpatialQuery(parcelUrl,
+          'intersects',
+          bufferShapeResponse,
+          parameters,
+          calculateDistance ? coords : null,
+        );
+      }
 
       console.log('spatialResponse:', spatialResponse);
 
