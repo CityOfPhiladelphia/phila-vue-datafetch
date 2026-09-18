@@ -13,6 +13,7 @@ import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
 
 import utils from './utils.js';
+import { databridgeParcelTable, fetchDatabridgeFeatures, pointWhere, ringWhere } from './databridge.js';
 import {
   GeocodeClient,
   ActiveSearchClient,
@@ -855,7 +856,7 @@ class DataManager {
     const configForParcelLayer = this.config.parcels[parcelLayer];
     const geocodeField = configForParcelLayer.geocodeField;
     // console.log('url:', url);
-    let parcelQuery;
+    let whereClause;
 
     if (id.includes('|')) {
       const idSplit = id.split('|');
@@ -868,13 +869,20 @@ class DataManager {
         }
       }
 
-      parcelQuery = url + '?where=' + queryString;
+      whereClause = queryString;
 
     } else if (Array.isArray(id)) {
-      parcelQuery = url + '?where=' + geocodeField + ' IN (' + id + ')';
+      whereClause = geocodeField + ' IN (' + id + ')';
     } else {
-      parcelQuery = url + '?where=' + geocodeField + "='" + id + "'";
+      whereClause = geocodeField + "='" + id + "'";
     }
+
+    const databridgeTable = this.config.databridge && databridgeParcelTable(parcelLayer);
+    if (databridgeTable) {
+      return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, whereClause);
+    }
+
+    const parcelQuery = url + '?where=' + whereClause;
     // console.log('parcelQuery:', parcelQuery);
 
     return new Promise(function(resolve, reject) {
@@ -899,6 +907,10 @@ class DataManager {
   getParcelsByLatLng(latlng, parcelLayer, fetch) {
     console.log('data-manager.js getParcelsByLatLng, latlng:', latlng, 'parcelLayer:', parcelLayer, 'fetch:', fetch, 'this.config.map.featureLayers:', this.config.map.featureLayers);
     if( latlng != null) {
+      const databridgeTable = this.config.databridge && databridgeParcelTable(parcelLayer);
+      if (databridgeTable) {
+        return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, pointWhere(latlng));
+      }
       const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
       return new Promise(function(resolve, reject) {
         let params = {
@@ -935,6 +947,11 @@ class DataManager {
       theLatLngs.push([ latlng._latlngs[0][0].lng, latlng._latlngs[0][0].lat ]);
     } else {
       theLatLngs = latlng;
+    }
+
+    const databridgeTable = this.config.databridge && databridgeParcelTable('pwd');
+    if (databridgeTable) {
+      return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, ringWhere(theLatLngs));
     }
 
     const url = this.config.map.featureLayers.pwdParcels.url + '/query?';

@@ -38,6 +38,11 @@ class ShapeSearchClient extends BaseClient {
     let data = response.data;
     const url = response.config.url;
 
+    // databridge envelope (data.features[].properties) -> the rows shape this client works in
+    if (data && data.data && data.data.features) {
+      data = { rows: data.data.features.map(f => f.properties) };
+    }
+
     data = this.evaluateDataForUnits(data);
 
     let features = data.rows;
