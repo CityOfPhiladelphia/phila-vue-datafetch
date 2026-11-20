@@ -29,6 +29,10 @@ To publish a new version of @phila/vue-datafetch to NPM:
 
 ## Release Notes
 
+### 2.2.27 - 11/20/2026
+
+* databridge parcel lookups run on PostgREST instead of Carto: the point lookup uses databridge-api's `x`/`y` point-in-polygon params and the by-id lookup sends a plain `where`; only the drawn-shape and buffer queries (`ringQuery`) still pin `service=carto`, since a spatial `where` runs nowhere else
+
 ### 2.2.26 - 9/18/2026
 
 * adds a databridge-api mode, gated on a new `config.databridge` (`{ url, clientId }`): the PWD parcel queries (by id, by point, by drawn shape, by buffer) move from the AGO PWD_PARCELS layer to table-style databridge queries, and the shape search accepts the databridge response envelope
