@@ -13,7 +13,7 @@ import explode from '@turf/explode';
 import nearest from '@turf/nearest-point';
 
 import utils from './utils.js';
-import { databridgeParcelTable, fetchDatabridgeFeatures, pointWhere, ringWhere } from './databridge.js';
+import { databridgeParcelTable, fetchDatabridgeFeatures, pointQuery, ringQuery } from './databridge.js';
 import {
   GeocodeClient,
   ActiveSearchClient,
@@ -879,7 +879,7 @@ class DataManager {
 
     const databridgeTable = this.config.databridge && databridgeParcelTable(parcelLayer);
     if (databridgeTable) {
-      return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, whereClause);
+      return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, { where: whereClause });
     }
 
     const parcelQuery = url + '?where=' + whereClause;
@@ -909,7 +909,7 @@ class DataManager {
     if( latlng != null) {
       const databridgeTable = this.config.databridge && databridgeParcelTable(parcelLayer);
       if (databridgeTable) {
-        return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, pointWhere(latlng));
+        return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, pointQuery(latlng));
       }
       const url = this.config.map.featureLayers[parcelLayer+'Parcels'].url + '/query';
       return new Promise(function(resolve, reject) {
@@ -951,7 +951,7 @@ class DataManager {
 
     const databridgeTable = this.config.databridge && databridgeParcelTable('pwd');
     if (databridgeTable) {
-      return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, ringWhere(theLatLngs));
+      return fetchDatabridgeFeatures(this.config.databridge, databridgeTable, ringQuery(theLatLngs));
     }
 
     const url = this.config.map.featureLayers.pwdParcels.url + '/query?';

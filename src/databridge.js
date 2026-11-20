@@ -1,9 +1,11 @@
 import axios from 'axios';
 
 // databridge-api parcel queries: table-style queries whose features come back as
-// GeoJSON, shaped like an AGO f=geojson response. Spatial wheres only run on the
-// Carto V3 backend, so the service is pinned. Callers gate on config.databridge
+// GeoJSON, shaped like an AGO f=geojson response. Callers gate on config.databridge
 // ({ url, clientId }) - apps without it keep their AGO paths.
+// Each query is the params that pick the rows. A plain where and the API's x/y
+// point-in-polygon lookup run on PostgREST; a spatial where only runs on the Carto V3
+// backend, which counts against the Carto quota, so only the ring query pins it.
 
 const PARCEL_TABLES = {
   pwd: 'pwd_parcels',
@@ -14,22 +16,25 @@ export function databridgeParcelTable(parcelLayer) {
   return PARCEL_TABLES[parcelLayer];
 }
 
-export function pointWhere(latlng) {
-  return "ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_Point(" + latlng.lng + "," + latlng.lat + "),4326),2272))";
+// the polygons containing a 4326 point
+export function pointQuery(latlng) {
+  return { x: latlng.lng, y: latlng.lat };
 }
 
-// ring: a closed [ [lng, lat], ... ] polygon ring
-export function ringWhere(ring) {
+// the polygons intersecting a closed [ [lng, lat], ... ] polygon ring
+export function ringQuery(ring) {
   const poly = ring.map(coord => coord[0] + ' ' + coord[1]).join(',');
-  return "ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_GeomFromText('POLYGON((" + poly + "))'),4326),2272))";
+  return {
+    where: "ST_Intersects(shape, ST_Transform(ST_SetSRID(ST_GeomFromText('POLYGON((" + poly + "))'),4326),2272))",
+    service: 'carto',
+  };
 }
 
-export function fetchDatabridgeFeatures(databridge, table, where) {
+export function fetchDatabridgeFeatures(databridge, table, query) {
   const params = {
     table: table,
-    where: where,
+    ...query,
     out_sr: 4326,
-    service: 'carto',
     client_id: databridge.clientId,
   };
   return axios.get(databridge.url, { params }).then(response => {
