@@ -6,7 +6,7 @@ import { point, polygon, isNumber } from '@turf/helpers';
 import distance from '@turf/distance';
 import area from '@turf/area';
 import utils from '../utils.js';
-import { fetchDatabridgeFeatures, ringWhere } from '../databridge.js';
+import { fetchDatabridgeFeatures, ringQuery } from '../databridge.js';
 
 import BaseClient from './base-client';
 
@@ -165,7 +165,7 @@ class BufferSearchClient extends BaseClient {
   // Needs config.databridge { url, clientId }.
   fetchPwdParcelsByShape(xyCoords, calculateDistancePt) {
     const ring = this.thinRing(xyCoords);
-    return fetchDatabridgeFeatures(this.config.databridge, 'pwd_parcels', ringWhere(ring)).then(featureCollection => {
+    return fetchDatabridgeFeatures(this.config.databridge, 'pwd_parcels', ringQuery(ring)).then(featureCollection => {
       let features = featureCollection.features;
       if (calculateDistancePt) {
         features = this.addDistances(features, calculateDistancePt);
